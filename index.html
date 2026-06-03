@@ -3,16 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>体育课考勤系统</title>
+    <title>体育课精细化考勤系统-专业版</title>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-<link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2643/2643501.png">
-<link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2643/2643501.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2643/2643501.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2643/2643501.png">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         :root {
             --leave: #FFC107;
@@ -159,13 +160,11 @@
         .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; z-index: 10100; }
         .close-modal:hover { color: #333; }
         
-        /* 【新增强调】滑轨外层包裹器，用于为切换箭头提供绝对定位基准 */
         .slider-wrapper {
             position: relative;
             margin-top: 10px;
         }
         
-        /* 【新增强调】电脑端高显切换按钮样式 */
         .nav-arrow {
             position: absolute;
             top: 50%;
@@ -266,7 +265,10 @@
 
     <div class="section">
         <h3>3. 期末出勤率统计</h3>
-        <button onclick="generateStats()" style="background-color: #607D8B; margin-bottom: 12px;">生成/刷新出勤率报告</button>
+        <div style="display: flex; gap: 10px; margin-bottom: 12px;">
+            <button onclick="generateStats()" style="background-color: #607D8B; flex: 1; margin: 0;">📊 生成/刷新报告</button>
+            <button onclick="exportStatsToExcel()" style="background-color: #2E7D32; flex: 1; margin: 0;">🟢 导出 Excel 总表</button>
+        </div>
         <div id="statsResult"></div>
     </div>
 
@@ -284,7 +286,7 @@
     <div class="modal-content" onclick="event.stopPropagation()">
         <span class="close-modal" onclick="document.getElementById('calendarModal').style.display='none'">&times;</span>
         <div id="modalCalendarBody">
-            </div>
+        </div>
     </div>
 </div>
 
@@ -559,7 +561,7 @@
                 const rate = ((effectiveAttendance / totalClasses) * 100).toFixed(1);
                 
                 const isDanger = parseFloat(rate) < 50.0;
-                const rateClass = isDanger ? 'class="danger-rate"' : 'class="rate-click-cell"';
+                const rateClass = isDanger ? 'class="danger-rate"' : 'class="rate-click-cell"' ;
                 
                 html += `
                     <tr>
@@ -578,6 +580,86 @@
         });
 
         document.getElementById('statsResult').innerHTML = html;
+    }
+
+    // 【新增核心功能】一键计算数据并无缝导出规范的 Excel 多班级考勤总表
+    function exportStatsToExcel() {
+        const classNames = Object.keys(students);
+        if (classNames.length === 0) { alert('暂无班级数据，无法导出报表！'); return; }
+
+        // 1. 本地动态跑一遍严谨的权重汇总计算逻辑
+        const classTotalDays = {};
+        classNames.forEach(c => classTotalDays[c] = 0);
+
+        const stats = {};
+        classNames.forEach(className => {
+            stats[className] = {};
+            students[className].forEach(studentObj => {
+                stats[className][studentObj.name] = { normal: 0, leave: 0, absent: 0, late: 0, early: 0 };
+            });
+        });
+
+        for (let date in records) {
+            const dateData = records[date];
+            classNames.forEach(className => {
+                if (dateData[className]) {
+                    classTotalDays[className]++;
+                    students[className].forEach(studentObj => {
+                        const sName = studentObj.name;
+                        const status = dateData[className][sName] || 'normal';
+                        if (stats[className][sName]) { stats[className][sName][status]++; }
+                    });
+                }
+            });
+        }
+
+        // 2. 组装符合 Excel 标准二维数组的行数据集
+        const dataRows = [];
+        // 定义规范表头
+        dataRows.push(["班级", "序号", "姓名", "性别", "请假(次)", "旷课(次)", "迟到(次)", "早退(次)", "综合出勤率"]);
+
+        classNames.forEach(className => {
+            const totalClasses = classTotalDays[className];
+            if (totalClasses === 0) return; // 过滤无打卡记录的空白班级
+
+            students[className].forEach((studentObj, index) => {
+                const sName = studentObj.name;
+                const sGender = studentObj.gender;
+                const s = stats[className][sName];
+                
+                // 执行相同的核心精细化公式
+                const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
+                let effectiveAttendance = totalClasses - totalMissedScore;
+                if (effectiveAttendance < 0) effectiveAttendance = 0;
+                const rate = ((effectiveAttendance / totalClasses) * 100).toFixed(1) + "%";
+
+                dataRows.push([
+                    className,
+                    index + 1,
+                    sName,
+                    sGender,
+                    s.leave,
+                    s.absent,
+                    s.late,
+                    s.early,
+                    rate
+                ]);
+            });
+        });
+
+        if (dataRows.length <= 1) {
+            alert("当前系统中没有任何班级产生过有效上课打卡记录，请打卡后再行导出！");
+            return;
+        }
+
+        // 3. 驱动 SheetJS 在浏览器纯前端构建并下载文件
+        const ws = XLSX.utils.aoa_to_sheet(dataRows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, "期末考勤出勤率");
+
+        // 截取当前日期作为文件名后缀
+        const dateStr = new Date().toISOString().slice(0, 10);
+        XLSX.writeFile(wb, `体育课综合出勤率总表_${dateStr}.xlsx`);
     }
 
     // 🗓️ 左右滑动+点击按钮双驱动切换月份日历
@@ -663,11 +745,10 @@
         }, 60);
     }
 
-    // 【新增核心控制函数】点击箭头驱动滑块横向整页滚动
+    // 点击箭头驱动滑块横向整页滚动
     function scrollCalendarContainer(direction) {
         const slider = document.getElementById('calendarSlider');
         if (slider) {
-            // clientWidth 代表单个可见月份页面卡片的整体物理宽度
             const pageWidth = slider.clientWidth;
             slider.scrollBy({
                 left: direction * pageWidth,
