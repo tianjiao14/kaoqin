@@ -1,0 +1,723 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>体育课考勤系统</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    
+    <style>
+        :root {
+            --leave: #FFC107;
+            --absent: #F44336;
+            --late: #FF9800;
+            --early: #00BCD4;
+            --bg: #f4f7f6;
+            --accent: #2196F3;
+        }
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            padding: 10px;
+            color: #333;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+        }
+        h2 { text-align: center; color: #2c3e50; margin-top: 5px; font-size: 20px; }
+        .section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .section:last-child { border-bottom: none; }
+        
+        .file-input-wrapper {
+            border: 2px dashed #ccc;
+            padding: 15px;
+            text-align: center;
+            background: #fafafa;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .file-input-wrapper input[type="file"] { display: none; }
+        
+        input[type="text"], textarea, input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 8px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 14px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            margin-top: 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+        }
+        button:active { opacity: 0.8; }
+        
+        /* 手风琴折叠样式 */
+        .class-group { margin-bottom: 10px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; }
+        .class-header {
+            background: #e9ecef;
+            padding: 12px 15px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            user-select: none;
+        }
+        .class-header:hover { background: #dee2e6; }
+        .class-header::after { content: '▼'; font-size: 11px; color: #666; transition: transform 0.2s; }
+        .class-group.open .class-header::after { content: '▲'; }
+        
+        .class-content { display: none; padding: 0 10px 10px 10px; background: #fff; }
+        .class-group.open .class-content { display: block; }
+
+        /* 学生条目优化 */
+        .student-item {
+            display: flex;
+            flex-direction: column;
+            padding: 10px 0;
+            border-bottom: 1px dashed #eee;
+        }
+        @media(min-width: 400px) {
+            .student-item { flex-direction: row; justify-content: space-between; align-items: center; }
+        }
+        .student-info { display: flex; align-items: center; gap: 6px; font-size: 15px; font-weight: 500; margin-bottom: 5px; }
+        @media(min-width: 400px) { .student-info { margin-bottom: 0; } }
+        .gender-tag { font-size: 11px; color: #777; background: #e8e8e8; padding: 1px 5px; border-radius: 4px; }
+        .btn-del-student { color: #bbb; cursor: pointer; font-size: 13px; margin-left: 4px; }
+        .btn-del-student:hover { color: var(--absent); }
+        
+        .status-group { display: flex; width: 100%; justify-content: space-between; gap: 4px; }
+        @media(min-width: 400px) { .status-group { width: auto; justify-content: flex-end; } }
+        
+        .status-btn {
+            flex: 1;
+            text-align: center;
+            padding: 8px 6px;
+            border: 1px solid #ddd;
+            background: #fff;
+            color: #555;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        .status-btn.active[data-status="leave"] { background: var(--leave); color: black; border-color: var(--leave); font-weight: bold; }
+        .status-btn.active[data-status="absent"] { background: var(--absent); color: white; border-color: var(--absent); font-weight: bold; }
+        .status-btn.active[data-status="late"] { background: var(--late); color: white; border-color: var(--late); font-weight: bold; }
+        .status-btn.active[data-status="early"] { background: var(--early); color: white; border-color: var(--early); font-weight: bold; }
+
+        .action-block { display: flex; gap: 10px; margin-top: 10px; }
+
+        /* 统计表格 */
+        .table-responsive { width: 100%; overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; min-width: 380px; }
+        th, td { padding: 6px 4px; text-align: center; border-bottom: 1px solid #ddd; font-size: 13px; }
+        th { background-color: #f8f9fa; color: #555; }
+        
+        /* 可点击出勤率样式 */
+        .rate-click-cell { cursor: pointer; text-decoration: underline; text-decoration-style: dotted; color: var(--accent); font-weight: bold; }
+        .danger-rate { color: var(--absent) !important; font-weight: bold; text-decoration: underline; text-decoration-style: dotted; cursor: pointer;}
+        
+        /* 备份模块样式 */
+        .backup-btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-secondary { background-color: #78909C; font-size: 14px; padding: 8px; }
+
+        /* 🗓️ 弹窗日历核心样式 */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 10000;
+        }
+        .modal-content {
+            background: white; padding: 20px 15px; border-radius: 10px; width: 95%; max-width: 420px;
+            max-height: 90vh; overflow-y: auto; position: relative; box-sizing: border-box;
+        }
+        .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; z-index: 10100; }
+        .close-modal:hover { color: #333; }
+        
+        /* 【新增强调】滑轨外层包裹器，用于为切换箭头提供绝对定位基准 */
+        .slider-wrapper {
+            position: relative;
+            margin-top: 10px;
+        }
+        
+        /* 【新增强调】电脑端高显切换按钮样式 */
+        .nav-arrow {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(0, 0, 0, 0.4);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+            z-index: 10200;
+            user-select: none;
+            transition: background 0.2s, opacity 0.2s;
+        }
+        .nav-arrow:hover { background: rgba(0, 0, 0, 0.7); }
+        .nav-arrow:active { opacity: 0.6; }
+        .nav-arrow.left { left: 4px; }
+        .nav-arrow.right { right: 4px; }
+        
+        .calendar-slider {
+            display: flex;
+            overflow-x: auto;
+            scroll-snap-type: x mandatory;
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            gap: 15px;
+            padding: 5px 0;
+        }
+        .calendar-slider::-webkit-scrollbar { display: none; }
+        
+        .month-container {
+            flex: 0 0 100%;
+            scroll-snap-align: start;
+            border: 1px solid #e0e0e0;
+            padding: 12px 10px;
+            border-radius: 8px;
+            background: #fff;
+            box-sizing: border-box;
+        }
+        
+        .month-title { text-align: center; font-weight: bold; margin-bottom: 12px; color: #2c3e50; font-size: 15px; }
+        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #777; font-weight: bold; margin-bottom: 8px; }
+        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
+        
+        .day-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; font-size: 12px; background: #fafafa; border: 1px solid #f0f0f0; color: #ccc; }
+        .day-cell.pad { background: transparent; border: none; }
+        
+        /* 日历状态颜色叠加 */
+        .day-cell.cal-recorded { background: #4CAF50 !important; color: white !important; font-weight: bold; border-color: #4CAF50; } 
+        .day-cell.cal-leave { background: var(--leave) !important; color: black !important; font-weight: bold; border-color: var(--leave); }
+        .day-cell.cal-absent { background: var(--absent) !important; color: white !important; font-weight: bold; border-color: var(--absent); }
+        .day-cell.cal-late { background: var(--late) !important; color: white !important; font-weight: bold; border-color: var(--late); }
+        .day-cell.cal-early { background: var(--early) !important; color: white !important; font-weight: bold; border-color: var(--early); }
+        
+        /* 弹窗图例 */
+        .calendar-legend { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; font-size: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
+        .legend-item { display: flex; align-items: center; gap: 4px; }
+        .legend-box { width: 13px; height: 13px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>📋 体育课考勤系统</h2>
+
+    <div class="section">
+        <h3>1. 导入学生名单</h3>
+        <p style="font-size: 12px; color: #666; margin: 0;">
+            <b>方式A：Excel导入</b>（包含：<b>班级</b>、<b>姓名</b>、<b>性别</b>，会重置旧名单）
+        </p>
+        <div class="file-input-wrapper" onclick="document.getElementById('excelFile').click()">
+            <span id="fileStatus">点击选择或拖拽 Excel 文件导入</span>
+            <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="importExcel(event)">
+        </div>
+
+        <details style="margin-top: 12px; background: #fafafa; border: 1px solid #ddd; padding: 10px; border-radius: 6px;">
+            <summary style="cursor: pointer; font-weight: bold; font-size: 13px; color: #555; user-select: none;">
+                ➕ 方式B：手动录入 / 追加学生名单 (点击展开)
+            </summary>
+            <div style="margin-top: 8px;">
+                <input type="text" id="classNameInput" placeholder="请输入要追加的班级（如：1班）">
+                <textarea id="studentListInput" rows="3" placeholder="每行输入：姓名 性别（中间空格隔开）&#10;如：&#10;张三 男&#10;李四 女"></textarea>
+                <button onclick="saveStudentsManual()" style="font-size:14px; padding:8px; background-color: #009688;">确认追加至该班名单</button>
+            </div>
+        </details>
+    </div>
+
+    <div class="section">
+        <h3>2. 班级今日考勤</h3>
+        <input type="date" id="datePicker">
+        <div id="accordionContainer" style="margin-top: 12px;"></div>
+    </div>
+
+    <div class="section">
+        <h3>3. 期末出勤率统计</h3>
+        <button onclick="generateStats()" style="background-color: #607D8B; margin-bottom: 12px;">生成/刷新出勤率报告</button>
+        <div id="statsResult"></div>
+    </div>
+
+    <div class="section" style="background: #fcfcfc; padding: 10px; border-radius: 6px; border: 1px dashed #bbb;">
+        <h4 style="margin: 0; font-size: 14px; color: #555;">🛡️ 数据备份与防丢管理</h4>
+        <div class="backup-btn-group">
+            <button class="btn-secondary" onclick="exportBackupData()">📥 导出数据备份</button>
+            <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="background-color: #5c6bc0;">📤 导入历史备份</button>
+            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importBackupData(event)">
+        </div>
+    </div>
+</div>
+
+<div class="modal-overlay" id="calendarModal" onclick="closeModal(event)">
+    <div class="modal-content" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="document.getElementById('calendarModal').style.display='none'">&times;</span>
+        <div id="modalCalendarBody">
+            </div>
+    </div>
+</div>
+
+<script>
+    document.getElementById('datePicker').valueAsDate = new Date();
+
+    let students = JSON.parse(localStorage.getItem('pe_v5_students')) || {};
+    let records = JSON.parse(localStorage.getItem('pe_v5_records')) || {};
+
+    window.onload = () => { renderAccordion(); };
+
+    // Excel 导入
+    function importExcel(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        document.getElementById('fileStatus').innerText = "正在解析..." + file.name;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const data = evt.target.result;
+                const workbook = XLSX.read(data, { type: 'binary' });
+                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
+                if (json.length === 0) { alert('Excel内容为空！'); return; }
+                const firstRow = json[0];
+                if (!('班级' in firstRow) || !('姓名' in firstRow) || !('性别' in firstRow)) {
+                    alert('导入失败！Excel表头必须包含“班级”、“姓名”、“性别”！');
+                    document.getElementById('fileStatus').innerText = "格式错误";
+                    return;
+                }
+                const newStudents = {};
+                json.forEach(row => {
+                    const cls = String(row['班级']).trim();
+                    const name = String(row['姓名']).trim();
+                    const gender = String(row['性别']).trim();
+                    if (cls && name) {
+                        if (!newStudents[cls]) { newStudents[cls] = []; }
+                        newStudents[cls].push({ name: name, gender: gender });
+                    }
+                });
+                students = newStudents;
+                localStorage.setItem('pe_v5_students', JSON.stringify(students));
+                let summary = '🎉 成功导入：\n';
+                for (let c in students) { summary += `• ${c}：${students[c].length} 人\n`; }
+                alert(summary);
+                document.getElementById('fileStatus').innerText = "导入成功！";
+                renderAccordion();
+                document.getElementById('statsResult').innerHTML = ''; 
+            } catch (err) {
+                alert('解析失败：' + err);
+                document.getElementById('fileStatus').innerText = "解析出错";
+            }
+        };
+        reader.readAsBinaryString(file);
+    }
+
+    // 手动追加录入
+    function saveStudentsManual() {
+        const className = document.getElementById('classNameInput').value.trim();
+        const inputText = document.getElementById('studentListInput').value;
+        if (!className || !inputText) { alert('请填写班级和学生名单内容！'); return; }
+        
+        if (!students[className]) { students[className] = []; }
+        const lines = inputText.split('\n').map(n => n.trim()).filter(n => n !== '');
+        let addCount = 0;
+        let dupCount = 0;
+
+        lines.forEach(line => {
+            const parts = line.split(/[\s,，]+/).filter(p => p !== '');
+            const name = parts[0];
+            const gender = parts[1] || '未知';
+            if (name) {
+                const isDuplicate = students[className].some(s => s.name === name);
+                if (!isDuplicate) {
+                    students[className].push({ name: name, gender: gender });
+                    addCount++;
+                } else { dupCount++; }
+            }
+        });
+
+        localStorage.setItem('pe_v5_students', JSON.stringify(students));
+        alert(`【${className}】追加完成！\n成功：${addCount} 人。跳过重复：${dupCount} 人。`);
+        document.getElementById('classNameInput').value = '';
+        document.getElementById('studentListInput').value = '';
+        renderAccordion();
+    }
+
+    // 2. 渲染打卡册列表
+    function renderAccordion() {
+        const container = document.getElementById('accordionContainer');
+        container.innerHTML = '';
+        const currentDate = document.getElementById('datePicker').value;
+        const dateRecord = records[currentDate] || {};
+        const classNames = Object.keys(students);
+
+        if (classNames.length === 0) {
+            container.innerHTML = '<p style="color:#999; text-align:center; font-size:14px; padding:10px;">暂无名单，请选择方式导入。</p>';
+            return;
+        }
+
+        classNames.forEach(className => {
+            const classGroup = document.createElement('div');
+            classGroup.className = 'class-group';
+            classGroup.id = `group-${className}`;
+
+            const header = document.createElement('div');
+            header.className = 'class-header';
+            header.innerText = `${className} (${students[className].length}人)`;
+            header.onclick = () => toggleClass(classGroup);
+
+            const content = document.createElement('div');
+            content.className = 'class-content';
+            const classTodayRecord = dateRecord[className] || {};
+
+            students[className].forEach((studentObj, index) => {
+                const sName = studentObj.name;
+                const sGender = studentObj.gender;
+                const currentStatus = classTodayRecord[sName] || 'normal'; 
+                
+                const item = document.createElement('div');
+                item.className = 'student-item';
+                item.innerHTML = `
+                    <div class="student-info">
+                        <span style="color:#888; font-size:13px; margin-right:2px;">${index + 1}.</span>
+                        <span>${sName}</span>
+                        <span class="gender-tag">${sGender}</span>
+                        <span class="btn-del-student" onclick="deleteStudent('${className}', '${sName}')" title="删除该学生">🗑️</span>
+                    </div>
+                    <div class="status-group" data-class="${className}" data-student="${sName}">
+                        <button class="status-btn ${currentStatus === 'leave' ? 'active' : ''}" data-status="leave" onclick="changeStatus(this)">请假</button>
+                        <button class="status-btn ${currentStatus === 'absent' ? 'active' : ''}" data-status="absent" onclick="changeStatus(this)">旷课</button>
+                        <button class="status-btn ${currentStatus === 'late' ? 'active' : ''}" data-status="late" onclick="changeStatus(this)">迟到</button>
+                        <button class="status-btn ${currentStatus === 'early' ? 'active' : ''}" data-status="early" onclick="changeStatus(this)">早退</button>
+                    </div>
+                `;
+                content.appendChild(item);
+            });
+
+            const actionBlock = document.createElement('div');
+            actionBlock.className = 'action-block';
+            actionBlock.innerHTML = `
+                <button onclick="submitClassAttendance('${className}')" style="background-color: var(--accent); flex: 3; margin:0;">提交 ${className} 考勤</button>
+                <button onclick="deleteClass('${className}')" style="background-color: #90A4AE; flex: 1; margin:0; font-size:14px;">🗑️ 删班</button>
+            `;
+            content.appendChild(actionBlock);
+
+            classGroup.appendChild(header);
+            classGroup.appendChild(content);
+            container.appendChild(classGroup);
+        });
+    }
+
+    function deleteStudent(className, studentName) {
+        event.stopPropagation();
+        if (confirm(`确定要彻底删除学生【${studentName}】吗？`)) {
+            students[className] = students[className].filter(s => s.name !== studentName);
+            localStorage.setItem('pe_v5_students', JSON.stringify(students));
+            renderAccordion();
+            if (document.getElementById('statsResult').innerHTML !== '') generateStats();
+        }
+    }
+
+    function deleteClass(className) {
+        if (confirm(`⚠️ 确定要完全删除【${className}】吗？`)) {
+            delete students[className];
+            localStorage.setItem('pe_v5_students', JSON.stringify(students));
+            renderAccordion();
+            document.getElementById('statsResult').innerHTML = '';
+        }
+    }
+
+    function toggleClass(groupElement) { groupElement.classList.toggle('open'); }
+
+    function changeStatus(btn) {
+        const isAlreadyActive = btn.classList.contains('active');
+        const group = btn.parentElement;
+        group.querySelectorAll('.status-btn').forEach(b => b.classList.remove('active'));
+        if (!isAlreadyActive) { btn.classList.add('active'); }
+    }
+
+    document.getElementById('datePicker').addEventListener('change', renderAccordion);
+
+    // 提交考勤
+    function submitClassAttendance(className) {
+        const date = document.getElementById('datePicker').value;
+        if (!date) return;
+        if (!records[date]) records[date] = {};
+        if (!records[date][className]) records[date][className] = {};
+
+        const groups = document.querySelectorAll(`.status-group[data-class="${className}"]`);
+        groups.forEach(group => {
+            const student = group.getAttribute('data-student');
+            const activeBtn = group.querySelector('.status-btn.active');
+            records[date][className][student] = activeBtn ? activeBtn.getAttribute('data-status') : 'normal';
+        });
+
+        localStorage.setItem('pe_v5_records', JSON.stringify(records));
+        document.getElementById(`group-${className}`).classList.remove('open');
+        showToast(`已保存 ${className} 考勤并折叠`);
+    }
+
+    // 3. 期末出勤率统计
+    function generateStats() {
+        const classNames = Object.keys(students);
+        if (classNames.length === 0) { alert('暂无班级数据'); return; }
+
+        const classTotalDays = {};
+        classNames.forEach(c => classTotalDays[c] = 0);
+
+        const stats = {};
+        classNames.forEach(className => {
+            stats[className] = {};
+            students[className].forEach(studentObj => {
+                stats[className][studentObj.name] = { normal: 0, leave: 0, absent: 0, late: 0, early: 0 };
+            });
+        });
+
+        for (let date in records) {
+            const dateData = records[date];
+            classNames.forEach(className => {
+                if (dateData[className]) {
+                    classTotalDays[className]++;
+                    students[className].forEach(studentObj => {
+                        const sName = studentObj.name;
+                        const status = dateData[className][sName] || 'normal';
+                        if (stats[className][sName]) { stats[className][sName][status]++; }
+                    });
+                }
+            });
+        }
+
+        let html = '';
+        classNames.forEach(className => {
+            const totalClasses = classTotalDays[className];
+            
+            html += `
+                <div class="class-group">
+                    <div class="class-header" onclick="toggleClass(this.parentElement)">
+                        <span>📊 ${className} (累计上课 ${totalClasses} 节)</span>
+                    </div>
+                    <div class="class-content">
+            `;
+            
+            if (totalClasses === 0) {
+                html += '<p style="color:#999;font-size:13px;text-align:center;padding:10px;">该班级暂无历史考勤数据</p></div></div>';
+                return;
+            }
+
+            html += `
+                <div class="table-responsive">
+                    <table>
+                        <tr>
+                            <th style="width: 45px;">序号</th>
+                            <th>姓名</th>
+                            <th>性别</th>
+                            <th>请假</th>
+                            <th>旷课</th>
+                            <th>迟到</th>
+                            <th>早退</th>
+                            <th>出勤率</th>
+                        </tr>
+            `;
+
+            students[className].forEach((studentObj, index) => {
+                const sName = studentObj.name;
+                const sGender = studentObj.gender;
+                const s = stats[className][sName];
+                
+                const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
+                
+                let effectiveAttendance = totalClasses - totalMissedScore;
+                if (effectiveAttendance < 0) effectiveAttendance = 0;
+                const rate = ((effectiveAttendance / totalClasses) * 100).toFixed(1);
+                
+                const isDanger = parseFloat(rate) < 50.0;
+                const rateClass = isDanger ? 'class="danger-rate"' : 'class="rate-click-cell"';
+                
+                html += `
+                    <tr>
+                        <td style="color:#888;">${index + 1}</td>
+                        <td><b>${sName}</b></td>
+                        <td><span class="gender-tag">${sGender}</span></td>
+                        <td style="color:var(--leave)">${s.leave}</td>
+                        <td style="color:var(--absent)">${s.absent}</td>
+                        <td style="color:var(--late)">${s.late}</td>
+                        <td style="color:var(--early)">${s.early}</td>
+                        <td ${rateClass} onclick="showStudentCalendar('${className}', '${sName}')">${rate}%</td>
+                    </tr>
+                `;
+            });
+            html += `</table></div></div></div>`;
+        });
+
+        document.getElementById('statsResult').innerHTML = html;
+    }
+
+    // 🗓️ 左右滑动+点击按钮双驱动切换月份日历
+    function showStudentCalendar(className, studentName) {
+        let allDates = Object.keys(records).filter(date => records[date][className]);
+        if (allDates.length === 0) { alert("暂无任何打卡历史日期"); return; }
+        allDates.sort();
+
+        let uniqueMonths = [...new Set(allDates.map(d => d.substring(0, 7)))];
+        uniqueMonths.sort();
+
+        let modalBody = document.getElementById('modalCalendarBody');
+        
+        // 1. 渲染静止头部信息
+        modalBody.innerHTML = `
+            <h3 style="margin-top:5px; text-align:center; color:#333; margin-bottom: 5px;">📅 考勤轨迹明细</h3>
+            <p style="text-align:center; margin: 2px 0 8px 0; font-size:14px;">学生：<b>${studentName}</b> (${className})</p>
+            <div class="calendar-legend">
+                <div class="legend-item"><div class="legend-box" style="background:#4CAF50;"></div>正常</div>
+                <div class="legend-item"><div class="legend-box" style="background:var(--leave)"></div>请假</div>
+                <div class="legend-item"><div class="legend-box" style="background:var(--absent)"></div>旷课</div>
+                <div class="legend-item"><div class="legend-box" style="background:var(--late)"></div>迟到</div>
+                <div class="legend-item"><div class="legend-box" style="background:var(--early)"></div>早退</div>
+            </div>
+            
+            <div class="slider-wrapper">
+                <button class="nav-arrow left" onclick="scrollCalendarContainer(-1)">◀</button>
+                <div class="calendar-slider" id="calendarSlider"></div>
+                <button class="nav-arrow right" onclick="scrollCalendarContainer(1)">▶</button>
+            </div>
+        `;
+
+        let sliderContainer = document.getElementById('calendarSlider');
+
+        // 3. 压入各个独立月份卡片
+        uniqueMonths.forEach(ym => {
+            let [year, month] = ym.split('-').map(Number);
+            let firstDayIndex = new Date(year, month - 1, 1).getDay();
+            let daysInMonth = new Date(year, month, 0).getDate();
+
+            let monthHtml = `
+                <div class="month-container">
+                    <div class="month-title">📍 ${year}年${month}月</div>
+                    <div class="calendar-weekdays">
+                        <div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div>
+                    </div>
+                    <div class="calendar-days">
+            `;
+
+            for (let i = 0; i < firstDayIndex; i++) {
+                monthHtml += `<div class="day-cell pad"></div>`;
+            }
+
+            for (let day = 1; day <= daysInMonth; day++) {
+                let dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+                
+                let isRecorded = records[dateStr] && records[dateStr][className];
+                let status = isRecorded ? (records[dateStr][className][studentName] || 'normal') : 'none';
+
+                let statusClass = '';
+                if (status === 'normal') statusClass = 'cal-recorded';
+                else if (status === 'leave') statusClass = 'cal-leave';
+                else if (status === 'absent') statusClass = 'cal-absent';
+                else if (status === 'late') statusClass = 'cal-late';
+                else if (status === 'early') statusClass = 'cal-early';
+
+                monthHtml += `
+                    <div class="day-cell ${statusClass}">
+                        <span>${day}</span>
+                    </div>
+                `;
+            }
+
+            monthHtml += `</div></div>`;
+            sliderContainer.innerHTML += monthHtml;
+        });
+
+        document.getElementById('calendarModal').style.display = 'flex';
+        
+        // 自动定位到最新（最右侧）的一页月份
+        setTimeout(() => {
+            sliderContainer.scrollLeft = sliderContainer.scrollWidth;
+        }, 60);
+    }
+
+    // 【新增核心控制函数】点击箭头驱动滑块横向整页滚动
+    function scrollCalendarContainer(direction) {
+        const slider = document.getElementById('calendarSlider');
+        if (slider) {
+            // clientWidth 代表单个可见月份页面卡片的整体物理宽度
+            const pageWidth = slider.clientWidth;
+            slider.scrollBy({
+                left: direction * pageWidth,
+                behavior: 'smooth'
+            });
+        }
+    }
+
+    // 关闭弹窗
+    function closeModal(e) {
+        if(e.target.id === 'calendarModal') {
+            document.getElementById('calendarModal').style.display = 'none';
+        }
+    }
+
+    // 导出备份
+    function exportBackupData() {
+        const dataStr = JSON.stringify({ students: students, records: records });
+        const blob = new Blob([dataStr], { type: "application/json" });
+        const url = URL.createObjectURL(blob);
+        const date = new Date().toISOString().slice(0, 10);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `体育考勤数据备份_${date}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    }
+
+    // 导入备份
+    function importBackupData(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = function(evt) {
+            try {
+                const backData = JSON.parse(evt.target.result);
+                if (backData.students && backData.records) {
+                    students = backData.students;
+                    records = backData.records;
+                    localStorage.setItem('pe_v5_students', JSON.stringify(students));
+                    localStorage.setItem('pe_v5_records', JSON.stringify(records));
+                    alert("🎉 备份数据导入恢复成功！");
+                    renderAccordion();
+                    document.getElementById('statsResult').innerHTML = '';
+                } else { alert("导入失败，备份文件格式不匹配。"); }
+            } catch(err) { alert("文件解析失败：" + err); }
+        };
+        reader.readAsText(file);
+    }
+
+    function showToast(msg) {
+        const tip = document.createElement('div');
+        tip.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); color:white; padding:8px 16px; border-radius:20px; font-size:13px; z-index:9999;";
+        tip.innerText = msg;
+        document.body.appendChild(tip);
+        setTimeout(() => tip.remove(), 1200);
+    }
+</script>
+</body>
+</html>
