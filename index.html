@@ -4,14 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>体育课考勤系统</title>
+    <!-- 引入开源 Excel 解析与导出库 -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
     <link rel="manifest" href="manifest.json">
+    
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2643/2643501.png">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2643/2643501.png">
+    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2312/2312217.png">
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2312/2312217.png">
 
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
@@ -145,8 +147,10 @@
         .danger-rate { color: var(--absent) !important; font-weight: bold; text-decoration: underline; text-decoration-style: dotted; cursor: pointer;}
         
         /* 备份模块样式 */
-        .backup-btn-group { display: flex; gap: 10px; margin-top: 10px; }
-        .btn-secondary { background-color: #78909C; font-size: 14px; padding: 8px; }
+        .backup-btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
+        .btn-secondary { background-color: #78909C; font-size: 14px; padding: 8px; flex: 1; min-width: 120px; }
+        .btn-danger-sys { background-color: #d32f2f; font-size: 14px; padding: 8px; flex: 1; min-width: 120px; }
+        .btn-danger-sys:active { background-color: #b71c1c; }
 
         /* 🗓️ 弹窗日历核心样式 */
         .modal-overlay {
@@ -238,7 +242,8 @@
     <div class="section">
         <h3>1. 导入学生名单</h3>
         <p style="font-size: 12px; color: #666; margin: 0;">
-            <b>方式A：Excel导入</b>（包含：<b>班级</b>、<b>姓名</b>、<b>性别</b>，会重置旧名单）
+            <!-- 【更新提示】说明其支持追加 -->
+            <b>方式A：Excel导入</b>（包含：<b>班级</b>、<b>姓名</b>、<b>性别</b>，支持多班级分批追加导入）
         </p>
         <div class="file-input-wrapper" onclick="document.getElementById('excelFile').click()">
             <span id="fileStatus">点击选择或拖拽 Excel 文件导入</span>
@@ -274,9 +279,11 @@
 
     <div class="section" style="background: #fcfcfc; padding: 10px; border-radius: 6px; border: 1px dashed #bbb;">
         <h4 style="margin: 0; font-size: 14px; color: #555;">🛡️ 数据备份与防丢管理</h4>
-        <div class="backup-btn-group">
+        <div class="backup-btn-group" style="margin-top: 10px;">
             <button class="btn-secondary" onclick="exportBackupData()">📥 导出数据备份</button>
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="background-color: #5c6bc0;">📤 导入历史备份</button>
+            <!-- 【新功能】密码初始化系统按钮 -->
+            <button class="btn-danger-sys" onclick="systemReset()">🚨 初始化系统</button>
             <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importBackupData(event)">
         </div>
     </div>
@@ -298,7 +305,7 @@
 
     window.onload = () => { renderAccordion(); };
 
-    // Excel 导入
+    // 【升级功能】Excel 导入由覆盖改为智能分批追加
     function importExcel(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -316,6 +323,7 @@
                     document.getElementById('fileStatus').innerText = "格式错误";
                     return;
                 }
+                
                 const newStudents = {};
                 json.forEach(row => {
                     const cls = String(row['班级']).trim();
@@ -326,12 +334,29 @@
                         newStudents[cls].push({ name: name, gender: gender });
                     }
                 });
-                students = newStudents;
+
+                // 【核心修改：合并追加逻辑】
+                let newClassCount = 0;
+                let newStudentCount = 0;
+
+                for (let cls in newStudents) {
+                    if (!students[cls]) {
+                        students[cls] = [];
+                        newClassCount++;
+                    }
+                    newStudents[cls].forEach(newStu => {
+                        // 查重：如果在已有班级里找不到同名学生，则进行追加
+                        const isDuplicate = students[cls].some(s => s.name === newStu.name);
+                        if (!isDuplicate) {
+                            students[cls].push(newStu);
+                            newStudentCount++;
+                        }
+                    });
+                }
+
                 localStorage.setItem('pe_v5_students', JSON.stringify(students));
-                let summary = '🎉 成功导入：\n';
-                for (let c in students) { summary += `• ${c}：${students[c].length} 人\n`; }
-                alert(summary);
-                document.getElementById('fileStatus').innerText = "导入成功！";
+                alert(`🎉 智能分批导入完成！\n本次共新增班级：${newClassCount} 个\n新追加学生：${newStudentCount} 人`);
+                document.getElementById('fileStatus').innerText = "导入/追加成功！";
                 renderAccordion();
                 document.getElementById('statsResult').innerHTML = ''; 
             } catch (err) {
@@ -459,6 +484,7 @@
 
     function toggleClass(groupElement) { groupElement.classList.toggle('open'); }
 
+    // 修改按钮控制
     function changeStatus(btn) {
         const isAlreadyActive = btn.classList.contains('active');
         const group = btn.parentElement;
@@ -582,12 +608,11 @@
         document.getElementById('statsResult').innerHTML = html;
     }
 
-    // 【新增核心功能】一键计算数据并无缝导出规范的 Excel 多班级考勤总表
+    // 4. 一键导出 Excel 表功能
     function exportStatsToExcel() {
         const classNames = Object.keys(students);
         if (classNames.length === 0) { alert('暂无班级数据，无法导出报表！'); return; }
 
-        // 1. 本地动态跑一遍严谨的权重汇总计算逻辑
         const classTotalDays = {};
         classNames.forEach(c => classTotalDays[c] = 0);
 
@@ -613,21 +638,18 @@
             });
         }
 
-        // 2. 组装符合 Excel 标准二维数组的行数据集
         const dataRows = [];
-        // 定义规范表头
         dataRows.push(["班级", "序号", "姓名", "性别", "请假(次)", "旷课(次)", "迟到(次)", "早退(次)", "综合出勤率"]);
 
         classNames.forEach(className => {
             const totalClasses = classTotalDays[className];
-            if (totalClasses === 0) return; // 过滤无打卡记录的空白班级
+            if (totalClasses === 0) return; 
 
             students[className].forEach((studentObj, index) => {
                 const sName = studentObj.name;
                 const sGender = studentObj.gender;
                 const s = stats[className][sName];
                 
-                // 执行相同的核心精细化公式
                 const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
                 let effectiveAttendance = totalClasses - totalMissedScore;
                 if (effectiveAttendance < 0) effectiveAttendance = 0;
@@ -648,16 +670,14 @@
         });
 
         if (dataRows.length <= 1) {
-            alert("当前系统中没有任何班级产生过有效上课打卡记录，请打卡后再行导出！");
+            alert("当前系统中没有任何班级产生过有效考勤记录，无法生成Excel文件！");
             return;
         }
 
-        // 3. 驱动 SheetJS 在浏览器纯前端构建并下载文件
         const ws = XLSX.utils.aoa_to_sheet(dataRows);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "期末考勤出勤率");
 
-        // 截取当前日期作为文件名后缀
         const dateStr = new Date().toISOString().slice(0, 10);
         XLSX.writeFile(wb, `体育课综合出勤率总表_${dateStr}.xlsx`);
     }
@@ -673,7 +693,6 @@
 
         let modalBody = document.getElementById('modalCalendarBody');
         
-        // 1. 渲染静止头部信息
         modalBody.innerHTML = `
             <h3 style="margin-top:5px; text-align:center; color:#333; margin-bottom: 5px;">📅 考勤轨迹明细</h3>
             <p style="text-align:center; margin: 2px 0 8px 0; font-size:14px;">学生：<b>${studentName}</b> (${className})</p>
@@ -694,7 +713,6 @@
 
         let sliderContainer = document.getElementById('calendarSlider');
 
-        // 3. 压入各个独立月份卡片
         uniqueMonths.forEach(ym => {
             let [year, month] = ym.split('-').map(Number);
             let firstDayIndex = new Date(year, month - 1, 1).getDay();
@@ -739,13 +757,11 @@
 
         document.getElementById('calendarModal').style.display = 'flex';
         
-        // 自动定位到最新（最右侧）的一页月份
         setTimeout(() => {
             sliderContainer.scrollLeft = sliderContainer.scrollWidth;
         }, 60);
     }
 
-    // 点击箭头驱动滑块横向整页滚动
     function scrollCalendarContainer(direction) {
         const slider = document.getElementById('calendarSlider');
         if (slider) {
@@ -764,7 +780,7 @@
         }
     }
 
-    // 导出备份
+    // 导出数据备份
     function exportBackupData() {
         const dataStr = JSON.stringify({ students: students, records: records });
         const blob = new Blob([dataStr], { type: "application/json" });
@@ -777,7 +793,7 @@
         URL.revokeObjectURL(url);
     }
 
-    // 导入备份
+    // 导入历史备份
     function importBackupData(e) {
         const file = e.target.files[0];
         if (!file) return;
@@ -797,6 +813,25 @@
             } catch(err) { alert("文件解析失败：" + err); }
         };
         reader.readAsText(file);
+    }
+
+    // 【新功能】输入密码安全初始化系统
+    function systemReset() {
+        const password = prompt("⚠️ 您正在尝试重置整个系统！\n该操作将完全清空所有班级名单和所有历史考勤记录。\n请输入管理员密码确认操作：");
+        if (password === null) return; // 点击取消则中断
+        
+        if (password === "admin") {
+            if (confirm("🚨 请再次确认！\n所有考勤数据清空后将无法恢复（除非您有下载过历史备份文件）。\n确定要清空全部数据吗？")) {
+                localStorage.removeItem('pe_v5_students');
+                localStorage.removeItem('pe_v5_records');
+                students = {};
+                records = {};
+                alert("系统已成功还原初始化！");
+                location.reload(); // 强刷页面清空状态
+            }
+        } else {
+            alert("❌ 密码错误，鉴权失败！系统拒绝了重置请求。");
+        }
     }
 
     function showToast(msg) {
