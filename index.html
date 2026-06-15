@@ -589,7 +589,7 @@
         let modalBody = document.getElementById('modalCalendarBody');
         let currentScores = studentObj.scores || {};
 
-        let fieldsHtml = '';
+     let fieldsHtml = '';
         allowedProjs.forEach(proj => {
             let val = currentScores[proj] !== undefined ? currentScores[proj] : '';
             let initialScore = queryStandardScore(proj, val, className, gender);
@@ -601,6 +601,7 @@
                 <div class="score-row">
                     <label>${proj}:</label>
                     <input type="text" id="modal-score-${proj}" class="student-score-field" 
+                           inputmode="decimal"
                            data-proj="${proj}" value="${val}" placeholder="未录入"
                            oninput="updateLiveScore(this, '${className}', '${gender}')">
                     <div class="live-score-badge ${badgeCls}" id="live-badge-${proj}">${initialScore}分</div>
@@ -658,6 +659,7 @@
         div.innerHTML = `
             <label>${projName}:</label>
             <input type="text" id="modal-score-${projName}" class="student-score-field" 
+                   inputmode="decimal"
                    data-proj="${projName}" value="" placeholder="手动录入值"
                    oninput="updateLiveScore(this, '${className}', '${gender}')">
             <div class="live-score-badge" id="live-badge-${projName}">0分</div>
