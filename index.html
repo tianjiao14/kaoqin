@@ -138,18 +138,6 @@
             font-weight: bold;
         }
         .rate-badge.danger-rate { background: #FFEBEE; color: var(--absent); }
-        
-        .score-summary-tag {
-            font-size: 11px;
-            background: #f5f5f5;
-            color: #666;
-            padding: 1px 4px;
-            border-radius: 4px;
-            max-width: 140px;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
 
         /* 单钮状态循环切换按钮 */
         .status-cycle-btn {
@@ -199,7 +187,7 @@
         }
         .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; z-index: 10100; }
         
-        /* 成绩表单微调 */
+        /* 成绩表单样式 */
         .score-row { display: flex; align-items: center; margin-bottom: 10px; gap: 8px;}
         .score-row label { font-size: 14px; font-weight: bold; width: 85px; text-align: right; shrink: 0; }
         .score-row input { flex: 1; width: auto; margin: 0; min-width: 60px; }
@@ -241,7 +229,7 @@
             <span id="fileStatus">🟢 导入/追加 Excel</span>
             <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="importExcel(event)">
         </div>
-        <p style="font-size: 11px; color:#777; margin: 4px 0 0 0; text-align: center;">表格需包含【班级、姓名、性别】。男生自动过滤出引体向上/1000米，女生仰卧起坐/800米。</p>
+        <p style="font-size: 11px; color:#777; margin: 4px 0 0 0; text-align: center;">阶段性测试：本学期未测科目不显示；个别缺考算0分并计算平均分。</p>
     </div>
 
     <div class="section">
@@ -278,24 +266,24 @@
         run50: { "初一男": [[7.8,100],[7.9,95],[8,90],[8.1,85],[8.2,80],[8.4,78],[8.6,76],[8.8,74],[9,72],[9.2,70],[9.4,68],[9.6,66],[9.8,64],[10,62],[10.2,60],[10.4,50],[10.6,40],[10.8,30],[11,20],[11.2,10]], "初二男": [[7.5,100],[7.6,95],[7.7,90],[7.8,85],[7.9,80],[8.1,78],[8.3,76],[8.5,74],[8.7,72],[8.9,70],[9.1,68],[9.3,66],[9.5,64],[9.7,62],[9.9,60],[10.1,50],[10.3,40],[10.5,30],[10.7,20],[10.9,10]], "初三男": [[7.3,100],[7.4,95],[7.5,90],[7.6,85],[7.7,80],[7.9,78],[8.1,76],[8.3,74],[8.5,72],[8.7,70],[8.9,68],[9.1,66],[9.3,64],[9.5,62],[9.7,60],[9.9,50],[10.1,40],[10.3,30],[10.5,20],[10.7,10]], "高一男": [[7.1,100],[7.2,95],[7.3,90],[7.4,85],[7.5,80],[7.7,78],[7.9,76],[8.1,74],[8.3,72],[8.5,70],[8.7,68],[8.9,66],[9.1,64],[9.3,62],[9.5,60],[9.7,50],[9.9,40],[10.1,30],[10.3,20],[10.5,10]], "高二男": [[7,100],[7.1,95],[7.2,90],[7.3,85],[7.4,80],[7.6,78],[7.8,76],[8,74],[8.2,72],[8.4,70],[8.6,68],[8.8,66],[9,64],[9.2,62],[9.4,60],[9.6,50],[9.8,40],[10,30],[10.2,20],[10.4,10]], "高三男": [[6.8,100],[6.9,95],[7,90],[7.1,85],[7.2,80],[7.4,78],[7.6,76],[7.8,74],[8,72],[8.2,70],[8.4,68],[8.6,66],[8.8,64],[9,62],[9.2,60],[9.4,50],[9.6,40],[9.8,30],[10,20],[10.2,10]], "初一女": [[8.1,100],[8.2,95],[8.3,90],[8.6,85],[8.9,80],[9.1,78],[9.3,76],[9.5,74],[9.7,72],[9.9,70],[10.1,68],[10.3,66],[10.5,64],[10.7,62],[10.9,60],[11.1,50],[11.3,40],[11.5,30],[11.7,20],[11.9,10]], "初二女": [[8,100],[8.1,95],[8.2,90],[8.5,85],[8.8,80],[9,78],[9.2,76],[9.4,74],[9.6,72],[9.8,70],[10,68],[10.2,66],[10.4,64],[10.6,62],[10.8,60],[11,50],[11.2,40],[11.4,30],[11.6,20],[11.8,10]], "初三女": [[7.9,100],[8,95],[8.1,90],[8.4,85],[8.7,80],[8.9,78],[9.1,76],[9.3,74],[9.5,72],[9.7,70],[9.9,68],[10.1,66],[10.3,64],[10.5,62],[10.7,60],[10.9,50],[11.1,40],[11.3,30],[11.5,20],[11.7,10]], "高一女": [[7.8,100],[7.9,95],[8,90],[8.3,85],[8.6,80],[8.8,78],[9,76],[9.2,74],[9.4,72],[9.6,70],[9.8,68],[10,66],[10.2,64],[10.4,62],[10.6,60],[10.8,50],[11,40],[11.2,30],[11.4,20],[11.6,10]], "高二女": [[7.7,100],[7.8,95],[7.9,90],[8.2,85],[8.5,80],[8.7,78],[8.9,76],[9.1,74],[9.3,72],[9.5,70],[9.7,68],[9.9,66],[10.1,64],[10.3,62],[10.5,60],[10.7,50],[10.9,40],[11.1,30],[11.3,20],[11.5,10]], "高三女": [[7.6,100],[7.7,95],[7.8,90],[8.1,85],[8.4,80],[8.6,78],[8.8,76],[9,74],[9.2,72],[9.4,70],[9.6,68],[9.8,66],[10,64],[10.2,62],[10.4,60],[10.6,50],[10.8,40],[11,30],[11.2,20],[11.4,10]] },
         jump: { "初一男": [[225,100],[218,95],[211,90],[203,85],[195,80],[191,78],[187,76],[183,74],[179,72],[175,70],[171,68],[167,66],[163,64],[159,62],[155,60],[150,50],[145,40],[140,30],[135,20],[130,10]], "初二男": [[240,100],[233,95],[226,90],[218,85],[210,80],[206,78],[202,76],[198,74],[194,72],[190,70],[186,68],[182,66],[178,64],[174,62],[170,60],[165,50],[160,40],[155,30],[150,20],[145,10]], "初三男": [[250,100],[245,95],[240,90],[233,85],[225,80],[221,78],[217,76],[213,74],[209,72],[205,70],[201,68],[197,66],[193,64],[189,62],[185,60],[180,50],[175,40],[170,30],[165,20],[160,10]], "高一男": [[260,100],[255,95],[250,90],[243,85],[235,80],[231,78],[227,76],[223,74],[219,72],[215,70],[211,68],[207,66],[203,64],[199,62],[195,60],[190,50],[185,40],[180,30],[175,20],[170,10]], "高二男": [[265,100],[260,95],[255,90],[248,85],[240,80],[236,78],[232,76],[228,74],[224,72],[220,70],[216,68],[212,66],[208,64],[204,62],[200,60],[195,50],[190,40],[185,30],[180,20],[175,10]], "高三男": [[270,100],[265,95],[260,90],[253,85],[245,80],[241,78],[237,76],[233,74],[229,72],[225,70],[221,68],[217,66],[213,64],[209,62],[205,60],[200,50],[195,40],[190,30],[185,20],[180,10]], "初一女": [[196,100],[190,95],[184,90],[177,85],[170,80],[167,78],[164,76],[161,74],[158,72],[155,70],[152,68],[149,66],[146,64],[143,62],[140,60],[135,50],[130,40],[125,30],[120,20],[115,10]], "初二女": [[200,100],[194,95],[188,90],[181,85],[174,80],[171,78],[168,76],[165,74],[162,72],[159,70],[156,68],[153,66],[150,64],[147,62],[144,60],[139,50],[134,40],[129,30],[124,20],[119,10]], "初三女": [[202,100],[196,95],[190,90],[183,85],[176,80],[173,78],[170,76],[167,74],[164,72],[161,70],[158,68],[155,66],[152,64],[149,62],[146,60],[141,50],[136,40],[131,30],[126,20],[121,10]], "高一女": [[204,100],[198,95],[192,90],[185,85],[178,80],[175,78],[172,76],[169,74],[166,72],[163,70],[160,68],[157,66],[154,64],[151,62],[148,60],[143,50],[138,40],[133,30],[128,20],[123,10]], "高二女": [[205,100],[199,95],[193,90],[186,85],[179,80],[176,78],[173,76],[170,74],[167,72],[164,70],[161,68],[158,66],[155,64],[152,62],[149,60],[144,50],[139,40],[134,30],[129,20],[124,10]], "高三女": [[206,100],[200,95],[194,90],[187,85],[180,80],[177,78],[174,76],[171,74],[168,72],[165,70],[162,68],[159,66],[156,64],[153,62],[150,60],[145,50],[140,40],[135,30],[130,20],[125,10]] },
         str: { "初一男": [[13,100],[12,95],[11,90],[10,85],[9,80],[8,76],[7,72],[6,68],[5,64],[4,60],[3,50],[2,40],[1,30]], "初二男": [[14,100],[13,95],[12,90],[11,85],[10,80],[9,76],[8,72],[7,68],[6,64],[5,60],[4,50],[3,40],[2,30],[1,20]], "初三男": [[15,100],[14,95],[13,90],[12,85],[11,80],[10,76],[9,72],[8,68],[7,64],[6,60],[5,50],[4,40],[3,30],[2,20],[1,10]], "高一男": [[16,100],[15,95],[14,90],[13,85],[12,80],[11,76],[10,72],[9,68],[8,64],[7,60],[6,50],[5,40],[4,30],[3,20],[2,10]], "高二男": [[17,100],[16,95],[15,90],[14,85],[13,80],[12,76],[11,72],[10,68],[9,64],[8,60],[7,50],[6,40],[5,30],[4,20],[3,10]], "高三男": [[18,100],[17,95],[16,90],[15,85],[14,80],[13,76],[12,72],[11,68],[10,64],[9,60],[8,50],[7,40],[6,30],[5,20],[4,10]], "初一女": [[50,100],[48,95],[46,90],[43,85],[40,80],[38,78],[36,76],[34,74],[32,72],[30,70],[28,68],[26,66],[24,64],[22,62],[20,60],[18,50],[16,40],[14,30],[12,20],[10,10]], "初二女": [[51,100],[49,95],[47,90],[44,85],[41,80],[39,78],[37,76],[35,74],[33,72],[31,70],[29,68],[27,66],[25,64],[23,62],[21,60],[19,50],[17,40],[15,30],[13,20],[11,10]], "初三女": [[52,100],[50,95],[48,90],[45,85],[42,80],[40,78],[38,76],[36,74],[34,72],[32,70],[30,68],[28,66],[26,64],[24,62],[22,60],[20,50],[18,40],[16,30],[14,20],[12,10]], "高一女": [[53,100],[51,95],[49,90],[46,85],[43,80],[41,78],[39,76],[37,74],[35,72],[33,70],[31,68],[29,66],[27,64],[25,62],[23,60],[21,50],[19,40],[17,30],[15,20],[13,10]], "高二女": [[54,100],[52,95],[50,90],[47,85],[44,80],[42,78],[40,76],[38,74],[36,72],[34,70],[32,68],[30,66],[28,64],[26,62],[24,60],[22,50],[20,40],[18,30],[16,20],[14,10]], "高三女": [[55,100],[53,95],[51,90],[48,85],[45,80],[43,78],[41,76],[39,74],[37,72],[35,70],[33,68],[31,66],[29,64],[27,62],[25,60],[23,50],[21,40],[19,30],[17,20],[15,10]] },
-        runL: { "初一男": [[235,100],[245,95],[255,90],[262,85],[270,80],[275,78],[280,76],[285,74],[290,72],[295,70],[300,68],[305,66],[310,64],[315,62],[320,60],[340,50],[360,40],[380,30],[400,20],[420,10]], "初二男": [[230,100],[235,95],[240,90],[247,85],[255,80],[260,78],[265,76],[270,74],[275,72],[280,70],[285,68],[290,66],[295,64],[300,62],[305,60],[325,50],[345,40],[365,30],[385,20],[405,10]], "初三男": [[220,100],[225,95],[230,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[315,50],[335,40],[355,30],[375,20],[395,10]], "高一男": [[210,100],[215,95],[220,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[305,50],[325,40],[345,30],[365,20],[385,10]], "高二男": [[205,100],[210,95],[215,90],[222,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[300,50],[320,40],[340,30],[360,20],[380,10]], "高三男": [[200,100],[205,95],[210,90],[217,85],[225,80],[230,78],[235,76],[240,74],[245,72],[250,70],[255,68],[260,66],[265,64],[270,62],[275,60],[295,50],[315,40],[335,30],[355,20],[375,10]], "初一女": [[215,100],[222,95],[229,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[305,50],[315,40],[325,30],[335,20],[345,10]], "初二女": [[210,100],[217,95],[224,90],[232,85],[240,80],[245,78],[250,76],[255,74],[260,72],[265,70],[270,68],[275,66],[280,64],[285,62],[290,60],[300,50],[310,40],[320,30],[330,20],[340,10]], "初三女": [[205,100],[212,95],[219,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[295,50],[305,40],[315,30],[325,20],[335,10]], "高一女": [[204,100],[210,95],[216,90],[223,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[290,50],[300,40],[310,30],[320,20],[330,10]], "高二女": [[202,100],[208,95],[214,90],[221,85],[228,80],[233,78],[238,76],[243,74],[248,72],[253,70],[258,68],[263,66],[268,64],[273,62],[278,60],[288,50],[298,40],[308,30],[318,20],[328,10]], "高三女": [[200,100],[206,95],[212,90],[219,85],[226,80],[231,78],[236,76],[241,74],[246,72],[251,70],[256,68],[261,66],[266,64],[271,62],[276,60],[286,50],[296,40],[306,30],[316,20],[326,10]] }
+        runL: { "初一男": [[235,100],[245,95],[255,90],[262,85],[270,80],[275,78],[280,76],[285,74],[290,72],[295,70],[300,68],[305,66],[310,64],[315,62],[320,60],[340,50],[360,40],[380,30],[400,20],[420,10]], "初二男": [[230,100],[235,95],[240,90],[247,85],[255,80],[260,78],[265,76],[270,74],[275,72],[280,70],[285,68],[290,66],[295,64],[300,62],[305,60],[325,50],[345,40],[365,30],[385,20],[405,10]], "初三男": [[220,100],[225,95],[230,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[315,50],[335,40],[355,30],[375,20],[395,10]], "高一男": [[210,100],[215,95],[220,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[305,50],[325,40],[345,30],[365,20],[385,10]], "高二男": [[205,100],[210,95],[215,90],[222,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[300,50],[320,40],[340,30],[360,20],[380,10]], "高三男": [[200,100],[205,95],[210,90],[217,85],[225,80],[230,78],[235,76],[240,74],[245,72],[250,70],[255,68],[260,66],[265,64],[270,62],[275,60],[295,50],[315,40],[335,30],[355,20],[375,10]], "初一女": [[215,100],[222,95],[229,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[305,50],[315,40],[325,30],[335,20],[345,10]], "初二女": [[210,100],[217,95],[224,90],[232,85],[240,80],[245,78],[250,76],[255,74],[260,72],[265,70],[270,68],[275,66],[280,64],[285,62],[290,60],[300,50],[310,40],[320,30],[330,20],[340,10]], "初三女": [[205,100],[212,95],[219,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[295,50],[305,40],[315,30],[325,20],[335,10]], "高一女": [[204,100],[210,95],[216,90],[223,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[290,50],[300,40],[310,30],[320,20],[330,10]], "高二女": [[202,100],[208,95],[214,90],[221,85],[228,80],[233,78],[238,76],[243,74],[248,72],[253,70],[258,68],[263,66],[268,64],[273,62],[278,60],[288,50],[298,40],[308,30],[318,20],[328,10]], "高三女": [[200,100],[206,95],[212,90],[219,85],[226,80],[231,78],[236,76],[241,74],[246,72],[251,70],[256,68],[261,66],[266,64],[271,62],[276,60],[286,50],[296,40],[306,30],[316,20],[326,10]] },
+        sit: { "初一男": [[17.6,100],[15.9,95],[14.2,90],[12.3,85],[10.4,80],[9.1,78],[7.8,76],[6.5,74],[5.2,72],[3.9,70],[2.6,68],[1.3,66],[0,64],[-1.3,62],[-2.6,60],[-3.8,50],[-5,40],[-6.2,30],[-7.4,20],[-8.6,10]], "初二男": [[19.6,100],[17.7,95],[15.8,90],[13.7,85],[11.6,80],[10.3,78],[9,76],[7.7,74],[6.4,72],[5.1,70],[3.8,68],[2.5,66],[1.2,64],[-0.1,62],[-1.4,60],[-2.6,50],[-3.8,40],[-5,30],[-6.2,20],[-7.4,10]], "初三男": [[21.6,100],[19.7,95],[17.8,90],[15.8,85],[13.8,80],[12.4,78],[11,76],[9.6,74],[8.2,72],[6.8,70],[5.4,68],[4,66],[2.6,64],[1.2,62],[-0.2,60],[-1.4,50],[-2.6,40],[-3.8,30],[-5,20],[-6.2,10]], "高一男": [[23.6,100],[21.5,95],[19.4,90],[17.2,85],[15,80],[13.6,78],[12.2,76],[10.8,74],[9.4,72],[8,70],[6.6,68],[5.2,66],[3.8,64],[2.4,62],[1,60],[0,50],[-1,40],[-2,30],[-3,20],[-4,10]], "高二男": [[24.3,100],[22.4,95],[20.5,90],[18.3,85],[16.1,80],[14.7,78],[13.3,76],[11.9,74],[10.5,72],[9.1,70],[7.7,68],[6.3,66],[4.9,64],[3.5,62],[2.1,60],[1.1,50],[0.1,40],[-0.9,30],[-1.9,20],[-2.9,10]], "高三男": [[24.6,100],[22.8,95],[21,90],[19.1,85],[17.2,80],[15.8,78],[14.4,76],[13,74],[11.6,72],[10.2,70],[8.8,68],[7.4,66],[6,64],[4.6,62],[3.2,60],[2.2,50],[1.2,40],[0.2,30],[-0.8,20],[-1.8,10]], "初一女": [[21.8,100],[20.1,95],[18.4,90],[16.7,85],[15,80],[13.7,78],[12.4,76],[11.1,74],[9.8,72],[8.5,70],[7.2,68],[5.9,66],[4.6,64],[3.3,62],[2,60],[1.2,50],[0.4,40],[-0.4,30],[-1.2,20],[-2,10]], "初二女": [[22.7,100],[21,95],[19.3,90],[17.6,85],[15.9,80],[14.6,78],[13.3,76],[12,74],[10.7,72],[9.4,70],[8.1,68],[6.8,66],[5.5,64],[4.2,62],[2.9,60],[2.1,50],[1.3,40],[0.5,30],[-0.3,20],[-1.1,10]], "初三女": [[23.5,100],[21.8,95],[20.1,90],[18.4,85],[16.7,80],[15.4,78],[14.1,76],[12.8,74],[11.5,72],[10.2,70],[8.9,68],[7.6,66],[6.3,64],[5,62],[3.7,60],[2.9,50],[2.1,40],[1.3,30],[0.5,20],[-0.3,10]], "高一女": [[24.2,100],[22.5,95],[20.8,90],[19.1,85],[17.4,80],[16.1,78],[14.8,76],[13.5,74],[12.2,72],[10.9,70],[9.6,68],[8.3,66],[7,64],[5.7,62],[4.4,60],[3.6,50],[2.8,40],[2,30],[1.2,20],[0.4,10]], "高二女": [[24.8,100],[23.1,95],[21.4,90],[19.7,85],[18,80],[16.7,78],[15.4,76],[14.1,74],[12.8,72],[11.5,70],[10.2,68],[8.9,66],[7.6,64],[6.3,62],[5,60],[4.2,50],[3.4,40],[2.6,30],[1.8,20],[1,10]], "高三女": [[25.3,100],[23.6,95],[21.9,90],[20.2,85],[18.5,80],[17.2,78],[15.9,76],[14.6,74],[13.3,72],[12,70],[10.7,68],[9.4,66],[8.1,64],[6.8,62],[5.5,60],[4.7,50],[3.9,40],[3.1,30],[2.3,20],[1.5,10]] }
     };
 
     document.getElementById('datePicker').valueAsDate = new Date();
     let students = JSON.parse(localStorage.getItem('pe_v6_students')) || {};
     let records = JSON.parse(localStorage.getItem('pe_v6_records')) || {};
+    let openedClassesState = JSON.parse(localStorage.getItem('pe_v6_open_state')) || {};
 
     const statusSequence = ['normal', 'leave', 'absent', 'late', 'early'];
     const statusTextMap = { 'normal': '正常', 'leave': '请假', 'absent': '旷课', 'late': '迟到', 'early': '早退' };
 
-    // 💡 智能查国标标准库评分引擎 (重写逻辑：没成绩/低于最低返回0；超越满分给100)
     function queryStandardScore(projectName, rawValue, className, gender) {
-        if (rawValue === undefined || rawValue === null || String(rawValue).trim() === '') return 0;
+        if (rawValue === undefined || rawValue === null || String(rawValue).trim() === '') return null;
         
         let val = parseFloat(rawValue);
-        if (isNaN(val)) return 0;
+        if (isNaN(val)) return null;
 
-        // 识别学段前缀
         let gradeKey = "初一"; 
         ["初一","初二","初三","高一","高二","高三"].forEach(g => { if(className.includes(g)) gradeKey = g; });
         const stdKey = `${gradeKey}${gender}`; 
@@ -303,10 +291,10 @@
         let projectType = "";
         if (projectName.includes("50米")) projectType = "run50";
         else if (projectName.includes("跳远")) projectType = "jump";
+        else if (projectName.includes("体前屈")) projectType = "sit";
         else if (projectName.includes("仰卧起坐") || projectName.includes("引体向上")) projectType = "str";
         else if (projectName.includes("1000米") || projectName.includes("800米") || projectName.includes("耐力跑")) {
             projectType = "runL";
-            // 🎯 特殊处理 3.58 格式：将其转换成秒数
             if (String(rawValue).includes('.')) {
                 let parts = String(rawValue).split('.');
                 let mins = parseInt(parts[0], 10) || 0;
@@ -316,35 +304,25 @@
         }
 
         if (!projectType || !STDS[projectType] || !STDS[projectType][stdKey]) {
-            // 常规非国标项目：100以内直接当分数，否则直接封顶/兜底
             if (val > 100) return 100;
             return val < 0 ? 0 : Math.round(val);
         }
 
         const ruleList = STDS[projectType][stdKey];
 
-        // 50米及耐力跑：时间越短（数值越小）分数越高
         if (projectType === "run50" || projectType === "runL") {
-            // 如果比100分的成绩还要短，直接给100分
             if (val <= ruleList[0][0]) return 100;
-            // 如果比最低分档还要长，直接判定为 0 分
             if (val > ruleList[ruleList.length - 1][0]) return 0;
-
             for (let i = 0; i < ruleList.length; i++) {
                 if (val <= ruleList[i][0]) return ruleList[i][1];
             }
             return 0;
-        } 
-        // 立定跳远及力量项：数量/距离越大分数越高
-        else {
+        } else {
             let actualVal = val;
             if (projectType === "jump" && val < 5) actualVal = Math.round(val * 100);
 
-            // 如果比100分的成绩还要大，直接给100分
             if (actualVal >= ruleList[0][0]) return 100;
-            // 如果达不到最低分标准，直接给 0 分
             if (actualVal < ruleList[ruleList.length - 1][0]) return 0;
-
             for (let i = 0; i < ruleList.length; i++) {
                 if (actualVal >= ruleList[i][0]) return ruleList[i][1];
             }
@@ -463,7 +441,6 @@
         nameInput.value = '';
         showToast(`已追加：${name}`);
         renderAccordion();
-        document.getElementById(`group-${className}`).classList.add('open');
     }
 
     function renderAccordion() {
@@ -484,13 +461,18 @@
             const classGroup = document.createElement('div');
             classGroup.className = 'class-group';
             classGroup.id = `group-${className}`;
+            
+            // 💡 恢复状态，保持当前折叠树的打开状态，不跳回
+            if (openedClassesState[className]) {
+                classGroup.classList.add('open');
+            }
 
             const totalClasses = classTotalDays[className] || 0;
 
             const header = document.createElement('div');
             header.className = 'class-header';
             header.innerText = `${className} (${students[className].length}人 / 累积上课${totalClasses}节)`;
-            header.onclick = () => toggleClass(classGroup);
+            header.onclick = () => toggleClass(classGroup, className);
 
             const content = document.createElement('div');
             content.className = 'class-content';
@@ -556,28 +538,23 @@
         });
     }
 
-    // 🏆 弹出单人成绩录入框 (内含性别自动分流与全新 0/100 分数规则)
     function openScoreModal(className, studentName) {
         event.stopPropagation();
         const studentObj = students[className].find(s => s.name === studentName);
         if(!studentObj) return;
 
         let gender = studentObj.gender || '男';
-
-        // 🎯 核心逻辑：基于性别确定允许呈现的科目组合
-        let allowedProjs = ["50米", "立定跳远"];
+        let allowedProjs = ["50米", "立定跳远", "坐位体前屈"];
         if (gender === '男') {
             allowedProjs.push("引体向上", "1000米");
         } else {
             allowedProjs.push("仰卧起坐", "800米");
         }
 
-        // 提取系统内可能已经存在的其他自定义额外科目
         Object.keys(students).forEach(c => {
             students[c].forEach(s => {
                 if (s.scores) {
                     Object.keys(s.scores).forEach(p => {
-                        // 过滤隔离掉相反性别的专属专测科目
                         if (gender === '男' && (p.includes("800米") || p.includes("仰卧起坐"))) return;
                         if (gender === '女' && (p.includes("1000米") || p.includes("引体向上"))) return;
                         if (!allowedProjs.includes(p)) allowedProjs.push(p);
@@ -589,13 +566,13 @@
         let modalBody = document.getElementById('modalCalendarBody');
         let currentScores = studentObj.scores || {};
 
-     let fieldsHtml = '';
+        let fieldsHtml = '';
         allowedProjs.forEach(proj => {
             let val = currentScores[proj] !== undefined ? currentScores[proj] : '';
             let initialScore = queryStandardScore(proj, val, className, gender);
             
-            // 样式根据是不是 0 分自动适配红/绿色标签
-            let badgeCls = initialScore > 0 ? 'has-val' : '';
+            let displayScore = initialScore !== null ? initialScore : 0;
+            let badgeCls = initialScore !== null && initialScore > 0 ? 'has-val' : '';
 
             fieldsHtml += `
                 <div class="score-row">
@@ -604,7 +581,7 @@
                            inputmode="decimal"
                            data-proj="${proj}" value="${val}" placeholder="未录入"
                            oninput="updateLiveScore(this, '${className}', '${gender}')">
-                    <div class="live-score-badge ${badgeCls}" id="live-badge-${proj}">${initialScore}分</div>
+                    <div class="live-score-badge ${badgeCls}" id="live-badge-${proj}">${displayScore}分</div>
                 </div>
             `;
         });
@@ -634,8 +611,9 @@
         const badge = document.getElementById(`live-badge-${proj}`);
         
         const calculated = queryStandardScore(proj, val, className, gender);
-        badge.innerText = `${calculated}分`;
-        if (calculated > 0) {
+        let displayScore = calculated !== null ? calculated : 0;
+        badge.innerText = `${displayScore}分`;
+        if (displayScore > 0) {
             badge.classList.add('has-val');
         } else {
             badge.classList.remove('has-val');
@@ -647,7 +625,6 @@
         const projName = input.value.trim();
         if(!projName) { alert('请输入科目名称！'); return; }
         
-        // 隔离串联性别的安全防御
         if (gender === '男' && (projName.includes("800米") || projName.includes("仰卧起坐"))) { alert('男生无需添加此科目！'); return; }
         if (gender === '女' && (projName.includes("1000米") || projName.includes("引体向上"))) { alert('女生无需添加此科目！'); return; }
 
@@ -689,7 +666,7 @@
         localStorage.setItem('pe_v6_students', JSON.stringify(students));
         document.getElementById('calendarModal').style.display = 'none';
         showToast(`已成功同步 ${studentName} 的个人期末成绩`);
-        renderAccordion();
+        renderAccordion(); // 🚀 重新渲染时，班级手风琴列表依然保持原样打开状态
     }
 
     function cycleStatus(btn) {
@@ -718,7 +695,17 @@
         }
     }
 
-    function toggleClass(groupElement) { groupElement.classList.toggle('open'); }
+    function toggleClass(classGroup, className) { 
+        classGroup.classList.toggle('open'); 
+        // 💡 记录状态
+        if (classGroup.classList.contains('open')) {
+            openedClassesState[className] = true;
+        } else {
+            delete openedClassesState[className];
+        }
+        localStorage.setItem('pe_v6_open_state', JSON.stringify(openedClassesState));
+    }
+
     document.getElementById('datePicker').addEventListener('change', renderAccordion);
 
     function submitClassAttendance(className) {
@@ -735,36 +722,60 @@
         });
 
         localStorage.setItem('pe_v6_records', JSON.stringify(records));
-        document.getElementById(`group-${className}`).classList.remove('open');
-        showToast(`已提交 ${className} 考勤，实时更新成绩册`);
+        showToast(`已提交 ${className} 考勤并实时归档`);
         renderAccordion();
     }
 
+    // 🚀 高阶格式化导出引擎：精准控制各列列宽，所有单元格强制垂直水平居中
     function exportStatsToExcel() {
         const classNames = Object.keys(students);
         if (classNames.length === 0) { alert('暂无班级数据'); return; }
 
         const classTotalDays = calculateAllStats();
 
-        // 收集并清洗所有出现过的科目名称
-        let allProjectNamesSet = new Set();
-        classNames.forEach(c => {
-            students[c].forEach(s => {
-                if (s.scores) { Object.keys(s.scores).forEach(p => allProjectNamesSet.add(p)); }
+        // 1. 扫描本学期参与测试的活动项目
+        let baseProjects = ["50米", "立定跳远", "坐位体前屈", "1000米", "800米", "仰卧起坐", "引体向上"];
+        let activeProjectsList = [];
+
+        baseProjects.forEach(proj => {
+            let hasAnyData = false;
+            classNames.forEach(c => {
+                students[c].forEach(s => {
+                    if (s.scores && s.scores[proj] !== undefined && s.scores[proj] !== null && String(s.scores[proj]).trim() !== '') {
+                        hasAnyData = true;
+                    }
+                });
             });
+            if (hasAnyData) activeProjectsList.push(proj);
         });
-        // 兜底补齐四大核心专测科目
-        ["50米", "立定跳远", "1000米", "800米", "仰卧起坐", "引体向上"].forEach(p => allProjectNamesSet.add(p));
-        let activeProjectsList = Array.from(allProjectNamesSet);
 
-        const tableHeaders = ["班级", "序号","姓名", "性别"];
+        // 2. 拼接双行嵌套表头
+        let row1 = ["序号", "班级", "姓名", "性别"];
+        let row2 = ["", "", "", ""];
+
         activeProjectsList.forEach(proj => {
-            tableHeaders.push(`${proj}成绩`, `${proj}分数`);
+            row1.push(proj, "");  
+            row2.push("成绩", "得分");
         });
-        tableHeaders.push("出勤率", "考勤分", "总分", "等级");
 
-        const dataRows = [tableHeaders];
+        row1.push("考勤分", "总分", "等级");
+        row2.push("", "", "");
 
+        let dataRows = [row1, row2];
+
+        // 3. 构建列宽配置数组(单位:字符数)
+        // 序号(4.5), 班级(6), 姓名(8.5), 性别(4.5)
+        let columnWidths = [ {wch: 4.5}, {wch: 6}, {wch: 8.5}, {wch: 4.5} ];
+        
+        // 测试科目：每个项目占两列 (成绩:5.5, 得分:5.5)
+        activeProjectsList.forEach(() => {
+            columnWidths.push({wch: 5.5}, {wch: 5.5});
+        });
+
+        // 考勤分(6), 总分(4.5), 等级(6)
+        columnWidths.push({wch: 6}, {wch: 4.5}, {wch: 6});
+
+        // 4. 数据行填充
         classNames.forEach(className => {
             const totalClasses = classTotalDays[className] || 0;
 
@@ -773,13 +784,11 @@
                 const sGender = studentObj.gender;
                 const sScores = studentObj.scores || {};
 
-                const rowCells = [className, index + 1, sName, sGender];
-
+                let rowCells = [index + 1, className, sName, sGender];
                 let validProjectsSum = 0;
                 let validProjectsCount = 0;
 
                 activeProjectsList.forEach(proj => {
-                    // 跨性别科目过滤保护（Excel中对无关同学的项目直接留白）
                     if (sGender === '男' && (proj.includes("800米") || proj.includes("仰卧起坐"))) {
                         rowCells.push("/", "/");
                         return;
@@ -792,26 +801,28 @@
                     const rawValue = sScores[proj];
                     const calculatedPoints = queryStandardScore(proj, rawValue, className, sGender);
                     
-                    rowCells.push(rawValue !== undefined && rawValue !== null && rawValue !== '' ? rawValue : "-", calculatedPoints);
-                    
-                    validProjectsSum += calculatedPoints;
+                    if (calculatedPoints !== null) {
+                        rowCells.push(rawValue, calculatedPoints);
+                        validProjectsSum += calculatedPoints;
+                    } else {
+                        rowCells.push("-", 0);
+                        validProjectsSum += 0;
+                    }
                     validProjectsCount++;
                 });
 
+                // 计算考勤分与最终得分
                 const s = cachedStats[className][sName] || { leave: 0, absent: 0, late: 0, early: 0 };
                 const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
                 let effectiveAttendance = totalClasses - totalMissedScore;
                 if (effectiveAttendance < 0) effectiveAttendance = 0;
                 const attendanceRateNum = totalClasses > 0 ? (effectiveAttendance / totalClasses) : 1.0;
-                
-                const attendanceRateStr = (attendanceRateNum * 100).toFixed(0) + "%";
                 const attendanceFinalScore = Math.round(attendanceRateNum * 100);
 
                 let sportsAverageScore = validProjectsCount > 0 ? (validProjectsSum / validProjectsCount) : 0;
                 let finalTotalScore = Math.round((sportsAverageScore * 0.8) + (attendanceFinalScore * 0.2));
 
                 rowCells.push(
-                    attendanceRateStr, 
                     attendanceFinalScore, 
                     finalTotalScore, 
                     getLevelText(finalTotalScore)
@@ -821,7 +832,42 @@
             });
         });
 
+        // 5. 组装工作表与样式对齐
         const ws = XLSX.utils.aoa_to_sheet(dataRows);
+        
+        // 核心对齐逻辑：使所有单元格在导出的表格中强制水平、垂直居中
+        const range = XLSX.utils.decode_range(ws['!ref']);
+        for (let R = range.s.r; R <= range.e.r; ++R) {
+            for (let C = range.s.c; C <= range.e.c; ++C) {
+                const cell_address = { c: C, r: R };
+                const cell_ref = XLSX.utils.encode_cell(cell_address);
+                if (!ws[cell_ref]) continue;
+                if (!ws[cell_ref].s) ws[cell_ref].s = {};
+                ws[cell_ref].s.alignment = { horizontal: "center", vertical: "center", wrapText: true };
+            }
+        }
+
+        // 6. 配置合并单元格
+        const merges = [];
+        // 基础栏目纵向合并
+        for(let i=0; i<4; i++) {
+            merges.push({ s: { r: 0, c: i }, e: { r: 1, c: i } });
+        }
+        // 科目横向合并
+        let startCol = 4;
+        activeProjectsList.forEach(() => {
+            merges.push({ s: { r: 0, c: startCol }, e: { r: 0, c: startCol + 1 } });
+            startCol += 2;
+        });
+        // 考勤、总分、等级纵向合并
+        for(let i=0; i<3; i++) {
+            merges.push({ s: { r: 0, c: startCol + i }, e: { r: 1, c: startCol + i } });
+        }
+
+        ws['!merges'] = merges;
+        ws['!cols'] = columnWidths; // 🚀 注入精细化定义的列宽
+
+        // 7. 导出
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "期末体育成绩册");
         const dateStr = new Date().toISOString().slice(0, 10);
@@ -903,6 +949,7 @@
     function systemReset() {
         if (prompt("数据清空请输入 admin:") === "admin" && confirm("确定清空系统数据吗？")) {
             localStorage.removeItem('pe_v6_students'); localStorage.removeItem('pe_v6_records');
+            localStorage.removeItem('pe_v6_open_state');
             students = {}; records = {}; location.reload();
         }
     }
