@@ -417,7 +417,7 @@
 
                 localStorage.setItem('pe_v6_students', JSON.stringify(students));
                 alert(`🎉 数据并轨完成！\n新增登记：${addStuCount} 人\n识别并追加更新项目成绩：${updateScoreCount} 项次`);
-                document.getElementById('fileStatus').innerText = "🟢 导入/追加 Excel (自动匹配国标进行评分)";
+                document.getElementById('fileStatus').innerText = "🟢 导入/追加 Excel ";
                 renderAccordion();
             } catch (err) {
                 alert('解析失败：' + err);
@@ -587,7 +587,7 @@
         });
 
         modalBody.innerHTML = `
-            <h3 style="margin-top:5px; text-align:center;">🏆 成绩个人单轨录入</h3>
+            <h3 style="margin-top:5px; text-align:center;">🏆 个人成绩录入</h3>
             <p style="text-align:center; font-size:14px; margin-bottom:15px;">学生：<b>${studentName}</b> (${className} / <span style="color:#e91e63;font-weight:bold;">${gender}</span>)</p>
             
             <div id="modalScoreFieldsContainer" style="max-height:280px; overflow-y:auto; padding-right:5px; border-bottom:1px dashed #eee; margin-bottom:10px;">
@@ -595,11 +595,11 @@
             </div>
 
             <div class="quick-add-form" style="border-bottom:none; padding: 5px 0 15px 0;">
-                <input type="text" id="newProjNameInput" placeholder="自定义附加测试科目(如:折返跑)" style="flex:2;">
+                <input type="text" id="newProjNameInput" placeholder="自定义附加测试科目(仅记录)" style="flex:2;">
                 <button onclick="addNewScoreFieldIntoModal('${className}', '${gender}')" style="flex:1; margin:0; background:#009688; padding:8px;">+ 科目</button>
             </div>
 
-            <button onclick="saveStudentSingleScores('${className}', '${studentName}')" style="background-color: #2E7D32; font-weight: bold; margin-top:5px;">💾 保存并实时并轨更新</button>
+            <button onclick="saveStudentSingleScores('${className}', '${studentName}')" style="background-color: #2E7D32; font-weight: bold; margin-top:5px;">💾 保存并更新</button>
         `;
 
         document.getElementById('calendarModal').style.display = 'flex';
