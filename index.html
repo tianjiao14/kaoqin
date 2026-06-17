@@ -139,6 +139,24 @@
         }
         .rate-badge.danger-rate { background: #FFEBEE; color: var(--absent); }
 
+        /* 🚀 新增：未录入红点提醒样式 */
+        .unrecorded-alert-badge {
+            font-size: 11px;
+            padding: 2px 6px;
+            border-radius: 10px;
+            background: #FFEBEE;
+            color: #D32F2F;
+            font-weight: bold;
+            border: 1px solid #FFCDD2;
+            animation: pulse-border 2s infinite;
+        }
+
+        @keyframes pulse-border {
+            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            70% { box-shadow: 0 0 0 5px rgba(211, 47, 47, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
+        }
+
         /* 单钮状态循环切换按钮 */
         .status-cycle-btn {
             width: 75px;
@@ -187,7 +205,7 @@
         }
         .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; z-index: 10100; }
         
-        /* 成绩表单样式 */
+        /* 成绩表单微调 */
         .score-row { display: flex; align-items: center; margin-bottom: 10px; gap: 8px;}
         .score-row label { font-size: 14px; font-weight: bold; width: 85px; text-align: right; shrink: 0; }
         .score-row input { flex: 1; width: auto; margin: 0; min-width: 60px; }
@@ -417,7 +435,7 @@
 
                 localStorage.setItem('pe_v6_students', JSON.stringify(students));
                 alert(`🎉 数据并轨完成！\n新增登记：${addStuCount} 人\n识别并追加更新项目成绩：${updateScoreCount} 项次`);
-                document.getElementById('fileStatus').innerText = "🟢 导入/追加 Excel ";
+                document.getElementById('fileStatus').innerText = "🟢 导入/追加 Excel";
                 renderAccordion();
             } catch (err) {
                 alert('解析失败：' + err);
@@ -462,7 +480,6 @@
             classGroup.className = 'class-group';
             classGroup.id = `group-${className}`;
             
-            // 💡 恢复状态，保持当前折叠树的打开状态，不跳回
             if (openedClassesState[className]) {
                 classGroup.classList.add('open');
             }
@@ -478,6 +495,18 @@
             content.className = 'class-content';
             const classTodayRecord = dateRecord[className] || {};
 
+            // 🚀 核心升级：分析当前班级内已开考（有任意一个学生录入数据）的项目组合
+            let activeClassProjs = new Set();
+            students[className].forEach(s => {
+                if(s.scores) {
+                    Object.keys(s.scores).forEach(p => {
+                        if(s.scores[p] !== undefined && s.scores[p] !== null && String(s.scores[p]).trim() !== '') {
+                            activeClassProjs.add(p);
+                        }
+                    });
+                }
+            });
+
             students[className].forEach((studentObj, index) => {
                 const sName = studentObj.name;
                 const sGender = studentObj.gender;
@@ -490,6 +519,23 @@
                 const rate = totalClasses > 0 ? ((effectiveAttendance / totalClasses) * 100).toFixed(0) : 100;
                 const isDanger = parseFloat(rate) < 85;
 
+                // 🚀 核心升级：判断该生在已开展项目中是否缺失专属成绩
+                let isUnrecorded = false;
+                let missingProjectNames = [];
+                activeClassProjs.forEach(proj => {
+                    // 性别专属项屏障过滤
+                    if (sGender === '男' && (proj.includes("800米") || proj.includes("仰卧起坐"))) return;
+                    if (sGender === '女' && (proj.includes("1000米") || proj.includes("引体向上"))) return;
+
+                    // 若已开考科目为空，判定为未录
+                    if (!studentObj.scores || studentObj.scores[proj] === undefined || studentObj.scores[proj] === null || String(studentObj.scores[proj]).trim() === '') {
+                        isUnrecorded = true;
+                        missingProjectNames.push(proj);
+                    }
+                });
+
+                let alertBadgeHtml = isUnrecorded ? `<span class="unrecorded-alert-badge" title="未录科目: ${missingProjectNames.join('、')}">● 未录</span>` : '';
+
                 const item = document.createElement('div');
                 item.className = 'student-item';
                 item.innerHTML = `
@@ -498,6 +544,7 @@
                         <span class="student-name" onclick="openScoreModal('${className}', '${sName}')" title="点击录入/修改成绩">${sName}</span>
                         <span class="gender-tag">${sGender}</span>
                         <span class="rate-badge ${isDanger ? 'danger-rate' : ''}" onclick="event.stopPropagation(); showStudentCalendar('${className}', '${sName}')">出勤:${rate}%</span>
+                        ${alertBadgeHtml}
                         <span class="btn-del-student" onclick="deleteStudent('${className}', '${sName}')" title="彻底删除">🗑️</span>
                     </div>
                     <button class="status-cycle-btn" 
@@ -587,7 +634,7 @@
         });
 
         modalBody.innerHTML = `
-            <h3 style="margin-top:5px; text-align:center;">🏆 个人成绩录入</h3>
+            <h3 style="margin-top:5px; text-align:center;">🏆 个人成绩单轨录入</h3>
             <p style="text-align:center; font-size:14px; margin-bottom:15px;">学生：<b>${studentName}</b> (${className} / <span style="color:#e91e63;font-weight:bold;">${gender}</span>)</p>
             
             <div id="modalScoreFieldsContainer" style="max-height:280px; overflow-y:auto; padding-right:5px; border-bottom:1px dashed #eee; margin-bottom:10px;">
@@ -666,7 +713,7 @@
         localStorage.setItem('pe_v6_students', JSON.stringify(students));
         document.getElementById('calendarModal').style.display = 'none';
         showToast(`已成功同步 ${studentName} 的个人期末成绩`);
-        renderAccordion(); // 🚀 重新渲染时，班级手风琴列表依然保持原样打开状态
+        renderAccordion(); // 重新渲染，依然保持原展开状态，红点自动计算刷新
     }
 
     function cycleStatus(btn) {
@@ -697,7 +744,6 @@
 
     function toggleClass(classGroup, className) { 
         classGroup.classList.toggle('open'); 
-        // 💡 记录状态
         if (classGroup.classList.contains('open')) {
             openedClassesState[className] = true;
         } else {
@@ -726,14 +772,13 @@
         renderAccordion();
     }
 
-    // 🚀 高阶格式化导出引擎：精准控制各列列宽，所有单元格强制垂直水平居中
+    // 🚀 高阶格式化导出引擎：精准匹配批示列宽，单元格强制居中
     function exportStatsToExcel() {
         const classNames = Object.keys(students);
         if (classNames.length === 0) { alert('暂无班级数据'); return; }
 
         const classTotalDays = calculateAllStats();
 
-        // 1. 扫描本学期参与测试的活动项目
         let baseProjects = ["50米", "立定跳远", "坐位体前屈", "1000米", "800米", "仰卧起坐", "引体向上"];
         let activeProjectsList = [];
 
@@ -749,7 +794,6 @@
             if (hasAnyData) activeProjectsList.push(proj);
         });
 
-        // 2. 拼接双行嵌套表头
         let row1 = ["序号", "班级", "姓名", "性别"];
         let row2 = ["", "", "", ""];
 
@@ -763,19 +807,16 @@
 
         let dataRows = [row1, row2];
 
-        // 3. 构建列宽配置数组(单位:字符数)
-        // 序号(4.5), 班级(6), 姓名(8.5), 性别(4.5)
+        // 🚀 单元格列宽：序号 4.5, 性别 4.5, 总分 4.5, 姓名 8.5, 班级 6, 考勤分 6, 等级 6
         let columnWidths = [ {wch: 4.5}, {wch: 6}, {wch: 8.5}, {wch: 4.5} ];
         
-        // 测试科目：每个项目占两列 (成绩:5.5, 得分:5.5)
+        // 🚀 成绩、得分 列宽为 5.5
         activeProjectsList.forEach(() => {
             columnWidths.push({wch: 5.5}, {wch: 5.5});
         });
 
-        // 考勤分(6), 总分(4.5), 等级(6)
         columnWidths.push({wch: 6}, {wch: 4.5}, {wch: 6});
 
-        // 4. 数据行填充
         classNames.forEach(className => {
             const totalClasses = classTotalDays[className] || 0;
 
@@ -811,7 +852,6 @@
                     validProjectsCount++;
                 });
 
-                // 计算考勤分与最终得分
                 const s = cachedStats[className][sName] || { leave: 0, absent: 0, late: 0, early: 0 };
                 const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
                 let effectiveAttendance = totalClasses - totalMissedScore;
@@ -832,10 +872,9 @@
             });
         });
 
-        // 5. 组装工作表与样式对齐
         const ws = XLSX.utils.aoa_to_sheet(dataRows);
         
-        // 核心对齐逻辑：使所有单元格在导出的表格中强制水平、垂直居中
+        // 🚀 所有字体垂直、水平居中显示
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let R = range.s.r; R <= range.e.r; ++R) {
             for (let C = range.s.c; C <= range.e.c; ++C) {
@@ -847,27 +886,22 @@
             }
         }
 
-        // 6. 配置合并单元格
         const merges = [];
-        // 基础栏目纵向合并
         for(let i=0; i<4; i++) {
             merges.push({ s: { r: 0, c: i }, e: { r: 1, c: i } });
         }
-        // 科目横向合并
         let startCol = 4;
         activeProjectsList.forEach(() => {
             merges.push({ s: { r: 0, c: startCol }, e: { r: 0, c: startCol + 1 } });
             startCol += 2;
         });
-        // 考勤、总分、等级纵向合并
         for(let i=0; i<3; i++) {
             merges.push({ s: { r: 0, c: startCol + i }, e: { r: 1, c: startCol + i } });
         }
 
         ws['!merges'] = merges;
-        ws['!cols'] = columnWidths; // 🚀 注入精细化定义的列宽
+        ws['!cols'] = columnWidths; 
 
-        // 7. 导出
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, "期末体育成绩册");
         const dateStr = new Date().toISOString().slice(0, 10);
