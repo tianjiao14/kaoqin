@@ -152,7 +152,7 @@
         }
 
         @keyframes pulse-border {
-            0% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
+            0 { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
             70% { box-shadow: 0 0 0 5px rgba(211, 47, 47, 0); }
             100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
         }
@@ -211,6 +211,17 @@
         .score-row input { flex: 1; width: auto; margin: 0; min-width: 60px; }
         .live-score-badge { width: 70px; text-align: center; font-size: 12px; padding: 4px 6px; border-radius: 4px; background: #ffebee; color: #c62828; font-weight: bold; shrink: 0; }
         .live-score-badge.has-val { background: #E8F5E9; color: #2E7D32; }
+
+        /* 🚀 新增：单轨录入总分看板样式 */
+        .live-total-score-wrapper {
+            background: #E3F2FD;
+            border: 1px solid #BBDEFB;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #0D47A1;
+        }
 
         .slider-wrapper { position: relative; margin-top: 10px; }
         .nav-arrow {
@@ -635,9 +646,16 @@
 
         modalBody.innerHTML = `
             <h3 style="margin-top:5px; text-align:center;">🏆 个人成绩单轨录入</h3>
-            <p style="text-align:center; font-size:14px; margin-bottom:15px;">学生：<b>${studentName}</b> (${className} / <span style="color:#e91e63;font-weight:bold;">${gender}</span>)</p>
+            <p style="text-align:center; font-size:14px; margin-bottom:10px;">学生：<b>${studentName}</b> (${className} / <span style="color:#e91e63;font-weight:bold;">${gender}</span>)</p>
             
-            <div id="modalScoreFieldsContainer" style="max-height:280px; overflow-y:auto; padding-right:5px; border-bottom:1px dashed #eee; margin-bottom:10px;">
+            <div class="live-total-score-wrapper">
+                <span style="font-size: 14px; font-weight: 500;">期末总分：</span>
+                <b id="modalLiveTotalScore" style="font-size: 22px;">--</b>
+                <span id="modalLiveTotalLevel" style="font-size: 13px; font-weight: bold; margin-left:6px; background:#fff; padding:2px 6px; border-radius:4px;">--</span>
+                <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">(计算公式：项目平均分×80% + 考勤分×20%)</p>
+            </div>
+
+            <div id="modalScoreFieldsContainer" style="max-height:240px; overflow-y:auto; padding-right:5px; border-bottom:1px dashed #eee; margin-bottom:10px;">
                 ${fieldsHtml}
             </div>
 
@@ -650,6 +668,9 @@
         `;
 
         document.getElementById('calendarModal').style.display = 'flex';
+        
+        // 打开时，首次触发实时总分计算
+        refreshModalTotalScore(className, gender);
     }
 
     function updateLiveScore(inputElem, className, gender) {
@@ -665,6 +686,62 @@
         } else {
             badge.classList.remove('has-val');
         }
+
+        // 🚀 核心联动：只要输入改变，同步刷新最上方的总分和级别看板
+        refreshModalTotalScore(className, gender);
+    }
+
+    // 🚀 精准修复：录入了几项成绩，就按几项计算平均分（不录入的不占科目总数）
+    function refreshModalTotalScore(className, gender) {
+        const fields = document.querySelectorAll('.student-score-field');
+        let validProjectsSum = 0;
+        let validProjectsCount = 0; // 记录真正录入了成绩的项目数
+
+        fields.forEach(f => {
+            const proj = f.getAttribute('data-proj');
+            const val = f.value.trim();
+
+            // 1. 过滤掉不属于当前性别的无效项目干扰
+            if (gender === '男' && (proj.includes("800米") || proj.includes("仰卧起坐"))) return;
+            if (gender === '女' && (proj.includes("1000米") || proj.includes("引体向上"))) return;
+
+            // 2. 只有当老师填写了成绩时，才计入总分和科目总数
+            if (val !== '') {
+                const calculatedPoints = queryStandardScore(proj, val, className, gender);
+                if (calculatedPoints !== null) {
+                    validProjectsSum += calculatedPoints;
+                    validProjectsCount++; // 只有有效录入才增加计数
+                }
+            }
+        });
+
+        // 3. 提取考勤扣分逻辑
+        const studentName = document.querySelector('#modalCalendarBody b').innerText;
+        const classTotalDays = calculateAllStats();
+        const totalClasses = classTotalDays[className] || 0;
+        
+        const s = cachedStats[className][studentName] || { leave: 0, absent: 0, late: 0, early: 0 };
+        const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
+        let effectiveAttendance = totalClasses - totalMissedScore;
+        if (effectiveAttendance < 0) effectiveAttendance = 0;
+        const attendanceRateNum = totalClasses > 0 ? (effectiveAttendance / totalClasses) : 1.0;
+        const attendanceFinalScore = Math.round(attendanceRateNum * 100);
+
+        // 4. 汇算最终成绩：如果一项都没录入，项目平均分暂按 0 分算
+        let sportsAverageScore = validProjectsCount > 0 ? (validProjectsSum / validProjectsCount) : 0;
+        let finalTotalScore = Math.round((sportsAverageScore * 0.8) + (attendanceFinalScore * 0.2));
+
+        // 5. 更新看板渲染
+        document.getElementById('modalLiveTotalScore').innerText = `${finalTotalScore} 分`;
+        const levelText = getLevelText(finalTotalScore);
+        const lvlBadge = document.getElementById('modalLiveTotalLevel');
+        lvlBadge.innerText = levelText;
+
+        // 根据等级微调小标签颜色
+        if(levelText === "优秀") { lvlBadge.style.color = "#2E7D32"; }
+        else if(levelText === "良好") { lvlBadge.style.color = "#1565C0"; }
+        else if(levelText === "及格") { lvlBadge.style.color = "#EF6C00"; }
+        else { lvlBadge.style.color = "#C62828"; }
     }
 
     function addNewScoreFieldIntoModal(className, gender) {
@@ -691,6 +768,9 @@
         container.appendChild(div);
         input.value = '';
         container.scrollTop = container.scrollHeight;
+
+        // 联动刷新
+        refreshModalTotalScore(className, gender);
     }
 
     function saveStudentSingleScores(className, studentName) {
@@ -772,7 +852,6 @@
         renderAccordion();
     }
 
-    // 🚀 高阶格式化导出引擎：精准匹配批示列宽，单元格强制居中
     function exportStatsToExcel() {
         const classNames = Object.keys(students);
         if (classNames.length === 0) { alert('暂无班级数据'); return; }
@@ -807,10 +886,8 @@
 
         let dataRows = [row1, row2];
 
-        // 🚀 单元格列宽：序号 4.5, 性别 4.5, 总分 4.5, 姓名 8.5, 班级 6, 考勤分 6, 等级 6
         let columnWidths = [ {wch: 4.5}, {wch: 6}, {wch: 8.5}, {wch: 4.5} ];
         
-        // 🚀 成绩、得分 列宽为 5.5
         activeProjectsList.forEach(() => {
             columnWidths.push({wch: 5.5}, {wch: 5.5});
         });
@@ -874,7 +951,6 @@
 
         const ws = XLSX.utils.aoa_to_sheet(dataRows);
         
-        // 🚀 所有字体垂直、水平居中显示
         const range = XLSX.utils.decode_range(ws['!ref']);
         for (let R = range.s.r; R <= range.e.r; ++R) {
             for (let C = range.s.c; C <= range.e.c; ++C) {
