@@ -506,7 +506,7 @@
             content.className = 'class-content';
             const classTodayRecord = dateRecord[className] || {};
 
-            // 🚀 核心升级：分析当前班级内已开考（有任意一个学生录入数据）的项目组合
+           
             let activeClassProjs = new Set();
             students[className].forEach(s => {
                 if(s.scores) {
@@ -687,35 +687,50 @@
             badge.classList.remove('has-val');
         }
 
-        // 🚀 核心联动：只要输入改变，同步刷新最上方的总分和级别看板
         refreshModalTotalScore(className, gender);
     }
 
-    // 🚀 精准修复：录入了几项成绩，就按几项计算平均分（不录入的不占科目总数）
+    
     function refreshModalTotalScore(className, gender) {
         const fields = document.querySelectorAll('.student-score-field');
+        
+
+        let activeClassProjs = new Set();
+        if (students[className]) {
+            students[className].forEach(s => {
+                if (s.scores) {
+                    Object.keys(s.scores).forEach(p => {
+                        let val = s.scores[p];
+                        if (val !== undefined && val !== null && String(val).trim() !== '') {
+                            // 过滤性别专属项干扰
+                            if (gender === '男' && (p.includes("800米") || p.includes("仰卧起坐"))) return;
+                            if (gender === '女' && (p.includes("1000米") || p.includes("引体向上"))) return;
+                            activeClassProjs.add(p);
+                        }
+                    });
+                }
+            });
+        }
+
         let validProjectsSum = 0;
-        let validProjectsCount = 0; // 记录真正录入了成绩的项目数
+   
+        let validProjectsCount = activeClassProjs.size; 
 
         fields.forEach(f => {
             const proj = f.getAttribute('data-proj');
             const val = f.value.trim();
 
-            // 1. 过滤掉不属于当前性别的无效项目干扰
-            if (gender === '男' && (proj.includes("800米") || proj.includes("仰卧起坐"))) return;
-            if (gender === '女' && (proj.includes("1000米") || proj.includes("引体向上"))) return;
-
-            // 2. 只有当老师填写了成绩时，才计入总分和科目总数
-            if (val !== '') {
+            if (activeClassProjs.has(proj)) {
                 const calculatedPoints = queryStandardScore(proj, val, className, gender);
                 if (calculatedPoints !== null) {
                     validProjectsSum += calculatedPoints;
-                    validProjectsCount++; // 只有有效录入才增加计数
+                } else {
+                    validProjectsSum += 0; // 该同学未录入此项（缺考），计 0 分
                 }
             }
         });
 
-        // 3. 提取考勤扣分逻辑
+        // 2. 提取考勤扣分逻辑
         const studentName = document.querySelector('#modalCalendarBody b').innerText;
         const classTotalDays = calculateAllStats();
         const totalClasses = classTotalDays[className] || 0;
@@ -727,11 +742,11 @@
         const attendanceRateNum = totalClasses > 0 ? (effectiveAttendance / totalClasses) : 1.0;
         const attendanceFinalScore = Math.round(attendanceRateNum * 100);
 
-        // 4. 汇算最终成绩：如果一项都没录入，项目平均分暂按 0 分算
+        // 3. 汇算最终成绩：如果班级还没开始任何考试，分母为 0 时平均分按 0 算
         let sportsAverageScore = validProjectsCount > 0 ? (validProjectsSum / validProjectsCount) : 0;
         let finalTotalScore = Math.round((sportsAverageScore * 0.8) + (attendanceFinalScore * 0.2));
 
-        // 5. 更新看板渲染
+        // 4. 更新看板渲染
         document.getElementById('modalLiveTotalScore').innerText = `${finalTotalScore} 分`;
         const levelText = getLevelText(finalTotalScore);
         const lvlBadge = document.getElementById('modalLiveTotalLevel');
