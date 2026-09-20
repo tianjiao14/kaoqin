@@ -2,28 +2,19 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>体育课考勤与成绩管理系统</title>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-    <link rel="manifest" href="manifest.json">
-    
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-    <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/2312/2312217.png">
-    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/2312/2312217.png">
-
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>国家学生体质健康测试采集站</title>
+    
+    <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/179/179249.png">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
     <style>
         :root {
-            --normal: #4CAF50;
-            --leave: #FFC107;
-            --absent: #F44336;
-            --late: #FF9800;
-            --early: #00BCD4;
+            --primary: #E65100;
+            --primary-bg: #FFF3E0;
+            --primary-border: #FFB74D;
             --bg: #f4f7f6;
-            --accent: #2196F3;
+            --success: #2E7D32;
         }
         body {
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
@@ -33,33 +24,32 @@
             color: #333;
         }
         .container {
-            max-width: 600px;
+            max-width: 650px;
             margin: 0 auto;
             background: white;
             padding: 15px;
             border-radius: 10px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        h2 { text-align: center; color: #2c3e50; margin-top: 5px; font-size: 20px; }
-        h3 { margin-top: 5px; margin-bottom: 10px; font-size: 16px; }
+        h2 { text-align: center; color: #BF360C; margin: 5px 0 15px 0; font-size: 20px; }
         .section { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-        .section:last-child { border-bottom: none; }
-        
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
         .file-input-wrapper {
-            border: 2px dashed #4CAF50;
+            border: 2px dashed var(--primary);
             padding: 12px;
             text-align: center;
-            background: #f1f8e9;
+            background: var(--primary-bg);
             border-radius: 6px;
             cursor: pointer;
             margin-top: 5px;
             font-size: 13px;
             font-weight: bold;
-            color: #2E7D32;
+            color: #BF360C;
         }
         .file-input-wrapper input[type="file"] { display: none; }
-        
-        input[type="text"], input[type="date"], select {
+
+        input[type="text"], input[type="password"], input[type="date"], input[type="number"], select {
             padding: 8px;
             margin-top: 5px;
             border: 1px solid #ccc;
@@ -68,215 +58,252 @@
             font-size: 14px;
         }
         button {
-            background-color: #4CAF50;
+            background-color: var(--primary);
             color: white;
             border: none;
             padding: 10px 15px;
             margin-top: 10px;
-            border-radius: 5px;
+            border-radius: 6px;
             cursor: pointer;
             font-size: 15px;
             width: 100%;
-        }
-        button:active { opacity: 0.8; }
-        
-        /* 手风琴折叠样式 */
-        .class-group { margin-bottom: 10px; border-radius: 6px; overflow: hidden; border: 1px solid #ddd; }
-        .class-header {
-            background: #e9ecef;
-            padding: 12px 15px;
-            font-size: 15px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            user-select: none;
-        }
-        .class-header:hover { background: #dee2e6; }
-        .class-header::after { content: '▼'; font-size: 11px; color: #666; transition: transform 0.2s; }
-        .class-group.open .class-header::after { content: '▲'; }
-        
-        .class-content { display: none; padding: 0 10px 10px 10px; background: #fff; }
-        .class-group.open .class-content { display: block; }
-
-        /* 学生条目整行优化 */
-        .student-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px 0;
-            border-bottom: 1px dashed #eee;
-        }
-        
-        .student-info { 
-            display: flex; 
-            align-items: center; 
-            gap: 6px; 
-            flex-wrap: wrap; 
-            flex: 1;
-        }
-        .student-name {
-            font-size: 17px; 
-            font-weight: 800; 
-            color: #2196F3;
-            cursor: pointer;
-            text-decoration: underline;
-        }
-        .student-name:hover {
-            color: #0b7dda;
-        }
-        .gender-tag { font-size: 12px; color: #666; background: #e8e8e8; padding: 1px 5px; border-radius: 4px; }
-        
-        .rate-badge {
-            font-size: 12px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            background: #E3F2FD;
-            color: var(--accent);
-            cursor: pointer;
             font-weight: bold;
         }
-        .rate-badge.danger-rate { background: #FFEBEE; color: var(--absent); }
+        button:active { opacity: 0.85; }
 
-        /* 🚀 新增：未录入红点提醒样式 */
-        .unrecorded-alert-badge {
-            font-size: 11px;
-            padding: 2px 6px;
-            border-radius: 10px;
-            background: #FFEBEE;
-            color: #D32F2F;
-            font-weight: bold;
-            border: 1px solid #FFCDD2;
-            animation: pulse-border 2s infinite;
+        .level-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; }
+        .lvl-yl { background-color: #4CAF50; }
+        .lvl-yx { background-color: #00BCD4; }
+        .lvl-bk { background-color: #FF9800; }
+        .lvl-nl { background-color: #9E9E9E; }
+
+        .live-score-badge { 
+            width: 65px; 
+            text-align: center; 
+            font-size: 12px; 
+            padding: 4px 6px; 
+            border-radius: 4px; 
+            background: #ffebee; 
+            color: #c62828; 
+            font-weight: bold; 
+            flex-shrink: 0; 
         }
+        .live-score-badge.has-val { background: #E8F5E9; color: #2E7D32; }
 
-        @keyframes pulse-border {
-            0 { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0.4); }
-            70% { box-shadow: 0 0 0 5px rgba(211, 47, 47, 0); }
-            100% { box-shadow: 0 0 0 0 rgba(211, 47, 47, 0); }
-        }
-
-        /* 单钮状态循环切换按钮 */
-        .status-cycle-btn {
-            width: 75px;
-            text-align: center;
-            padding: 8px 4px;
-            border: 1px solid #ddd;
-            background: #f8f9fa;
-            color: #444;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 14px;
-            font-weight: bold;
-            white-space: nowrap;
-            user-select: none;
-        }
-        .status-cycle-btn[data-status="normal"] { background: #f8f9fa; color: #444; border-color: #ddd; font-weight: normal; }
-        .status-cycle-btn[data-status="leave"] { background: var(--leave); color: black; border-color: var(--leave); }
-        .status-cycle-btn[data-status="absent"] { background: var(--absent); color: white; border-color: var(--absent); }
-        .status-cycle-btn[data-status="late"] { background: var(--late); color: white; border-color: var(--late); }
-        .status-cycle-btn[data-status="early"] { background: var(--early); color: white; border-color: var(--early); }
-
-        .quick-add-form {
-            display: flex;
-            gap: 6px;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px solid #eee;
-            background: #fdfdfd;
-        }
-        .quick-add-form input[type="text"] { flex: 2; margin: 0; padding: 7px; font-size: 13px; }
-        .quick-add-form select { flex: 1; margin: 0; padding: 7px; font-size: 13px; }
-        .quick-add-form button { flex: 1; margin: 0; padding: 7px; font-size: 13px; background-color: #009688; }
-
-        .action-block { display: flex; gap: 10px; margin-top: 12px; }
-        .backup-btn-group { display: flex; gap: 10px; margin-top: 10px; flex-wrap: wrap; }
-        .btn-secondary { background-color: #78909C; font-size: 13px; padding: 8px; flex: 1; min-width: 100px; }
-        .btn-danger-sys { background-color: #d32f2f; font-size: 13px; padding: 8px; flex: 1; min-width: 100px; }
+        .score-row { display: flex; align-items: center; margin-bottom: 10px; gap: 8px; }
+        .score-row label { font-size: 14px; font-weight: bold; width: 110px; text-align: right; flex-shrink: 0; }
+        .score-row input { flex: 1; width: auto; margin: 0; min-width: 60px; }
 
         .modal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 10000;
         }
         .modal-content {
-            background: white; padding: 20px 15px; border-radius: 10px; width: 95%; max-width: 440px;
+            background: white; padding: 20px 15px; border-radius: 10px; width: 95%; max-width: 480px;
             max-height: 90vh; overflow-y: auto; position: relative; box-sizing: border-box;
         }
-        .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; z-index: 10100; }
-        
-        /* 成绩表单微调 */
-        .score-row { display: flex; align-items: center; margin-bottom: 10px; gap: 8px;}
-        .score-row label { font-size: 14px; font-weight: bold; width: 85px; text-align: right; shrink: 0; }
-        .score-row input { flex: 1; width: auto; margin: 0; min-width: 60px; }
-        .live-score-badge { width: 70px; text-align: center; font-size: 12px; padding: 4px 6px; border-radius: 4px; background: #ffebee; color: #c62828; font-weight: bold; shrink: 0; }
-        .live-score-badge.has-val { background: #E8F5E9; color: #2E7D32; }
+        .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; }
 
-        /* 🚀 新增：单轨录入总分看板样式 */
-        .live-total-score-wrapper {
-            background: #E3F2FD;
-            border: 1px solid #BBDEFB;
-            padding: 10px;
-            border-radius: 8px;
-            text-align: center;
-            margin-bottom: 15px;
-            color: #0D47A1;
+        .backup-btn-group { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+        .btn-secondary { background-color: #78909C; font-size: 13px; padding: 8px; flex: 1; min-width: 90px; }
+        .btn-danger-sys { background-color: #d32f2f; font-size: 13px; padding: 8px; flex: 1; min-width: 90px; }
+/* ================== 秒表放大调整后的样式 ================== */
+.stopwatch-float-panel {
+    position: fixed;
+    z-index: 12000;
+    background: rgba(28, 28, 30, 0.96);
+    backdrop-filter: blur(12px);
+    border: 2.5px solid #FF9800;
+    border-radius: 16px;
+    padding: 12px 14px 14px 14px; /* 内边距加大 */
+    box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* 各组件间距拉大 */
+    width: 210px; /* 面板总宽度加宽（原 140~155px） */
+    user-select: none;
+    touch-action: none;
+    box-sizing: border-box;
+}
+
+.sw-drag-handle {
+    cursor: move;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 2px 0 5px 0;
+    font-size: 13px; /* 拖拽栏字号加大 */
+    border-bottom: 1px dashed rgba(255,255,255,0.25);
+}
+
+.sw-timer-display {
+    font-family: ui-monospace, SFMono-Regular, "Courier New", monospace;
+    color: #00E676;
+    background: #000;
+    text-align: center;
+    font-size: 28px; /* 计时数字字号放大（原 22~24px） */
+    font-weight: 800;
+    padding: 10px 4px; /* 计时屏高度增加 */
+    border-radius: 8px;
+    letter-spacing: 1px;
+}
+
+.sw-btn-row {
+    border: none;
+    border-radius: 10px;
+    color: white;
+    font-weight: 800;
+    padding: 14px 0; /* 按钮上下高度加厚（原 9px），更方便户外大拇指盲按 */
+    font-size: 17px; /* 按钮字号放大（原 14px） */
+    margin: 0;
+    width: 100%;
+    cursor: pointer;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+    transition: all 0.15s ease;
+}
+.btn-start-state { background: #00C853; }
+        .btn-lap-state { background: #1976D2; }
+        .btn-stop-state { background: #D50000; }
+        .btn-reset-state { background: #546E7A; }
+.sw-btn-row:active { 
+    transform: scale(0.95); 
+    opacity: 0.9; 
+}
+
+/* 计次流水列表同步微调（防止字体过小） */
+.sw-laps-container {
+    max-height: 120px;
+    overflow-y: auto;
+    background: rgba(0, 0, 0, 0.45);
+    border-radius: 8px;
+    padding: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.sw-lap-item {
+    font-size: 13px; /* 计次项字号加大（原 11px） */
+    padding: 6px 8px; /* 计次点击条加高，方便点选 */
+}
+.sw-laps-container::-webkit-scrollbar { width: 3px; }
+        .sw-laps-container::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+        .sw-lap-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 11px;
+            padding: 4px 6px;
+            border-radius: 4px;
+            background: rgba(255, 255, 255, 0.1);
+            color: #eee;
+            cursor: pointer;
+        }
+        .sw-lap-item.active-lap {
+            background: #FF9800;
+            color: #000;
+            font-weight: bold;
         }
 
-        .slider-wrapper { position: relative; margin-top: 10px; }
-        .nav-arrow {
-            position: absolute; top: 50%; transform: translateY(-50%); background: rgba(0, 0, 0, 0.4); color: white;
-            border: none; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; z-index: 10200;
+        .awaiting-target-name { 
+            background-color: #FFF9C4 !important; 
+            outline: 2px dashed #FF9800 !important; 
+            animation: pulse-border 1.2s infinite;
         }
-        .nav-arrow.left { left: 4px; }
-        .nav-arrow.right { right: 4px; }
-        .calendar-slider { display: flex; overflow-x: auto; scroll-snap-type: x mandatory; scroll-behavior: smooth; gap: 15px; padding: 5px 0; }
-        .calendar-slider::-webkit-scrollbar { display: none; }
-        .month-container { flex: 0 0 100%; scroll-snap-align: start; border: 1px solid #e0e0e0; padding: 12px 10px; border-radius: 8px; background: #fff; box-sizing: border-box; }
-        .month-title { text-align: center; font-weight: bold; margin-bottom: 12px; color: #2c3e50; font-size: 15px; }
-        .calendar-weekdays { display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; font-size: 12px; color: #777; font-weight: bold; margin-bottom: 8px; }
-        .calendar-days { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; text-align: center; }
-        .day-cell { aspect-ratio: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; border-radius: 6px; font-size: 12px; background: #fafafa; border: 1px solid #f0f0f0; color: #ccc; }
-        .day-cell.pad { background: transparent; border: none; }
-        .day-cell.cal-recorded { background: var(--normal) !important; color: white !important; font-weight: bold; } 
-        .day-cell.cal-leave { background: var(--leave) !important; color: black !important; font-weight: bold; }
-        .day-cell.cal-absent { background: var(--absent) !important; color: white !important; font-weight: bold; }
-        .day-cell.cal-late { background: var(--late) !important; color: white !important; font-weight: bold; }
-        .day-cell.cal-early { background: var(--early) !important; color: white !important; font-weight: bold; }
-        .calendar-legend { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 10px; font-size: 12px; border-bottom: 1px dashed #eee; padding-bottom: 10px; }
-        .legend-item { display: flex; align-items: center; gap: 4px; }
-        .legend-box { width: 13px; height: 13px; border-radius: 3px; }
+
+        .awaiting-target-name { 
+            background-color: #FFF9C4 !important; 
+            outline: 2px dashed #FF9800 !important; 
+            animation: pulse-border 1.2s infinite;
+        }
+        @keyframes pulse-border {
+            0% { outline-color: #FF9800; }
+            50% { outline-color: #D50000; }
+            100% { outline-color: #FF9800; }
+        }
     </style>
 </head>
 <body>
 
+<div id="userStatusBar" style="max-width: 650px; margin: 0 auto 10px auto; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 15px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
+    <div>当前登录: <b id="currentUserDisplay" style="color: #E65100;">未登录</b> (<span id="currentUserRole">游客</span>)</div>
+    <div style="display:flex; gap:6px;">
+        <button id="adminManageBtn" onclick="openTeacherAdminModal()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; background:#673AB7; display:none;">⚙️ 教师班级分配</button>
+        <button onclick="handleLogout()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; background:#e53935;">退出账号</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="loginModal" style="z-index: 20000;">
+    <div class="modal-content" style="max-width: 320px; text-align: center;">
+        <h3 style="margin-top:0; color:#BF360C;">🔐 体测系统账号登录</h3>
+        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">
+        <input type="text" id="loginUsername" placeholder="账号 / 教师姓名" style="width: 100%; margin-bottom: 12px;">
+        <input type="password" id="loginPassword" placeholder="密码" style="width: 100%; margin-bottom: 12px;">
+        <button onclick="handleLoginSubmit()" style="background-color: var(--primary); font-weight: bold; margin:0;">立即登录</button>
+    </div>
+</div>
+
+<div class="modal-overlay" id="teacherAdminModal" style="z-index: 15000;" onclick="if(event.target.id==='teacherAdminModal') this.style.display='none'">
+    <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+        <span class="close-modal" onclick="document.getElementById('teacherAdminModal').style.display='none'">&times;</span>
+        <h3 style="text-align: center; margin-top: 0; color:#333;">👥 教师班级分配后台</h3>
+        
+        <div style="background: #f1f8e9; border: 1px dashed #8bc34a; padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+            <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #33691e;">➕ 添加/更新教师账号</h4>
+            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                <input type="text" id="newTeacherName" placeholder="教师姓名/账号" style="flex:1; margin:0; padding:6px; font-size:12px;">
+                <input type="text" id="newTeacherPwd" placeholder="登录密码" style="flex:1; margin:0; padding:6px; font-size:12px;" value="123456">
+            </div>
+            <div style="font-size: 11px; color: #555; margin-bottom: 4px;">勾选负责班级（可多选）:</div>
+            <div id="adminClassCheckboxList" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; background: #fff; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>
+            <button onclick="saveTeacherAccount()" style="background: #558b2f; padding: 6px; font-size: 13px; margin-top: 6px;">💾 保存该教师账号及分配</button>
+        </div>
+
+        <h4 style="margin: 10px 0 6px 0; font-size: 13px;">📋 已分配教师列表</h4>
+        <div id="teacherAccountListContainer" style="max-height: 200px; overflow-y: auto;"></div>
+    </div>
+</div>
+
 <div class="container">
-    <h2>📋 体育课考勤与成绩管理系统</h2>
+    <h2>🏃 国家学生体质健康测试采集站</h2>
 
     <div class="section">
         <div class="file-input-wrapper" onclick="document.getElementById('excelFile').click()">
-            <span id="fileStatus">🟢 导入/追加 Excel</span>
+            <span id="fileStatus">🟠 导入体测名册 / 历史数据 Excel</span>
             <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="importExcel(event)">
         </div>
-        <p style="font-size: 11px; color:#777; margin: 4px 0 0 0; text-align: center;">表格需包含【班级、姓名、性别】。可包含 50米、立定跳远、坐位体前屈、引体向上、1000米，仰卧起坐、800米。</p>
+        <p style="font-size: 11px; color:#777; margin: 4px 0 0 0; text-align: center;">
+            支持表头：班级、姓名、性别、身高、体重、肺活量、50米、立定跳远、体前屈、仰卧/引体、800/1000米。
+        </p>
     </div>
 
     <div class="section">
-        <h3>今日考勤</h3>
-        <input type="date" id="datePicker" style="width: 100%; margin-bottom: 10px;">
-        <div id="accordionContainer"></div>
+        <div style="background:#FFF3E0; border:1px solid #FFE0B2; border-radius:8px; padding:10px; box-sizing:border-box;">
+            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                <select id="tcClassSelect" style="flex:1 1 130px; font-weight:bold; color:#E65100; border:1px solid #FFB74D; border-radius:6px;" onchange="renderTcProjectList()">
+                    <option value="">-- ① 选班级 --</option>
+                </select>
+                <select id="tcProjectSelect" style="flex:1 1 130px; font-weight:bold; color:#E65100; border:1px solid #FFB74D; border-radius:6px;" onchange="renderTcBatchEntryTable()">
+                    <option value="">-- ② 选项目 --</option>
+                </select>
+            </div>
+            <div id="tcBatchWorkspace" style="display:none;"></div>
+        </div>
     </div>
 
     <div class="section">
-        <button onclick="exportStatsToExcel()" style="background-color: #2E7D32; margin: 0; font-weight: bold; font-size: 16px;">🟢 生成并导出【期末成绩册】 Excel</button>
+        <button onclick="exportFitnessReportToExcel()" style="margin: 0; font-size: 16px;">📊 导出【国家体质健康测试总表】 Excel</button>
     </div>
 
-    <div class="section" style="background: #fcfcfc; padding: 10px; border-radius: 6px; border: 1px dashed #bbb;">
-        <h4 style="margin: 0; font-size: 13px; color: #555;">🛡️ 系统备份与安全</h4>
+    <div class="section" style="background: #fafafa; padding: 10px; border-radius: 6px; border: 1px dashed #ccc;">
+        <div style="font-size: 12px; font-weight: bold; color: #666; margin-bottom: 6px;">⚙️ 数据管理与备份</div>
         <div class="backup-btn-group">
             <button class="btn-secondary" onclick="exportBackupData()">📥 导出备份</button>
             <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="background-color: #5c6bc0;">📤 导入备份</button>
-            <button class="btn-danger-sys" onclick="systemReset()">🚨 初始化</button>
+            <button class="btn-secondary" onclick="clearAllScoresOnly()" style="background-color: #FF7043;">🧹 清空成绩</button>
+            <button class="btn-danger-sys" onclick="systemReset()">🚨 全部重置</button>
             <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importBackupData(event)">
         </div>
     </div>
@@ -290,57 +317,327 @@
 </div>
 
 <script>
-
-    const STDS = {
-        run50: { "初一男": [[7.8,100],[7.9,95],[8,90],[8.1,85],[8.2,80],[8.4,78],[8.6,76],[8.8,74],[9,72],[9.2,70],[9.4,68],[9.6,66],[9.8,64],[10,62],[10.2,60],[10.4,50],[10.6,40],[10.8,30],[11,20],[11.2,10]], "初二男": [[7.5,100],[7.6,95],[7.7,90],[7.8,85],[7.9,80],[8.1,78],[8.3,76],[8.5,74],[8.7,72],[8.9,70],[9.1,68],[9.3,66],[9.5,64],[9.7,62],[9.9,60],[10.1,50],[10.3,40],[10.5,30],[10.7,20],[10.9,10]], "初三男": [[7.3,100],[7.4,95],[7.5,90],[7.6,85],[7.7,80],[7.9,78],[8.1,76],[8.3,74],[8.5,72],[8.7,70],[8.9,68],[9.1,66],[9.3,64],[9.5,62],[9.7,60],[9.9,50],[10.1,40],[10.3,30],[10.5,20],[10.7,10]], "高一男": [[7.1,100],[7.2,95],[7.3,90],[7.4,85],[7.5,80],[7.7,78],[7.9,76],[8.1,74],[8.3,72],[8.5,70],[8.7,68],[8.9,66],[9.1,64],[9.3,62],[9.5,60],[9.7,50],[9.9,40],[10.1,30],[10.3,20],[10.5,10]], "高二男": [[7,100],[7.1,95],[7.2,90],[7.3,85],[7.4,80],[7.6,78],[7.8,76],[8,74],[8.2,72],[8.4,70],[8.6,68],[8.8,66],[9,64],[9.2,62],[9.4,60],[9.6,50],[9.8,40],[10,30],[10.2,20],[10.4,10]], "高三男": [[6.8,100],[6.9,95],[7,90],[7.1,85],[7.2,80],[7.4,78],[7.6,76],[7.8,74],[8,72],[8.2,70],[8.4,68],[8.6,66],[8.8,64],[9,62],[9.2,60],[9.4,50],[9.6,40],[9.8,30],[10,20],[10.2,10]], "初一女": [[8.1,100],[8.2,95],[8.3,90],[8.6,85],[8.9,80],[9.1,78],[9.3,76],[9.5,74],[9.7,72],[9.9,70],[10.1,68],[10.3,66],[10.5,64],[10.7,62],[10.9,60],[11.1,50],[11.3,40],[11.5,30],[11.7,20],[11.9,10]], "初二女": [[8,100],[8.1,95],[8.2,90],[8.5,85],[8.8,80],[9,78],[9.2,76],[9.4,74],[9.6,72],[9.8,70],[10,68],[10.2,66],[10.4,64],[10.6,62],[10.8,60],[11,50],[11.2,40],[11.4,30],[11.6,20],[11.8,10]], "初三女": [[7.9,100],[8,95],[8.1,90],[8.4,85],[8.7,80],[8.9,78],[9.1,76],[9.3,74],[9.5,72],[9.7,70],[9.9,68],[10.1,66],[10.3,64],[10.5,62],[10.7,60],[10.9,50],[11.1,40],[11.3,30],[11.5,20],[11.7,10]], "高一女": [[7.8,100],[7.9,95],[8,90],[8.3,85],[8.6,80],[8.8,78],[9,76],[9.2,74],[9.4,72],[9.6,70],[9.8,68],[10,66],[10.2,64],[10.4,62],[10.6,60],[10.8,50],[11,40],[11.2,30],[11.4,20],[11.6,10]], "高二女": [[7.7,100],[7.8,95],[7.9,90],[8.2,85],[8.5,80],[8.7,78],[8.9,76],[9.1,74],[9.3,72],[9.5,70],[9.7,68],[9.9,66],[10.1,64],[10.3,62],[10.5,60],[10.7,50],[10.9,40],[11.1,30],[11.3,20],[11.5,10]], "高三女": [[7.6,100],[7.7,95],[7.8,90],[8.1,85],[8.4,80],[8.6,78],[8.8,76],[9,74],[9.2,72],[9.4,70],[9.6,68],[9.8,66],[10,64],[10.2,62],[10.4,60],[10.6,50],[10.8,40],[11,30],[11.2,20],[11.4,10]] },
-        jump: { "初一男": [[225,100],[218,95],[211,90],[203,85],[195,80],[191,78],[187,76],[183,74],[179,72],[175,70],[171,68],[167,66],[163,64],[159,62],[155,60],[150,50],[145,40],[140,30],[135,20],[130,10]], "初二男": [[240,100],[233,95],[226,90],[218,85],[210,80],[206,78],[202,76],[198,74],[194,72],[190,70],[186,68],[182,66],[178,64],[174,62],[170,60],[165,50],[160,40],[155,30],[150,20],[145,10]], "初三男": [[250,100],[245,95],[240,90],[233,85],[225,80],[221,78],[217,76],[213,74],[209,72],[205,70],[201,68],[197,66],[193,64],[189,62],[185,60],[180,50],[175,40],[170,30],[165,20],[160,10]], "高一男": [[260,100],[255,95],[250,90],[243,85],[235,80],[231,78],[227,76],[223,74],[219,72],[215,70],[211,68],[207,66],[203,64],[199,62],[195,60],[190,50],[185,40],[180,30],[175,20],[170,10]], "高二男": [[265,100],[260,95],[255,90],[248,85],[240,80],[236,78],[232,76],[228,74],[224,72],[220,70],[216,68],[212,66],[208,64],[204,62],[200,60],[195,50],[190,40],[185,30],[180,20],[175,10]], "高三男": [[270,100],[265,95],[260,90],[253,85],[245,80],[241,78],[237,76],[233,74],[229,72],[225,70],[221,68],[217,66],[213,64],[209,62],[205,60],[200,50],[195,40],[190,30],[185,20],[180,10]], "初一女": [[196,100],[190,95],[184,90],[177,85],[170,80],[167,78],[164,76],[161,74],[158,72],[155,70],[152,68],[149,66],[146,64],[143,62],[140,60],[135,50],[130,40],[125,30],[120,20],[115,10]], "初二女": [[200,100],[194,95],[188,90],[181,85],[174,80],[171,78],[168,76],[165,74],[162,72],[159,70],[156,68],[153,66],[150,64],[147,62],[144,60],[139,50],[134,40],[129,30],[124,20],[119,10]], "初三女": [[202,100],[196,95],[190,90],[183,85],[176,80],[173,78],[170,76],[167,74],[164,72],[161,70],[158,68],[155,66],[152,64],[149,62],[146,60],[141,50],[136,40],[131,30],[126,20],[121,10]], "高一女": [[204,100],[198,95],[192,90],[185,85],[178,80],[175,78],[172,76],[169,74],[166,72],[163,70],[160,68],[157,66],[154,64],[151,62],[148,60],[143,50],[138,40],[133,30],[128,20],[123,10]], "高二女": [[205,100],[199,95],[193,90],[186,85],[179,80],[176,78],[173,76],[170,74],[167,72],[164,70],[161,68],[158,66],[155,64],[152,62],[149,60],[144,50],[139,40],[134,30],[129,20],[124,10]], "高三女": [[206,100],[200,95],[194,90],[187,85],[180,80],[177,78],[174,76],[171,74],[168,72],[165,70],[162,68],[159,66],[156,64],[153,62],[150,60],[145,50],[140,40],[135,30],[130,20],[125,10]] },
-        str: { "初一男": [[13,100],[12,95],[11,90],[10,85],[9,80],[8,76],[7,72],[6,68],[5,64],[4,60],[3,50],[2,40],[1,30]], "初二男": [[14,100],[13,95],[12,90],[11,85],[10,80],[9,76],[8,72],[7,68],[6,64],[5,60],[4,50],[3,40],[2,30],[1,20]], "初三男": [[15,100],[14,95],[13,90],[12,85],[11,80],[10,76],[9,72],[8,68],[7,64],[6,60],[5,50],[4,40],[3,30],[2,20],[1,10]], "高一男": [[16,100],[15,95],[14,90],[13,85],[12,80],[11,76],[10,72],[9,68],[8,64],[7,60],[6,50],[5,40],[4,30],[3,20],[2,10]], "高二男": [[17,100],[16,95],[15,90],[14,85],[13,80],[12,76],[11,72],[10,68],[9,64],[8,60],[7,50],[6,40],[5,30],[4,20],[3,10]], "高三男": [[18,100],[17,95],[16,90],[15,85],[14,80],[13,76],[12,72],[11,68],[10,64],[9,60],[8,50],[7,40],[6,30],[5,20],[4,10]], "初一女": [[50,100],[48,95],[46,90],[43,85],[40,80],[38,78],[36,76],[34,74],[32,72],[30,70],[28,68],[26,66],[24,64],[22,62],[20,60],[18,50],[16,40],[14,30],[12,20],[10,10]], "初二女": [[51,100],[49,95],[47,90],[44,85],[41,80],[39,78],[37,76],[35,74],[33,72],[31,70],[29,68],[27,66],[25,64],[23,62],[21,60],[19,50],[17,40],[15,30],[13,20],[11,10]], "初三女": [[52,100],[50,95],[48,90],[45,85],[42,80],[40,78],[38,76],[36,74],[34,72],[32,70],[30,68],[28,66],[26,64],[24,62],[22,60],[20,50],[18,40],[16,30],[14,20],[12,10]], "高一女": [[53,100],[51,95],[49,90],[46,85],[43,80],[41,78],[39,76],[37,74],[35,72],[33,70],[31,68],[29,66],[27,64],[25,62],[23,60],[21,50],[19,40],[17,30],[15,20],[13,10]], "高二女": [[54,100],[52,95],[50,90],[47,85],[44,80],[42,78],[40,76],[38,74],[36,72],[34,70],[32,68],[30,66],[28,64],[26,62],[24,60],[22,50],[20,40],[18,30],[16,20],[14,10]], "高三女": [[55,100],[53,95],[51,90],[48,85],[45,80],[43,78],[41,76],[39,74],[37,72],[35,70],[33,68],[31,66],[29,64],[27,62],[25,60],[23,50],[21,40],[19,30],[17,20],[15,10]] },
-        runL: { "初一男": [[235,100],[245,95],[255,90],[262,85],[270,80],[275,78],[280,76],[285,74],[290,72],[295,70],[300,68],[305,66],[310,64],[315,62],[320,60],[340,50],[360,40],[380,30],[400,20],[420,10]], "初二男": [[230,100],[235,95],[240,90],[247,85],[255,80],[260,78],[265,76],[270,74],[275,72],[280,70],[285,68],[290,66],[295,64],[300,62],[305,60],[325,50],[345,40],[365,30],[385,20],[405,10]], "初三男": [[220,100],[225,95],[230,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[315,50],[335,40],[355,30],[375,20],[395,10]], "高一男": [[210,100],[215,95],[220,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[305,50],[325,40],[345,30],[365,20],[385,10]], "高二男": [[205,100],[210,95],[215,90],[222,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[300,50],[320,40],[340,30],[360,20],[380,10]], "高三男": [[200,100],[205,95],[210,90],[217,85],[225,80],[230,78],[235,76],[240,74],[245,72],[250,70],[255,68],[260,66],[265,64],[270,62],[275,60],[295,50],[315,40],[335,30],[355,20],[375,10]], "初一女": [[215,100],[222,95],[229,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[305,50],[315,40],[325,30],[335,20],[345,10]], "初二女": [[210,100],[217,95],[224,90],[232,85],[240,80],[245,78],[250,76],[255,74],[260,72],[265,70],[270,68],[275,66],[280,64],[285,62],[290,60],[300,50],[310,40],[320,30],[330,20],[340,10]], "初三女": [[205,100],[212,95],[219,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[295,50],[305,40],[315,30],[325,20],[335,10]], "高一女": [[204,100],[210,95],[216,90],[223,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[290,50],[300,40],[310,30],[320,20],[330,10]], "高二女": [[202,100],[208,95],[214,90],[221,85],[228,80],[233,78],[238,76],[243,74],[248,72],[253,70],[258,68],[263,66],[268,64],[273,62],[278,60],[288,50],[298,40],[308,30],[318,20],[328,10]], "高三女": [[200,100],[206,95],[212,90],[219,85],[226,80],[231,78],[236,76],[241,74],[246,72],[251,70],[256,68],[261,66],[266,64],[271,62],[276,60],[286,50],[296,40],[306,30],[316,20],[326,10]] },
-        sit: { "初一男": [[17.6,100],[15.9,95],[14.2,90],[12.3,85],[10.4,80],[9.1,78],[7.8,76],[6.5,74],[5.2,72],[3.9,70],[2.6,68],[1.3,66],[0,64],[-1.3,62],[-2.6,60],[-3.8,50],[-5,40],[-6.2,30],[-7.4,20],[-8.6,10]], "初二男": [[19.6,100],[17.7,95],[15.8,90],[13.7,85],[11.6,80],[10.3,78],[9,76],[7.7,74],[6.4,72],[5.1,70],[3.8,68],[2.5,66],[1.2,64],[-0.1,62],[-1.4,60],[-2.6,50],[-3.8,40],[-5,30],[-6.2,20],[-7.4,10]], "初三男": [[21.6,100],[19.7,95],[17.8,90],[15.8,85],[13.8,80],[12.4,78],[11,76],[9.6,74],[8.2,72],[6.8,70],[5.4,68],[4,66],[2.6,64],[1.2,62],[-0.2,60],[-1.4,50],[-2.6,40],[-3.8,30],[-5,20],[-6.2,10]], "高一男": [[23.6,100],[21.5,95],[19.4,90],[17.2,85],[15,80],[13.6,78],[12.2,76],[10.8,74],[9.4,72],[8,70],[6.6,68],[5.2,66],[3.8,64],[2.4,62],[1,60],[0,50],[-1,40],[-2,30],[-3,20],[-4,10]], "高二男": [[24.3,100],[22.4,95],[20.5,90],[18.3,85],[16.1,80],[14.7,78],[13.3,76],[11.9,74],[10.5,72],[9.1,70],[7.7,68],[6.3,66],[4.9,64],[3.5,62],[2.1,60],[1.1,50],[0.1,40],[-0.9,30],[-1.9,20],[-2.9,10]], "高三男": [[24.6,100],[22.8,95],[21,90],[19.1,85],[17.2,80],[15.8,78],[14.4,76],[13,74],[11.6,72],[10.2,70],[8.8,68],[7.4,66],[6,64],[4.6,62],[3.2,60],[2.2,50],[1.2,40],[0.2,30],[-0.8,20],[-1.8,10]], "初一女": [[21.8,100],[20.1,95],[18.4,90],[16.7,85],[15,80],[13.7,78],[12.4,76],[11.1,74],[9.8,72],[8.5,70],[7.2,68],[5.9,66],[4.6,64],[3.3,62],[2,60],[1.2,50],[0.4,40],[-0.4,30],[-1.2,20],[-2,10]], "初二女": [[22.7,100],[21,95],[19.3,90],[17.6,85],[15.9,80],[14.6,78],[13.3,76],[12,74],[10.7,72],[9.4,70],[8.1,68],[6.8,66],[5.5,64],[4.2,62],[2.9,60],[2.1,50],[1.3,40],[0.5,30],[-0.3,20],[-1.1,10]], "初三女": [[23.5,100],[21.8,95],[20.1,90],[18.4,85],[16.7,80],[15.4,78],[14.1,76],[12.8,74],[11.5,72],[10.2,70],[8.9,68],[7.6,66],[6.3,64],[5,62],[3.7,60],[2.9,50],[2.1,40],[1.3,30],[0.5,20],[-0.3,10]], "高一女": [[24.2,100],[22.5,95],[20.8,90],[19.1,85],[17.4,80],[16.1,78],[14.8,76],[13.5,74],[12.2,72],[10.9,70],[9.6,68],[8.3,66],[7,64],[5.7,62],[4.4,60],[3.6,50],[2.8,40],[2,30],[1.2,20],[0.4,10]], "高二女": [[24.8,100],[23.1,95],[21.4,90],[19.7,85],[18,80],[16.7,78],[15.4,76],[14.1,74],[12.8,72],[11.5,70],[10.2,68],[8.9,66],[7.6,64],[6.3,62],[5,60],[4.2,50],[3.4,40],[2.6,30],[1.8,20],[1,10]], "高三女": [[25.3,100],[23.6,95],[21.9,90],[20.2,85],[18.5,80],[17.2,78],[15.9,76],[14.6,74],[13.3,72],[12,70],[10.7,68],[9.4,66],[8.1,64],[6.8,62],[5.5,60],[4.7,50],[3.9,40],[3.1,30],[2.3,20],[1.5,10]] }
+    const DEFAULT_TY_STDS = {
+        weights: { bmi: 0.15, lung: 0.15, run50: 0.20, jump: 0.10, sit: 0.10, runL: 0.20, str: 0.10 },
+        bonusRule: {
+            run: { "男": [4, 8, 12, 16, 20, 23, 26, 29, 32, 35], "女": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50] },
+            str: { "男": [1, 2, 3, 4, 5, 6, 7, 8, 9, 10], "女": [2, 4, 6, 7, 8, 9, 10, 11, 12, 13] }
+        },
+        bmi: {
+            "初一男": [15.4, 22.1, 24.9], "初一女": [14.7, 21.7, 24.4],
+            "初二男": [15.6, 22.5, 25.2], "初二女": [15.2, 22.2, 24.8],
+            "初三男": [15.7, 22.8, 26.0], "初三女": [15.9, 22.6, 25.1],
+            "高一男": [16.4, 23.2, 26.3], "高一女": [16.4, 22.7, 25.2],
+            "高二男": [16.7, 23.7, 26.5], "高二女": [16.8, 23.2, 25.4],
+            "高三男": [17.2, 23.8, 27.3], "高三女": [17.0, 23.3, 25.7]
+        },
+        lung: {
+            "初一男": [[3640,100],[3520,95],[3400,90],[3150,85],[2900,80],[2780,78],[2660,76],[2540,74],[2420,72],[2300,70],[2180,68],[2060,66],[1940,64],[1820,62],[1700,60],[1600,50],[1500,40],[1400,30],[1300,20],[1200,10]],
+            "初二男": [[3940,100],[3820,95],[3700,90],[3450,85],[3200,80],[3080,78],[2960,76],[2840,74],[2720,72],[2600,70],[2480,68],[2360,66],[2240,64],[2120,62],[2000,60],[1890,50],[1780,40],[1670,30],[1560,20],[1450,10]],
+            "初三男": [[4240,100],[4120,95],[4000,90],[3750,85],[3500,80],[3380,78],[3260,76],[3140,74],[3020,72],[2900,70],[2780,68],[2660,66],[2540,64],[2420,62],[2300,60],[2180,50],[2060,40],[1940,30],[1820,20],[1700,10]],
+            "高一男": [[4540,100],[4420,95],[4300,90],[4050,85],[3800,80],[3680,78],[3560,76],[3440,74],[3320,72],[3200,70],[3080,68],[2960,66],[2840,64],[2720,62],[2600,60],[2470,50],[2340,40],[2210,30],[2080,20],[1950,10]],
+            "高二男": [[4740,100],[4620,95],[4500,90],[4250,85],[4000,80],[3880,78],[3760,76],[3640,74],[3520,72],[3400,70],[3280,68],[3160,66],[3040,64],[2920,62],[2800,60],[2660,50],[2520,40],[2380,30],[2240,20],[2100,10]],
+            "高三男": [[4940,100],[4820,95],[4700,90],[4450,85],[4200,80],[4080,78],[3960,76],[3840,74],[3720,72],[3600,70],[3480,68],[3360,66],[3240,64],[3120,62],[3000,60],[2850,50],[2700,40],[2550,30],[2400,20],[2250,10]],
+            "初一女": [[2750,100],[2650,95],[2550,90],[2450,85],[2350,80],[2250,78],[2150,76],[2050,74],[1950,72],[1850,70],[1750,68],[1650,66],[1550,64],[1450,62],[1350,60],[1310,50],[1270,40],[1230,30],[1190,20],[1150,10]],
+            "初二女": [[2900,100],[2850,95],[2800,90],[2650,85],[2500,80],[2400,78],[2300,76],[2200,74],[2100,72],[2000,70],[1900,68],[1800,66],[1700,64],[1600,62],[1500,60],[1460,50],[1420,40],[1380,30],[1340,20],[1300,10]],
+            "初三女": [[3050,100],[3000,95],[2950,90],[2800,85],[2650,80],[2550,78],[2450,76],[2350,74],[2250,72],[2150,70],[2050,68],[1950,66],[1850,64],[1750,62],[1650,60],[1610,50],[1570,40],[1530,30],[1490,20],[1450,10]],
+            "高一女": [[3150,100],[3100,95],[3050,90],[2900,85],[2750,80],[2650,78],[2550,76],[2450,74],[2350,72],[2250,70],[2150,68],[2050,66],[1950,64],[1850,62],[1750,60],[1710,50],[1670,40],[1630,30],[1590,20],[1550,10]],
+            "高二女": [[3250,100],[3200,95],[3150,90],[3000,85],[2850,80],[2750,78],[2650,76],[2550,74],[2450,72],[2350,70],[2250,68],[2150,66],[2050,64],[1950,62],[1850,60],[1810,50],[1770,40],[1730,30],[1690,20],[1650,10]],
+            "高三女": [[3350,100],[3300,95],[3250,90],[3100,85],[2950,80],[2850,78],[2750,76],[2650,74],[2550,72],[2350,70],[2250,68],[2150,66],[2050,64],[1950,62],[1850,60],[1910,50],[1870,40],[1830,30],[1790,20],[1750,10]]
+        },
+        run50: { 
+            "初一男": [[7.8,100],[7.9,95],[8,90],[8.1,85],[8.2,80],[8.4,78],[8.6,76],[8.8,74],[9,72],[9.2,70],[9.4,68],[9.6,66],[9.8,64],[10,62],[10.2,60],[10.4,50],[10.6,40],[10.8,30],[11,20],[11.2,10]], 
+            "初二男": [[7.5,100],[7.6,95],[7.7,90],[7.8,85],[7.9,80],[8.1,78],[8.3,76],[8.5,74],[8.7,72],[8.9,70],[9.1,68],[9.3,66],[9.5,64],[9.7,62],[9.9,60],[10.1,50],[10.3,40],[10.5,30],[10.7,20],[10.9,10]], 
+            "初三男": [[7.3,100],[7.4,95],[7.5,90],[7.6,85],[7.7,80],[7.9,78],[8.1,76],[8.3,74],[8.5,72],[8.7,70],[8.9,68],[9.1,66],[9.3,64],[9.5,62],[9.7,60],[9.9,50],[10.1,40],[10.3,30],[10.5,20],[10.7,10]], 
+            "高一男": [[7.1,100],[7.2,95],[7.3,90],[7.4,85],[7.5,80],[7.7,78],[7.9,76],[8.1,74],[8.3,72],[8.5,70],[8.7,68],[8.9,66],[9.1,64],[9.3,62],[9.5,60],[9.7,50],[9.9,40],[10.1,30],[10.3,20],[10.5,10]], 
+            "高二男": [[7,100],[7.1,95],[7.2,90],[7.3,85],[7.4,80],[7.6,78],[7.8,76],[8,74],[8.2,72],[8.4,70],[8.6,68],[8.8,66],[9,64],[9.2,62],[9.4,60],[9.6,50],[9.8,40],[10,30],[10.2,20],[10.4,10]], 
+            "高三男": [[6.8,100],[6.9,95],[7,90],[7.1,85],[7.2,80],[7.4,78],[7.6,76],[7.8,74],[8,72],[8.2,70],[8.4,68],[8.6,66],[8.8,64],[9,62],[9.2,60],[9.4,50],[9.6,40],[9.8,30],[10,20],[10.2,10]], 
+            "初一女": [[8.1,100],[8.2,95],[8.3,90],[8.6,85],[8.9,80],[9.1,78],[9.3,76],[9.5,74],[9.7,72],[9.9,70],[10.1,68],[10.3,66],[10.5,64],[10.7,62],[10.9,60],[11.1,50],[11.3,40],[11.5,30],[11.7,20],[11.9,10]], 
+            "初二女": [[8,100],[8.1,95],[8.2,90],[8.5,85],[8.8,80],[9,78],[9.2,76],[9.4,74],[9.6,72],[9.8,70],[10,68],[10.2,66],[10.4,64],[10.6,62],[10.8,60],[11,50],[11.2,40],[11.4,30],[11.6,20],[11.8,10]], 
+            "初三女": [[7.9,100],[8,95],[8.1,90],[8.4,85],[8.7,80],[8.9,78],[9.1,76],[9.3,74],[9.5,72],[9.7,70],[9.9,68],[10.1,66],[10.3,64],[10.5,62],[10.7,60],[10.9,50],[11.1,40],[11.3,30],[11.5,20],[11.7,10]], 
+            "高一女": [[7.8,100],[7.9,95],[8,90],[8.3,85],[8.6,80],[8.8,78],[9,76],[9.2,74],[9.4,72],[9.6,70],[9.8,68],[10,66],[10.2,64],[10.4,62],[10.6,60],[10.8,50],[11,40],[11.2,30],[11.4,20],[11.6,10]], 
+            "高二女": [[7.7,100],[7.8,95],[7.9,90],[8.2,85],[8.5,80],[8.7,78],[8.9,76],[9.1,74],[9.3,72],[9.5,70],[9.7,68],[9.9,66],[10.1,64],[10.3,62],[10.5,60],[10.7,50],[10.9,40],[11.1,30],[11.3,20],[11.5,10]], 
+            "高三女": [[7.6,100],[7.7,95],[7.8,90],[8.1,85],[8.4,80],[8.6,78],[8.8,76],[9,74],[9.2,72],[9.4,70],[9.6,68],[9.8,66],[10,64],[10.2,62],[10.4,60],[10.6,50],[10.8,40],[11,30],[11.2,20],[11.4,10]] 
+        },
+        jump: { 
+            "初一男": [[225,100],[218,95],[211,90],[203,85],[195,80],[191,78],[187,76],[183,74],[179,72],[175,70],[171,68],[167,66],[163,64],[159,62],[155,60],[150,50],[145,40],[140,30],[135,20],[130,10]], 
+            "初二男": [[240,100],[233,95],[226,90],[218,85],[210,80],[206,78],[202,76],[198,74],[194,72],[190,70],[186,68],[182,66],[178,64],[174,62],[170,60],[165,50],[160,40],[155,30],[150,20],[145,10]], 
+            "初三男": [[250,100],[245,95],[240,90],[233,85],[225,80],[221,78],[217,76],[213,74],[209,72],[205,70],[201,68],[197,66],[193,64],[189,62],[185,60],[180,50],[175,40],[170,30],[165,20],[160,10]], 
+            "高一男": [[260,100],[255,95],[250,90],[243,85],[235,80],[231,78],[227,76],[223,74],[219,72],[215,70],[211,68],[207,66],[203,64],[199,62],[195,60],[190,50],[185,40],[180,30],[175,20],[170,10]], 
+            "高二男": [[265,100],[260,95],[255,90],[248,85],[240,80],[236,78],[232,76],[228,74],[224,72],[220,70],[216,68],[212,66],[208,64],[204,62],[200,60],[195,50],[190,40],[185,30],[180,20],[175,10]], 
+            "高三男": [[270,100],[265,95],[260,90],[253,85],[245,80],[241,78],[237,76],[233,74],[229,72],[225,70],[221,68],[217,66],[213,64],[209,62],[205,60],[200,50],[195,40],[190,30],[185,20],[180,10]], 
+            "初一女": [[196,100],[190,95],[184,90],[177,85],[170,80],[167,78],[164,76],[161,74],[158,72],[155,70],[152,68],[149,66],[146,64],[143,62],[140,60],[135,50],[130,40],[125,30],[120,20],[115,10]], 
+            "初二女": [[200,100],[194,95],[188,90],[181,85],[174,80],[171,78],[168,76],[165,74],[162,72],[159,70],[156,68],[153,66],[150,64],[147,62],[144,60],[139,50],[134,40],[129,30],[124,20],[119,10]], 
+            "初三女": [[202,100],[196,95],[190,90],[183,85],[176,80],[173,78],[170,76],[167,74],[164,72],[161,70],[158,68],[155,66],[152,64],[149,62],[146,60],[141,50],[136,40],[131,30],[126,20],[121,10]], 
+            "高一女": [[204,100],[198,95],[192,90],[185,85],[178,80],[175,78],[172,76],[169,74],[166,72],[163,70],[160,68],[157,66],[154,64],[151,62],[148,60],[143,50],[138,40],[133,30],[128,20],[123,10]], 
+            "高二女": [[205,100],[199,95],[193,90],[186,85],[179,80],[176,78],[173,76],[170,74],[167,72],[164,70],[161,68],[158,66],[155,64],[152,62],[149,60],[144,50],[139,40],[134,30],[129,20],[124,10]], 
+            "高三女": [[206,100],[200,95],[194,90],[187,85],[180,80],[177,78],[174,76],[171,74],[168,72],[165,70],[162,68],[159,66],[156,64],[153,62],[150,60],[145,50],[140,40],[135,30],[130,20],[125,10]] 
+        },
+        str: { 
+            "初一男": [[13,100],[12,95],[11,90],[10,85],[9,80],[8,76],[7,72],[6,68],[5,64],[4,60],[3,50],[2,40],[1,30]], 
+            "初二男": [[14,100],[13,95],[12,90],[11,85],[10,80],[9,76],[8,72],[7,68],[6,64],[5,60],[4,50],[3,40],[2,30],[1,20]], 
+            "初三男": [[15,100],[14,95],[13,90],[12,85],[11,80],[10,76],[9,72],[8,68],[7,64],[6,60],[5,50],[4,40],[3,30],[2,20],[1,10]], 
+            "高一男": [[16,100],[15,95],[14,90],[13,85],[12,80],[11,76],[10,72],[9,68],[8,64],[7,60],[6,50],[5,40],[4,30],[3,20],[2,10]], 
+            "高二男": [[17,100],[16,95],[15,90],[14,85],[13,80],[12,76],[11,72],[10,68],[9,64],[8,60],[7,50],[6,40],[5,30],[4,20],[3,10]], 
+            "高三男": [[18,100],[17,95],[16,90],[15,85],[14,80],[13,76],[12,72],[11,68],[10,64],[9,60],[8,50],[7,40],[6,30],[5,20],[4,10]], 
+            "初一女": [[50,100],[48,95],[46,90],[43,85],[40,80],[38,78],[36,76],[34,74],[32,72],[30,70],[28,68],[26,66],[24,64],[22,62],[20,60],[18,50],[16,40],[14,30],[12,20],[10,10]], 
+            "初二女": [[51,100],[49,95],[47,90],[44,85],[41,80],[39,78],[37,76],[35,74],[33,72],[31,70],[29,68],[27,66],[25,64],[23,62],[21,60],[19,50],[17,40],[15,30],[13,20],[11,10]], 
+            "初三女": [[52,100],[50,95],[48,90],[45,85],[42,80],[40,78],[38,76],[36,74],[34,72],[32,70],[30,68],[28,66],[26,64],[24,62],[22,60],[20,50],[18,40],[16,30],[14,20],[12,10]], 
+            "高一女": [[53,100],[51,95],[49,90],[46,85],[43,80],[41,78],[39,76],[37,74],[35,72],[33,70],[31,68],[29,66],[27,64],[25,62],[23,60],[21,50],[19,40],[17,30],[15,20],[13,10]], 
+            "高二女": [[54,100],[52,95],[50,90],[47,85],[44,80],[42,78],[40,76],[38,74],[36,72],[34,70],[32,68],[30,66],[28,64],[26,62],[24,60],[22,50],[20,40],[18,30],[16,20],[14,10]], 
+            "高三女": [[55,100],[53,95],[51,90],[48,85],[45,80],[43,78],[41,76],[39,74],[37,72],[35,70],[33,68],[31,66],[29,64],[27,62],[25,60],[23,50],[21,40],[19,30],[17,20],[15,10]] 
+        },
+        runL: { 
+            "初一男": [[235,100],[245,95],[255,90],[262,85],[270,80],[275,78],[280,76],[285,74],[290,72],[295,70],[300,68],[305,66],[310,64],[315,62],[320,60],[340,50],[360,40],[380,30],[400,20],[420,10]], 
+            "初二男": [[230,100],[235,95],[240,90],[247,85],[255,80],[260,78],[265,76],[270,74],[275,72],[280,70],[285,68],[290,66],[295,64],[300,62],[305,60],[325,50],[345,40],[365,30],[385,20],[405,10]], 
+            "初三男": [[220,100],[225,95],[230,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[315,50],[335,40],[355,30],[375,20],[395,10]], 
+            "高一男": [[210,100],[215,95],[220,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[305,50],[325,40],[345,30],[365,20],[385,10]], 
+            "高二男": [[205,100],[210,95],[215,90],[222,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[300,50],[320,40],[340,30],[360,20],[380,10]], 
+            "高三男": [[200,100],[205,95],[210,90],[217,85],[225,80],[230,78],[235,76],[240,74],[245,72],[250,70],[255,68],[260,66],[265,64],[270,62],[275,60],[295,50],[315,40],[335,30],[355,20],[375,10]], 
+            "初一女": [[215,100],[222,95],[229,90],[237,85],[245,80],[250,78],[255,76],[260,74],[265,72],[270,70],[275,68],[280,66],[285,64],[290,62],[295,60],[305,50],[315,40],[325,30],[335,20],[345,10]], 
+            "初二女": [[210,100],[217,95],[224,90],[232,85],[240,80],[245,78],[250,76],[255,74],[260,72],[265,70],[270,68],[275,66],[280,64],[285,62],[290,60],[300,50],[310,40],[320,30],[330,20],[340,10]], 
+            "初三女": [[205,100],[212,95],[219,90],[227,85],[235,80],[240,78],[245,76],[250,74],[255,72],[260,70],[265,68],[270,66],[275,64],[280,62],[285,60],[295,50],[305,40],[315,30],[325,20],[335,10]], 
+            "高一女": [[204,100],[210,95],[216,90],[223,85],[230,80],[235,78],[240,76],[245,74],[250,72],[255,70],[260,68],[265,66],[270,64],[275,62],[280,60],[290,50],[300,40],[310,30],[320,20],[330,10]], 
+            "高二女": [[202,100],[208,95],[214,90],[221,85],[228,80],[233,78],[238,76],[243,74],[248,72],[253,70],[258,68],[263,66],[268,64],[273,62],[278,60],[288,50],[298,40],[308,30],[318,20],[328,10]], 
+            "高三女": [[200,100],[206,95],[212,90],[219,85],[226,80],[231,78],[236,76],[241,74],[246,72],[251,70],[256,68],[261,66],[266,64],[271,62],[276,60],[286,50],[296,40],[306,30],[316,20],[326,10]] 
+        },
+        sit: { 
+            "初一男": [[17.6,100],[15.9,95],[14.2,90],[12.3,85],[10.4,80],[9.1,78],[7.8,76],[6.5,74],[5.2,72],[3.9,70],[2.6,68],[1.3,66],[0,64],[-1.3,62],[-2.6,60],[-3.8,50],[-5,40],[-6.2,30],[-7.4,20],[-8.6,10]], 
+            "初二男": [[19.6,100],[17.7,95],[15.8,90],[13.7,85],[11.6,80],[10.3,78],[9,76],[7.7,74],[6.4,72],[5.1,70],[3.8,68],[2.5,66],[1.2,64],[-0.1,62],[-1.4,60],[-2.6,50],[-3.8,40],[-5,30],[-6.2,20],[-7.4,10]], 
+            "初三男": [[21.6,100],[19.7,95],[17.8,90],[15.8,85],[13.8,80],[12.4,78],[11,76],[9.6,74],[8.2,72],[6.8,70],[5.4,68],[4,66],[2.6,64],[1.2,62],[-0.2,60],[-1.4,50],[-2.6,40],[-3.8,30],[-5,20],[-6.2,10]], 
+            "高一男": [[23.6,100],[21.5,95],[19.4,90],[17.2,85],[15,80],[13.6,78],[12.2,76],[10.8,74],[9.4,72],[8,70],[6.6,68],[5.2,66],[3.8,64],[2.4,62],[1,60],[0,50],[-1,40],[-2,30],[-3,20],[-4,10]], 
+            "高二男": [[24.3,100],[22.4,95],[20.5,90],[18.3,85],[16.1,80],[14.7,78],[13.3,76],[11.9,74],[10.5,72],[9.1,70],[7.7,68],[6.3,66],[4.9,64],[3.5,62],[2.1,60],[1.1,50],[0.1,40],[-0.9,30],[-1.9,20],[-2.9,10]], 
+            "高三男": [[24.6,100],[22.8,95],[21,90],[19.1,85],[17.2,80],[15.8,78],[14.4,76],[13,74],[11.6,72],[10.2,70],[8.8,68],[7.4,66],[6,64],[4.6,62],[3.2,60],[2.2,50],[1.2,40],[0.2,30],[-0.8,20],[-1.8,10]], 
+            "初一女": [[21.8,100],[20.1,95],[18.4,90],[16.7,85],[15,80],[13.7,78],[12.4,76],[11.1,74],[9.8,72],[8.5,70],[7.2,68],[5.9,66],[4.6,64],[3.3,62],[2,60],[1.2,50],[0.4,40],[-0.4,30],[-1.2,20],[-2,10]], 
+            "初二女": [[22.7,100],[21,95],[19.3,90],[17.6,85],[15.9,80],[14.6,78],[13.3,76],[12,74],[10.7,72],[9.4,70],[8.1,68],[6.8,66],[5.5,64],[4.2,62],[2.9,60],[2.1,50],[1.3,40],[0.5,30],[-0.3,20],[-1.1,10]], 
+            "初三女": [[23.5,100],[21.8,95],[20.1,90],[18.4,85],[16.7,80],[15.4,78],[14.1,76],[12.8,74],[11.5,72],[10.2,70],[8.9,68],[7.6,66],[6.3,64],[5,62],[3.7,60],[2.9,50],[2.1,40],[1.3,30],[0.5,20],[-0.3,10]], 
+            "高一女": [[24.2,100],[22.5,95],[20.8,90],[19.1,85],[17.4,80],[16.1,78],[14.8,76],[13.5,74],[12.2,72],[10.9,70],[9.6,68],[8.3,66],[7,64],[5.7,62],[4.4,60],[3.6,50],[2.8,40],[2,30],[1.2,20],[0.4,10]], 
+            "高二女": [[24.8,100],[23.1,95],[21.4,90],[19.7,85],[18,80],[16.7,78],[15.4,76],[14.1,74],[12.8,72],[11.5,70],[10.2,68],[8.9,66],[7.6,64],[6.3,62],[5,60],[4.2,50],[3.4,40],[2.6,30],[1.8,20],[1,10]], 
+            "高三女": [[25.3,100],[23.6,95],[21.9,90],[20.2,85],[18.5,80],[17.2,78],[15.9,76],[14.6,74],[13.3,72],[12,70],[10.7,68],[9.4,66],[8.1,64],[6.8,62],[5.5,60],[4.7,50],[3.9,40],[3.1,30],[2.3,20],[1.5,10]] 
+        }
     };
 
-    document.getElementById('datePicker').valueAsDate = new Date();
-    let students = JSON.parse(localStorage.getItem('pe_v6_students')) || {};
-    let records = JSON.parse(localStorage.getItem('pe_v6_records')) || {};
-    let openedClassesState = JSON.parse(localStorage.getItem('pe_v6_open_state')) || {};
+    let students = JSON.parse(localStorage.getItem('tc_standalone_students')) || {};
+    let currentTYStandards = JSON.parse(localStorage.getItem('tc_standalone_standards')) || DEFAULT_TY_STDS;
 
-    const statusSequence = ['normal', 'leave', 'absent', 'late', 'early'];
-    const statusTextMap = { 'normal': '正常', 'leave': '请假', 'absent': '旷课', 'late': '迟到', 'early': '早退' };
+    let currentUser = JSON.parse(localStorage.getItem('tc_sys_current_user')) || null;
+    let teacherAccounts = JSON.parse(localStorage.getItem('tc_sys_teacher_accounts')) || {
+        "admin": { password: "admin", role: "admin", classes: [] }
+    };
+
+    function checkUserLoginState() {
+        const userDisplay = document.getElementById('currentUserDisplay');
+        const roleDisplay = document.getElementById('currentUserRole');
+        const adminBtn = document.getElementById('adminManageBtn');
+        
+        if (!currentUser) {
+            if (userDisplay) userDisplay.innerText = '未登录';
+            if (roleDisplay) roleDisplay.innerText = '游客';
+            if (adminBtn) adminBtn.style.display = 'none';
+            openLoginModal();
+            return;
+        }
+
+        if (userDisplay && roleDisplay) {
+            userDisplay.innerText = currentUser.username;
+            roleDisplay.innerText = currentUser.role === 'admin' ? '管理员' : '任课教师';
+            if (adminBtn) adminBtn.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+        }
+    }
+
+    function openLoginModal() {
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        document.getElementById('loginModal').style.display = 'flex';
+    }
+
+    function handleLoginSubmit() {
+        const u = document.getElementById('loginUsername').value.trim();
+        const p = document.getElementById('loginPassword').value.trim();
+        if (!u || !p) { alert('请输入账号和密码！'); return; }
+
+        if (u === 'admin') {
+            let adminPwd = teacherAccounts["admin"] ? teacherAccounts["admin"].password : "admin";
+            if (p === adminPwd || p === "admin888") {
+                currentUser = { username: 'admin', role: 'admin', classes: [] };
+                localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
+                document.getElementById('loginModal').style.display = 'none';
+                showToast('已登录管理员身份');
+                checkUserLoginState();
+                initTcClassOptions();
+                return;
+            } else {
+                alert('管理员密码错误！');
+                return;
+            }
+        }
+
+        if (teacherAccounts[u] && teacherAccounts[u].password === p) {
+            currentUser = { username: u, role: 'teacher', classes: teacherAccounts[u].classes || [] };
+            localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
+            document.getElementById('loginModal').style.display = 'none';
+            showToast(`欢迎教师：${u}`);
+            checkUserLoginState();
+            initTcClassOptions();
+        } else {
+            alert('账号不存在或密码错误！');
+        }
+    }
+
+    function handleLogout() {
+        if (confirm('确定要退出当前账号吗？')) {
+            localStorage.removeItem('tc_sys_current_user');
+            currentUser = null;
+            checkUserLoginState();
+            initTcClassOptions();
+            const workspace = document.getElementById('tcBatchWorkspace');
+            if (workspace) workspace.style.display = 'none';
+            openLoginModal();
+        }
+    }
+
+    function openTeacherAdminModal() {
+        if (!currentUser || currentUser.role !== 'admin') { alert('无权限访问管理后台！'); return; }
+        
+        const container = document.getElementById('adminClassCheckboxList');
+        container.innerHTML = '';
+        const allCls = Object.keys(students);
+        if (allCls.length === 0) {
+            container.innerHTML = '<span style="color:#999;font-size:11px;">系统暂无班级，请先在主页导入名单Excel</span>';
+        } else {
+            allCls.forEach(c => {
+                container.innerHTML += `
+                    <label style="font-size:12px; display:inline-flex; align-items:center; gap:2px; margin-right:6px; cursor:pointer;">
+                        <input type="checkbox" name="assignClassChk" value="${c}"> ${c}
+                    </label>
+                `;
+            });
+        }
+        renderTeacherAccountList();
+        document.getElementById('teacherAdminModal').style.display = 'flex';
+    }
+
+    function saveTeacherAccount() {
+        const tName = document.getElementById('newTeacherName').value.trim();
+        const tPwd = document.getElementById('newTeacherPwd').value.trim();
+        if (!tName || !tPwd) { alert('请输入教师姓名和密码！'); return; }
+        if (tName === 'admin') { alert('不能使用 admin 作为普通教师账号！'); return; }
+
+        const chks = document.querySelectorAll('input[name="assignClassChk"]:checked');
+        const selectedClasses = Array.from(chks).map(el => el.value);
+
+        teacherAccounts[tName] = { password: tPwd, role: 'teacher', classes: selectedClasses };
+        localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
+
+        document.getElementById('newTeacherName').value = '';
+        document.querySelectorAll('input[name="assignClassChk"]').forEach(el => el.checked = false);
+        renderTeacherAccountList();
+        showToast(`教师【${tName}】配置已更新！`);
+        initTcClassOptions();
+    }
+
+    function deleteTeacherAccount(tName) {
+        if (confirm(`确定要移除教师【${tName}】账号吗？`)) {
+            delete teacherAccounts[tName];
+            localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
+            renderTeacherAccountList();
+            initTcClassOptions();
+        }
+    }
+
+    function renderTeacherAccountList() {
+        const listCont = document.getElementById('teacherAccountListContainer');
+        listCont.innerHTML = '';
+        const tNames = Object.keys(teacherAccounts).filter(k => k !== 'admin');
+
+        if (tNames.length === 0) {
+            listCont.innerHTML = '<div style="color:#aaa; font-size:12px; text-align:center; padding:10px;">暂无分配记录</div>';
+            return;
+        }
+
+        tNames.forEach(name => {
+            const item = teacherAccounts[name];
+            const clsNames = (item.classes || []).join('、') || '暂未绑定班级';
+            listCont.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #eee; font-size:12px;">
+                    <div>
+                        <b>${name}</b> <span style="color:#888;">(密码: ${item.password})</span>
+                        <div style="color:#1976D2; font-size:11px; margin-top:2px;">负责班级: ${clsNames}</div>
+                    </div>
+                    <button onclick="deleteTeacherAccount('${name}')" style="width:auto; margin:0; padding:2px 6px; font-size:11px; background:#e53935;">删除</button>
+                </div>
+            `;
+        });
+    }
+
+    function getLevelText(score) {
+        if (score >= 90) return "优";
+        if (score >= 80) return "良好";
+        if (score >= 60) return "及格";
+        return "不及格";
+    }
+
+    function getLevelClass(levelText) {
+        switch(levelText) {
+            case "优": return "lvl-yx";
+            case "良好": return "lvl-yl";
+            case "及格": return "lvl-bk";
+            default: return "lvl-nl";
+        }
+    }
 
     function queryStandardScore(projectName, rawValue, className, gender) {
         if (rawValue === undefined || rawValue === null || String(rawValue).trim() === '') return null;
-        
-        let val = parseFloat(rawValue);
+        let strVal = String(rawValue).trim();
+        let val = parseFloat(strVal);
         if (isNaN(val)) return null;
 
         let gradeKey = "初一"; 
         ["初一","初二","初三","高一","高二","高三"].forEach(g => { if(className.includes(g)) gradeKey = g; });
         const stdKey = `${gradeKey}${gender}`; 
 
-        let projectType = "";
-        if (projectName.includes("50米")) projectType = "run50";
-        else if (projectName.includes("跳远")) projectType = "jump";
-        else if (projectName.includes("体前屈")) projectType = "sit";
-        else if (projectName.includes("仰卧起坐") || projectName.includes("引体向上")) projectType = "str";
-        else if (projectName.includes("1000米") || projectName.includes("800米") || projectName.includes("耐力跑")) {
-            projectType = "runL";
-            if (String(rawValue).includes('.')) {
-                let parts = String(rawValue).split('.');
-                let mins = parseInt(parts[0], 10) || 0;
-                let secs = parseInt(parts[1], 10) || 0;
-                val = mins * 60 + secs;
+        let targetProjectCode = "";
+        if (projectName.toUpperCase().includes("BMI") || projectName.includes("体重指数")) targetProjectCode = "bmi";
+        else if (projectName.includes("肺活量")) targetProjectCode = "lung";
+        else if (projectName.includes("50米")) targetProjectCode = "run50";
+        else if (projectName.includes("跳远")) targetProjectCode = "jump";
+        else if (projectName.includes("体前屈")) targetProjectCode = "sit";
+        else if (projectName.includes("仰卧起坐") || projectName.includes("引体向上")) targetProjectCode = "str";
+        else if (projectName.includes("1000米") || projectName.includes("800米") || projectName.includes("耐力跑") || projectName === "runL") {
+            targetProjectCode = "runL";
+            if (strVal.includes(':')) {
+                let parts = strVal.split(':');
+                val = (parseInt(parts[0], 10) || 0) * 60 + (parseFloat(parts[1]) || 0);
+            } else if (strVal.includes('.')) {
+                let parts = strVal.split('.');
+                // 兼容 分.秒.毫秒 (例如 3.45.28) 与 分.秒 (例如 3.45)
+                let minutes = parseInt(parts[0], 10) || 0;
+                let seconds = parseFloat(parts[1]) || 0;
+                let ms = parts[2] ? (parseFloat(parts[2]) / 100) : 0;
+                val = minutes * 60 + seconds + ms;
+            }
+        } else {
+            targetProjectCode = projectName;
+        }
+
+        const activePool = currentTYStandards[targetProjectCode];
+        if (!activePool || !activePool[stdKey]) return null;
+
+        const ruleList = activePool[stdKey];
+        if (!ruleList || ruleList.length === 0) return 0;
+
+        if (targetProjectCode === "bmi") {
+            if (Array.isArray(ruleList) && typeof ruleList[0] === 'number') {
+                if (val <= ruleList[0]) return 80;
+                if (val <= ruleList[1]) return 100;
+                if (val <= ruleList[2]) return 80;
+                return 60;
             }
         }
 
-        if (!projectType || !STDS[projectType] || !STDS[projectType][stdKey]) {
-            if (val > 100) return 100;
-            return val < 0 ? 0 : Math.round(val);
-        }
-
-        const ruleList = STDS[projectType][stdKey];
-
-        if (projectType === "run50" || projectType === "runL") {
-            if (val <= ruleList[0][0]) return 100;
+        let isTimeType = targetProjectCode.includes("run") || targetProjectCode.includes("50") || targetProjectCode.includes("米");
+        if (isTimeType) {
+            if (val <= ruleList[0][0]) return ruleList[0][1];
             if (val > ruleList[ruleList.length - 1][0]) return 0;
             for (let i = 0; i < ruleList.length; i++) {
                 if (val <= ruleList[i][0]) return ruleList[i][1];
@@ -348,9 +645,8 @@
             return 0;
         } else {
             let actualVal = val;
-            if (projectType === "jump" && val < 5) actualVal = Math.round(val * 100);
-
-            if (actualVal >= ruleList[0][0]) return 100;
+            if (targetProjectCode === "jump" && val < 5) actualVal = Math.round(val * 100); 
+            if (actualVal >= ruleList[0][0]) return ruleList[0][1];
             if (actualVal < ruleList[ruleList.length - 1][0]) return 0;
             for (let i = 0; i < ruleList.length; i++) {
                 if (actualVal >= ruleList[i][0]) return ruleList[i][1];
@@ -359,730 +655,1076 @@
         }
     }
 
-    function getLevelText(totalScore) {
-        if (totalScore >= 90) return "优秀";
-        if (totalScore >= 80) return "良好";
-        if (totalScore >= 60) return "及格";
-        return "不及格";
+    function calculateFitnessTotalScore(scoresObj, className, gender) {
+        if (!scoresObj) return { score: 0, level: '不及格', baseScore: 0, bonusScore: 0 };
+
+        let gradeKey = "初一"; 
+        ["初一","初二","初三","高一","高二","高三"].forEach(g => { if(className.includes(g)) gradeKey = g; });
+        const stdKey = `${gradeKey}${gender}`;
+
+        const getVal = (keywords) => {
+            for (let key in scoresObj) {
+                if (keywords.some(kw => key.includes(kw))) {
+                    let v = scoresObj[key];
+                    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+                }
+            }
+            return '';
+        };
+
+        const getPts = (proj, rawVal) => {
+            if (!rawVal) return 0;
+            let s = queryStandardScore(proj, rawVal, className, gender);
+            return s !== null ? s : 0;
+        };
+
+        const sBMI = getPts("体重指数(BMI)", getVal(["BMI", "体重指数"]));
+        const sVital = getPts("肺活量", getVal(["肺活量"]));
+        const s50m = getPts("50米", getVal(["50米", "50"]));
+        const sSit = getPts("坐位体前屈", getVal(["体前屈"]));
+        const sJump = getPts("立定跳远", getVal(["跳远"]));
+
+        const strProjName = gender === '男' ? "引体向上" : "仰卧起坐";
+        const rawStrVal = getVal(["引体", "仰卧"]);
+        const sStr = getPts(strProjName, rawStrVal);
+
+        const runLProjName = gender === '男' ? "1000米" : "800米";
+        const rawRunLVal = getVal(["1000米", "800米", "1000", "800"]);
+        const sRunL = getPts(runLProjName, rawRunLVal);
+
+        const baseTotal = (sBMI * 0.15) + (sVital * 0.15) + (s50m * 0.20) + (sSit * 0.10) + 
+                          (sJump * 0.10) + (sStr * 0.10) + (sRunL * 0.20);
+        const finalBaseScore = Math.round(baseTotal * 10) / 10;
+
+        let bonusRun = 0;
+        let bonusStr = 0;
+        const bonusRule = currentTYStandards.bonusRule || DEFAULT_TY_STDS.bonusRule;
+
+        if (bonusRule) {
+            if (sRunL >= 100 && rawRunLVal && currentTYStandards.runL && currentTYStandards.runL[stdKey]) {
+               let actualSeconds = 0;
+                if (String(rawRunLVal).includes(':')) {
+                    let p = String(rawRunLVal).split(':');
+                    actualSeconds = (parseInt(p[0], 10) || 0) * 60 + (parseFloat(p[1]) || 0);
+                } else if (String(rawRunLVal).includes('.')) {
+                    let p = String(rawRunLVal).split('.');
+                    let minutes = parseInt(p[0], 10) || 0;
+                    let seconds = parseFloat(p[1]) || 0;
+                    let ms = p[2] ? (parseFloat(p[2]) / 100) : 0;
+                    actualSeconds = minutes * 60 + seconds + ms;
+                } else {
+                    actualSeconds = parseFloat(rawRunLVal) || 0;
+                }
+
+                const base100Time = currentTYStandards.runL[stdKey][0][0];
+                const diffSec = base100Time - actualSeconds;
+                if (diffSec > 0 && bonusRule.run && bonusRule.run[gender]) {
+                    const ladder = bonusRule.run[gender];
+                    for (let i = ladder.length - 1; i >= 0; i--) {
+                        if (diffSec >= ladder[i]) {
+                            bonusRun = i + 1;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (sStr >= 100 && rawStrVal && currentTYStandards.str && currentTYStandards.str[stdKey]) {
+                const actualCount = parseFloat(rawStrVal) || 0;
+                const base100Count = currentTYStandards.str[stdKey][0][0];
+                const diffCount = actualCount - base100Count;
+                if (diffCount > 0 && bonusRule.str && bonusRule.str[gender]) {
+                    const ladder = bonusRule.str[gender];
+                    for (let i = ladder.length - 1; i >= 0; i--) {
+                        if (diffCount >= ladder[i]) {
+                            bonusStr = i + 1;
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+
+        const totalBonus = bonusRun + bonusStr;
+        const finalScore = Math.round((finalBaseScore + totalBonus) * 10) / 10;
+
+        return {
+            score: finalScore,
+            baseScore: finalBaseScore,
+            bonusScore: totalBonus,
+            level: getLevelText(finalBaseScore)
+        };
     }
 
-    window.onload = () => { renderAccordion(); };
+    function initTcClassOptions() {
+        const clsSelect = document.getElementById('tcClassSelect');
+        if (!clsSelect) return;
+        let classNames = Object.keys(students);
 
-    let cachedStats = {};
-    function calculateAllStats() {
-        const classNames = Object.keys(students);
-        const classTotalDays = {};
-        cachedStats = {};
-        
+        if (currentUser && currentUser.role === 'teacher') {
+            classNames = classNames.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        let html = '<option value="">-- ① 选班级 --</option>';
         classNames.forEach(c => {
-            classTotalDays[c] = 0; cachedStats[c] = {};
-            students[c].forEach(s => { cachedStats[c][s.name] = { leave: 0, absent: 0, late: 0, early: 0 }; });
+            html += `<option value="${c}">${c} (${students[c].length}人)</option>`;
+        });
+        clsSelect.innerHTML = html;
+    }
+
+    function renderTcProjectList() {
+        const cls = document.getElementById('tcClassSelect').value;
+        const projSelect = document.getElementById('tcProjectSelect');
+        const workspace = document.getElementById('tcBatchWorkspace');
+        if (workspace) workspace.style.display = 'none';
+
+        if (!cls) {
+            projSelect.innerHTML = '<option value="">-- ② 选项目 --</option>';
+            return;
+        }
+
+        projSelect.innerHTML = `
+            <option value="">-- ② 选项目 --</option>
+            <option value="50米">50米跑 (秒)</option>
+            <option value="runL">耐力跑 (男生1000m / 女生800m)</option>
+            <option value="立定跳远">立定跳远 (cm)</option>
+            <option value="坐位体前屈">坐位体前屈 (cm)</option>
+            <option value="肺活量">肺活量 (ml)</option>
+            <option value="身高">身高 (cm)</option>
+            <option value="体重">体重 (kg)</option>
+            <option value="str">力量类 (男生引体 / 女生仰卧)</option>
+        `;
+    }
+
+    function renderTcBatchEntryTable() {
+        const cls = document.getElementById('tcClassSelect').value;
+        const proj = document.getElementById('tcProjectSelect').value;
+        const workspace = document.getElementById('tcBatchWorkspace');
+        if (!cls || !proj) {
+            if (workspace) workspace.style.display = 'none';
+            removeStopwatchPanel();
+            return;
+        }
+
+        const studentList = students[cls] || [];
+        if (studentList.length === 0) {
+            workspace.innerHTML = `<div style="text-align:center; color:#888; padding:15px;">该班暂无学生，请先导入名册。</div>`;
+            workspace.style.display = 'block';
+            removeStopwatchPanel();
+            return;
+        }
+
+        let isRunningProject = (proj === '50米' || proj === 'runL');
+
+        let rowsHtml = '';
+        studentList.forEach((s, idx) => {
+            let actualProjName = proj;
+            if (proj === 'str') actualProjName = s.gender === '男' ? '引体向上' : '仰卧起坐';
+            if (proj === 'runL') actualProjName = s.gender === '男' ? '1000米' : '800米';
+
+            const sScores = s.scores || {};
+            const curVal = sScores[actualProjName] || '';
+            let initialPts = (actualProjName === '身高' || actualProjName === '体重') ? '' : (queryStandardScore(actualProjName, curVal, cls, s.gender) || 0);
+
+            rowsHtml += `
+                <tr style="border-bottom:1px solid #eee; background:${idx % 2 === 0 ? '#fff' : '#fafafa'};">
+                    <td style="padding:10px 4px; font-size:12px; color:#999; text-align:center;">${idx + 1}</td>
+                    <td style="padding:10px 4px; font-weight:800; font-size:15px; color:#0D47A1; cursor:pointer;" 
+                        class="tc-student-click-target" onclick="handleTcNameClick(${idx})">
+                        ${s.name}
+                        <span style="font-size:11px; display:block; color:#777; font-weight:normal;">${s.gender}</span>
+                    </td>
+                    <td style="padding:6px 4px;">
+                        <input type="text" inputmode="decimal" class="tc-batch-input" 
+                               id="tc-row-${idx}" data-idx="${idx}" data-name="${s.name}" data-gender="${s.gender}" data-proj="${actualProjName}"
+                               value="${curVal}" placeholder="${isRunningProject ? '秒表/键入' : '成绩'}"
+                               style="width:100%; margin:0; padding:8px 4px; font-size:15px; font-weight:bold; border:1px solid #FFB74D; border-radius:6px; text-align:center;"
+                               oninput="onTcBatchScoreInput(this, '${cls}')"
+                               onkeydown="handleTcInputNavigation(event, ${idx}, ${studentList.length})">
+                    </td>
+                    <td style="padding:10px 4px; text-align:center;">
+                        <span id="tc-badge-${idx}" class="live-score-badge ${initialPts > 0 ? 'has-val' : ''}" style="width:auto; min-width:44px; display:inline-block; font-size:12px;">
+                            ${actualProjName === '身高' || actualProjName === '体重' ? '-' : initialPts + '分'}
+                        </span>
+                    </td>
+                </tr>
+            `;
         });
 
-        for (let date in records) {
-            const dateData = records[date];
-            classNames.forEach(className => {
-                if (dateData[className]) {
-                    classTotalDays[className]++;
-                    students[className].forEach(studentObj => {
-                        const sName = studentObj.name;
-                        const status = dateData[className][sName] || 'normal';
-                        if (cachedStats[className] && cachedStats[className][sName] && status !== 'normal') {
-                            cachedStats[className][sName][status]++;
-                        }
-                    });
-                }
-            });
+        workspace.innerHTML = `
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:0 2px;">
+                <div style="font-size:13px; font-weight:bold; color:#BF360C;">
+                    ⚡ 当前采集：<span style="font-size:15px; color:#E65100;">${proj === 'str' ? '力量类' : (proj === 'runL' ? '耐力跑(800/1000m)' : proj)}</span>
+                </div>
+                <button onclick="saveAndExitTcProject()" style="background:#E65100; margin:0; width:auto; padding:6px 14px; font-size:13px; font-weight:bold; border-radius:6px;">💾 完成保存</button>
+            </div>
+            <div style="max-height:55vh; overflow-y:auto; border:1px solid #FFE0B2; border-radius:8px; background:#fff; -webkit-overflow-scrolling:touch;">
+                <table style="width:100%; border-collapse:collapse;">
+                    <thead style="position:sticky; top:0; background:#FFE0B2; color:#BF360C; font-size:12px; z-index:2;">
+                        <tr>
+                            <th style="padding:6px 2px; width:28px; text-align:center;">#</th>
+                            <th style="padding:6px 4px; text-align:left;">姓名 (点名填录成绩)</th>
+                            <th style="padding:6px; width:44%; text-align:center;">成绩输入</th>
+                            <th style="padding:6px 2px; width:52px; text-align:center;">得分</th>
+                        </tr>
+                    </thead>
+                    <tbody>${rowsHtml}</tbody>
+                </table>
+            </div>
+            <button onclick="saveAndExitTcProject()" style="background:#2E7D32; font-size:15px; font-weight:bold; margin-top:10px; padding:12px; border-radius:8px;">💾 保存当前成绩并选下一项</button>
+        `;
+        workspace.style.display = 'block';
+
+        // 🌟 核心：50米或耐力跑(800m/1000m)均唤起秒表面板
+        if (isRunningProject) {
+            renderStopwatchFloatPanel(proj);
+        } else {
+            removeStopwatchPanel();
         }
-        return classTotalDays;
+    }
+
+   function onTcBatchScoreInput(inputElem, className) {
+        const idx = inputElem.getAttribute('data-idx');
+        const gender = inputElem.getAttribute('data-gender');
+        const proj = inputElem.getAttribute('data-proj');
+        const sName = inputElem.getAttribute('data-name');
+        const val = inputElem.value.trim();
+        const badge = document.getElementById(`tc-badge-${idx}`);
+
+        // 🌟 1. 即时同步到内存对象与缓存，确保弹窗随时能读到最新成绩
+        if (students[className]) {
+            const sObj = students[className].find(s => s.name === sName);
+            if (sObj) {
+                if (!sObj.scores) sObj.scores = {};
+                if (val === '') {
+                    delete sObj.scores[proj];
+                } else {
+                    sObj.scores[proj] = val;
+                }
+                localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+            }
+        }
+
+        if (proj === '身高' || proj === '体重') {
+            if (badge) badge.innerText = '-';
+            return;
+        }
+
+        const calculated = queryStandardScore(proj, val, className, gender);
+        let pts = calculated !== null ? calculated : 0;
+        if (badge) {
+            badge.innerText = pts + "分";
+            if (pts > 0) badge.classList.add('has-val');
+            else badge.classList.remove('has-val');
+        }
+    }
+
+    function handleTcInputNavigation(e, currentIdx, totalLength) {
+        if (e.key === 'Enter' || e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextIdx = currentIdx + 1;
+            if (nextIdx < totalLength) {
+                const nextInput = document.getElementById(`tc-row-${nextIdx}`);
+                if (nextInput) { nextInput.focus(); nextInput.select(); }
+            }
+        } else if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevIdx = currentIdx - 1;
+            if (prevIdx >= 0) {
+                const prevInput = document.getElementById(`tc-row-${prevIdx}`);
+                if (prevInput) { prevInput.focus(); prevInput.select(); }
+            }
+        }
+    }
+
+    function saveAndExitTcProject() {
+        const cls = document.getElementById('tcClassSelect').value;
+        if (!cls) return;
+
+        const inputs = document.querySelectorAll('.tc-batch-input');
+        let updatedCount = 0;
+
+        inputs.forEach(inp => {
+            const sName = inp.getAttribute('data-name');
+            const proj = inp.getAttribute('data-proj');
+            const val = inp.value.trim();
+
+            const sObj = students[cls].find(s => s.name === sName);
+            if (sObj) {
+                if (!sObj.scores) sObj.scores = {};
+                if (val === '') {
+                    delete sObj.scores[proj];
+                } else {
+                    sObj.scores[proj] = val;
+                    updatedCount++;
+                }
+
+                if (proj === '身高' || proj === '体重') {
+                    const h = parseFloat(sObj.scores['身高']);
+                    const w = parseFloat(sObj.scores['体重']);
+                    if (!isNaN(h) && !isNaN(w) && h > 0) {
+                        let hM = h > 3 ? h / 100 : h;
+                        sObj.scores["体重指数(BMI)"] = (w / (hM * hM)).toFixed(1);
+                    }
+                }
+            }
+        });
+
+        localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+        showToast(`✅ 已保存本项成绩 (${updatedCount}人次)`);
+
+        const projSelect = document.getElementById('tcProjectSelect');
+        if (projSelect) projSelect.value = '';
+        const workspace = document.getElementById('tcBatchWorkspace');
+        if (workspace) workspace.style.display = 'none';
+        removeStopwatchPanel();
+        if (projSelect) projSelect.focus();
+    }
+
+    function openScoreModal(className, studentName) {
+        const studentObj = students[className].find(s => s.name === studentName);
+        if(!studentObj) return;
+
+        let gender = studentObj.gender || '男';
+        let modalBody = document.getElementById('modalCalendarBody');
+        let currentScores = studentObj.scores || {};
+
+        const rawH = currentScores["身高"] || '';
+        const rawW = currentScores["体重"] || '';
+        let curBMI = currentScores["体重指数(BMI)"] || '';
+        if(!curBMI && rawH && rawW) {
+            let hM = parseFloat(rawH) > 3 ? parseFloat(rawH)/100 : parseFloat(rawH);
+            if(hM > 0) curBMI = (parseFloat(rawW)/(hM*hM)).toFixed(1);
+        }
+
+        modalBody.innerHTML = `
+            <h3 style="margin-top:5px; text-align:center; color:#E65100;">🏃 学生体测个人档案</h3>
+            <p style="text-align:center; font-size:14px; margin-bottom:10px;">学生：<b>${studentName}</b> (${className} / <span style="color:#e91e63;font-weight:bold;">${gender}</span>)</p>
+            
+            <div style="background:#FFF3E0; border:1px solid #FFE0B2; color:#E65100; padding:10px; border-radius:8px; text-align:center; margin-bottom:12px;">
+                <div style="font-size: 13px; font-weight: bold;">国家体质健康测试总评</div>
+                <div style="margin: 4px 0;"><b id="modalLiveFitnessScore" style="font-size: 26px; color: #E65100;">--</b></div>
+                <span id="modalLiveFitnessLevel" class="level-badge" style="display:inline-block;">--</span>
+            </div>
+
+            <div style="max-height:320px; overflow-y:auto; padding-right:5px; margin-bottom:10px;">
+                <div class="score-row">
+                    <label>身高(cm):</label>
+                    <input type="number" step="0.1" id="tc-h" class="student-score-field" data-proj="身高" value="${rawH}" placeholder="厘米" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" style="background:#eee;color:#666;">形态</div>
+                </div>
+                <div class="score-row">
+                    <label>体重(kg):</label>
+                    <input type="number" step="0.1" id="tc-w" class="student-score-field" data-proj="体重" value="${rawW}" placeholder="公斤" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge has-val" id="tc-bmi-badge">BMI:${curBMI || '--'}</div>
+                </div>
+                <div class="score-row">
+                    <label>肺活量(ml):</label>
+                    <input type="number" class="student-score-field" data-proj="肺活量" value="${currentScores['肺活量']||''}" placeholder="毫升" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" id="live-badge-肺活量">0分</div>
+                </div>
+                <div class="score-row">
+                    <label>50米跑(秒):</label>
+                    <input type="number" step="0.01" class="student-score-field" data-proj="50米" value="${currentScores['50米']||''}" placeholder="秒" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" id="live-badge-50米">0分</div>
+                </div>
+                <div class="score-row">
+                    <label>立定跳远(cm):</label>
+                    <input type="number" class="student-score-field" data-proj="立定跳远" value="${currentScores['立定跳远']||''}" placeholder="厘米" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" id="live-badge-立定跳远">0分</div>
+                </div>
+                <div class="score-row">
+                    <label>坐位体前屈(cm):</label>
+                    <input type="number" step="0.1" class="student-score-field" data-proj="坐位体前屈" value="${currentScores['坐位体前屈']||''}" placeholder="厘米" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" id="live-badge-坐位体前屈">0分</div>
+                </div>
+                <div class="score-row">
+                    <label>${gender==='男'?'引体向上(次)':'仰卧起坐(次)'}:</label>
+                    <input type="number" class="student-score-field" data-proj="${gender==='男'?'引体向上':'仰卧起坐'}" value="${gender==='男'?(currentScores['引体向上']||''):(currentScores['仰卧起坐']||'')}" placeholder="次数" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" id="live-badge-${gender==='男'?'引体向上':'仰卧起坐'}">0分</div>
+                </div>
+                <div class="score-row">
+                    <label>${gender==='男'?'1000米跑':'800米跑'}:</label>
+                    <input type="text" class="student-score-field" data-proj="${gender==='男'?'1000米':'800米'}" value="${gender==='男'?(currentScores['1000米']||''):(currentScores['800米']||'')}" placeholder="分.秒(如: 3.45)" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <div class="live-score-badge" id="live-badge-${gender==='男'?'1000米':'800米'}">0分</div>
+                </div>
+            </div>
+
+            <button onclick="saveStudentTcScores('${className}', '${studentName}')" style="background-color: #E65100;">💾 保存体测成绩</button>
+        `;
+        document.getElementById('calendarModal').style.display = 'flex';
+        updateTcLiveScore(className, gender);
+    }
+
+    function updateTcLiveScore(className, gender) {
+        const fields = document.querySelectorAll('.student-score-field');
+        let tempScores = {};
+        fields.forEach(f => {
+            const p = f.getAttribute('data-proj');
+            const v = f.value.trim();
+            if(v !== '') tempScores[p] = v;
+        });
+
+        const hElem = document.getElementById('tc-h');
+        const wElem = document.getElementById('tc-w');
+        let h = hElem ? parseFloat(hElem.value) : 0;
+        let w = wElem ? parseFloat(wElem.value) : 0;
+        
+        if (!isNaN(h) && !isNaN(w) && h > 0 && w > 0) {
+            let hM = h > 3 ? h / 100 : h;
+            let bmiVal = (w / (hM * hM)).toFixed(1);
+            tempScores["体重指数(BMI)"] = bmiVal;
+            let bmiScore = queryStandardScore("体重指数(BMI)", bmiVal, className, gender) || 0;
+            const bmiBadge = document.getElementById('tc-bmi-badge');
+            if (bmiBadge) bmiBadge.innerText = `BMI:${bmiVal} (${bmiScore}分)`;
+        } else {
+            const bmiBadge = document.getElementById('tc-bmi-badge');
+            if (bmiBadge) bmiBadge.innerText = `BMI: --`;
+        }
+
+        fields.forEach(f => {
+            const p = f.getAttribute('data-proj');
+            if (p === '身高' || p === '体重') return;
+            const b = document.getElementById(`live-badge-${p}`);
+            if (b) {
+                let s = queryStandardScore(p, f.value.trim(), className, gender);
+                let displayPts = s !== null ? s : 0;
+                b.innerText = `${displayPts}分`;
+                if (displayPts > 0) b.classList.add('has-val');
+                else b.classList.remove('has-val');
+            }
+        });
+
+        const fitness = calculateFitnessTotalScore(tempScores, className, gender);
+        const scoreElem = document.getElementById('modalLiveFitnessScore');
+        const lvlElem = document.getElementById('modalLiveFitnessLevel');
+        if (scoreElem) {
+            if (fitness.bonusScore > 0) {
+                scoreElem.innerHTML = `${fitness.score} <span style="font-size:14px; color:#2E7D32;">(基础:${fitness.baseScore} + 附加:${fitness.bonusScore})</span>`;
+            } else {
+                scoreElem.innerText = `${fitness.score} 分`;
+            }
+        }
+        if (lvlElem) {
+            lvlElem.innerText = fitness.level;
+            lvlElem.className = "level-badge " + getLevelClass(fitness.level);
+        }
+    }
+
+    function saveStudentTcScores(className, studentName) {
+        const studentObj = students[className].find(s => s.name === studentName);
+        if (!studentObj) return;
+        if (!studentObj.scores) studentObj.scores = {};
+
+        const gender = studentObj.gender || '男';
+        const h = document.getElementById('tc-h') ? document.getElementById('tc-h').value.trim() : '';
+        const w = document.getElementById('tc-w') ? document.getElementById('tc-w').value.trim() : '';
+        
+        if (h) studentObj.scores["身高"] = h; else delete studentObj.scores["身高"];
+        if (w) studentObj.scores["体重"] = w; else delete studentObj.scores["体重"];
+        if (h && w) {
+            let hM = parseFloat(h) > 3 ? parseFloat(h) / 100 : parseFloat(h);
+            studentObj.scores["体重指数(BMI)"] = (parseFloat(w) / (hM * hM)).toFixed(1);
+        }
+
+        const assignField = (projName) => {
+            const el = document.querySelector(`.student-score-field[data-proj="${projName}"]`);
+            if (el) {
+                let v = el.value.trim();
+                if (v) studentObj.scores[projName] = v; else delete studentObj.scores[projName];
+            }
+        };
+
+        assignField('肺活量');
+        assignField('50米');
+        assignField('立定跳远');
+        assignField('坐位体前屈');
+        
+        if (gender === '男') {
+            assignField('引体向上');
+            assignField('1000米');
+        } else {
+            assignField('仰卧起坐');
+            assignField('800米');
+        }
+
+        localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+        document.getElementById('calendarModal').style.display = 'none';
+        showToast(`✅ 已更新【${studentName}】的体测档案`);
+        renderTcBatchEntryTable();
+    }
+
+    // ================== 7. 两行双态秒表与自适应计时引擎 ==================
+    let swTimer = null;
+    let swStartTime = 0;
+    let swElapsedTime = 0;
+    let swRunning = false;
+    let swLaps = [];
+    let selectedPendingLapTime = null;
+    let swPanelPos = JSON.parse(localStorage.getItem('sw_tc_pos')) || { right: 15, bottom: 60 };
+    let currentStopwatchProjectType = '50米';
+
+    // 格式化输出到流水与表格中的成绩
+function formatTimeByProject(ms, projType) {
+    let totalSec = ms / 1000;
+    if (projType === 'runL') {
+        let m = Math.floor(totalSec / 60);
+        let s = Math.floor(totalSec % 60);
+        let cs = Math.floor((ms % 1000) / 10); // 两位毫秒/百分秒 (00 - 99)
+        let sStr = s < 10 ? '0' + s : String(s);
+        let csStr = cs < 10 ? '0' + cs : String(cs);
+        return `${m}.${sStr}.${csStr}`; // 格式为：分.秒.毫秒 (例如 3.42.56)
+    } else {
+        return totalSec.toFixed(2); // 50米依然显示秒数 (例如 7.85)
+    }
+}
+
+    function formatDisplayClock(ms) {
+        let totalSec = Math.floor(ms / 1000);
+        let m = Math.floor(totalSec / 60);
+        let s = totalSec % 60;
+        let c = Math.floor((ms % 1000) / 10);
+        let pad = (n) => n < 10 ? '0' + n : n;
+        if (m > 0) {
+            return `${m}:${pad(s)}.${pad(c)}`;
+        }
+        return `${(ms / 1000).toFixed(2)}`;
+    }
+
+    function removeStopwatchPanel() {
+        if (swTimer) { clearInterval(swTimer); swTimer = null; }
+        swRunning = false;
+        swElapsedTime = 0;
+        swLaps = [];
+        selectedPendingLapTime = null;
+        clearPendingTargetHighlight();
+        const old = document.getElementById('swFloatPanel');
+        if (old) old.remove();
+    }
+
+    function renderStopwatchFloatPanel(projType = '50米') {
+        currentStopwatchProjectType = projType;
+        removeStopwatchPanel();
+        const panel = document.createElement('div');
+        panel.id = 'swFloatPanel';
+        panel.className = 'stopwatch-float-panel';
+        
+        const screenW = window.innerWidth || document.documentElement.clientWidth;
+        const screenH = window.innerHeight || document.documentElement.clientHeight;
+
+        if (swPanelPos.left !== undefined && swPanelPos.top !== undefined && 
+            swPanelPos.left >= 0 && swPanelPos.left < (screenW - 100) &&
+            swPanelPos.top >= 0 && swPanelPos.top < (screenH - 100)) {
+            panel.style.left = swPanelPos.left + 'px';
+            panel.style.top = swPanelPos.top + 'px';
+            panel.style.right = 'auto';
+            panel.style.bottom = 'auto';
+        } else {
+            panel.style.right = '15px';
+            panel.style.bottom = '60px';
+            panel.style.left = 'auto';
+            panel.style.top = 'auto';
+        }
+
+        const projTitle = projType === 'runL' ? '耐力跑秒表' : '50m秒表';
+
+        panel.innerHTML = `
+            <div class="sw-drag-handle" id="swDragBar">
+                <span style="font-size:11px; color:#FFB74D; font-weight:bold;">⚡ ${projTitle}</span>
+                <span style="font-size:10px; color:#bbb;">⠿ 拖动</span>
+            </div>
+            <div class="sw-timer-display" id="swTimeDisplay">0.00</div>
+            
+            <button id="swRow1Btn" class="sw-btn-row btn-start-state" onclick="handleSwRow1Action()">▶ 开始</button>
+            <button id="swRow2Btn" class="sw-btn-row btn-reset-state" onclick="handleSwRow2Action()">🔄 重置</button>
+            
+            <div id="swLapsWrapper" style="display:none; margin-top:2px;">
+                <div style="font-size:10px; color:#aaa; margin-bottom:2px; display:flex; justify-content:space-between;">
+                    <span>流水(点名填录):</span>
+                    <span id="swLapCountTag" style="color:#FFB74D;">0次</span>
+                </div>
+                <div class="sw-laps-container" id="swLapsContainer"></div>
+            </div>
+        `;
+        document.body.appendChild(panel);
+        bindStopwatchDragEvents(panel);
+    }
+
+    function bindStopwatchDragEvents(panel) {
+        const handle = panel.querySelector('#swDragBar');
+        let isDragging = false;
+        let startX, startY, initLeft, initTop;
+
+        const onStart = (e) => {
+            isDragging = true;
+            const touch = e.touches ? e.touches[0] : e;
+            startX = touch.clientX;
+            startY = touch.clientY;
+            const rect = panel.getBoundingClientRect();
+            initLeft = rect.left;
+            initTop = rect.top;
+            panel.style.right = 'auto';
+            panel.style.bottom = 'auto';
+            panel.style.left = initLeft + 'px';
+            panel.style.top = initTop + 'px';
+        };
+
+        const onMove = (e) => {
+            if (!isDragging) return;
+            const touch = e.touches ? e.touches[0] : e;
+            const dx = touch.clientX - startX;
+            const dy = touch.clientY - startY;
+            let newX = Math.max(5, Math.min(initLeft + dx, window.innerWidth - panel.offsetWidth - 5));
+            let newY = Math.max(5, Math.min(initTop + dy, window.innerHeight - panel.offsetHeight - 5));
+            panel.style.left = newX + 'px';
+            panel.style.top = newY + 'px';
+        };
+
+        const onEnd = () => {
+            if (!isDragging) return;
+            isDragging = false;
+            swPanelPos = { left: parseInt(panel.style.left, 10), top: parseInt(panel.style.top, 10) };
+            localStorage.setItem('sw_tc_pos', JSON.stringify(swPanelPos));
+        };
+
+        handle.addEventListener('touchstart', onStart, { passive: false });
+        window.addEventListener('touchmove', onMove, { passive: false });
+        window.addEventListener('touchend', onEnd);
+        handle.addEventListener('mousedown', onStart);
+        window.addEventListener('mousemove', onMove);
+        window.addEventListener('mouseup', onEnd);
+    }
+
+    function updateStopwatchButtonsUI() {
+        const btn1 = document.getElementById('swRow1Btn');
+        const btn2 = document.getElementById('swRow2Btn');
+        if (!btn1 || !btn2) return;
+
+        if (swRunning) {
+            btn1.innerText = "⏱ 计次";
+            btn1.className = "sw-btn-row btn-lap-state";
+
+            btn2.innerText = "⏹ 停止";
+            btn2.className = "sw-btn-row btn-stop-state";
+        } else {
+            btn1.innerText = "▶ 开始";
+            btn1.className = "sw-btn-row btn-start-state";
+
+            btn2.innerText = "🔄 重置";
+            btn2.className = "sw-btn-row btn-reset-state";
+        }
+    }
+
+    function handleSwRow1Action() {
+        if (!swRunning) {
+            swRunning = true;
+            swStartTime = performance.now() - swElapsedTime;
+            swTimer = setInterval(() => {
+                swElapsedTime = performance.now() - swStartTime;
+                document.getElementById('swTimeDisplay').innerText = formatDisplayClock(swElapsedTime);
+            }, 25);
+            updateStopwatchButtonsUI();
+            showToast('▶ 秒表已起动');
+        } else {
+            const currentFormattedStr = formatTimeByProject(swElapsedTime, currentStopwatchProjectType);
+            swLaps.push(currentFormattedStr);
+            
+            if (!selectedPendingLapTime) {
+                setPendingLapTime(swLaps[0]);
+            } else {
+                renderStopwatchLapsList();
+            }
+            showToast(`⏱ 已计第${swLaps.length}名: ${currentFormattedStr}`);
+        }
+    }
+
+    function handleSwRow2Action() {
+        if (swRunning) {
+            clearInterval(swTimer);
+            swTimer = null;
+            swRunning = false;
+            updateStopwatchButtonsUI();
+            
+            const finalFormattedStr = formatTimeByProject(swElapsedTime, currentStopwatchProjectType);
+            if (parseFloat(finalFormattedStr) > 0 && !swLaps.includes(finalFormattedStr)) {
+                swLaps.push(finalFormattedStr);
+            }
+            
+            if (swLaps.length > 0) {
+                setPendingLapTime(swLaps[0]);
+                showToast(`🏁 计时结束！待录第1名: ${swLaps[0]} (点姓名填入)`);
+            } else {
+                showToast(`⏹ 秒表停止: ${finalFormattedStr}`);
+            }
+        } else {
+            swElapsedTime = 0;
+            swLaps = [];
+            selectedPendingLapTime = null;
+            document.getElementById('swTimeDisplay').innerText = '0.00';
+            clearPendingTargetHighlight();
+            
+            const wrapper = document.getElementById('swLapsWrapper');
+            if (wrapper) wrapper.style.display = 'none';
+            
+            updateStopwatchButtonsUI();
+            showToast('🔄 秒表已归零');
+        }
+    }
+
+    function renderStopwatchLapsList() {
+        const wrapper = document.getElementById('swLapsWrapper');
+        const container = document.getElementById('swLapsContainer');
+        const tag = document.getElementById('swLapCountTag');
+        if (!wrapper || !container) return;
+
+        if (swLaps.length === 0) {
+            wrapper.style.display = 'none';
+            return;
+        }
+
+        wrapper.style.display = 'block';
+        tag.innerText = `${swLaps.length}条待录`;
+
+        let html = '';
+        swLaps.forEach((timeStr, idx) => {
+            const isSelected = (selectedPendingLapTime === timeStr);
+            html += `
+                <div class="sw-lap-item ${isSelected ? 'active-lap' : ''}" onclick="setPendingLapTime('${timeStr}')">
+                    <span>第 ${idx + 1} 名</span>
+                    <span><b>${timeStr}</b></span>
+                </div>
+            `;
+        });
+        container.innerHTML = html;
+    }
+
+    function setPendingLapTime(timeStr) {
+        selectedPendingLapTime = timeStr;
+        renderStopwatchLapsList();
+        
+        // 高亮姓名列，明确告知体育老师可点击填入
+        const targets = document.querySelectorAll('.tc-student-click-target');
+        targets.forEach(el => el.classList.add('awaiting-target-name'));
+    }
+
+    function clearPendingTargetHighlight() {
+        const targets = document.querySelectorAll('.tc-student-click-target');
+        targets.forEach(el => el.classList.remove('awaiting-target-name'));
+    }
+
+    function handleTcNameClick(idx) {
+        const input = document.getElementById(`tc-row-${idx}`);
+        const cls = document.getElementById('tcClassSelect').value;
+        if (!input) return;
+
+        if (selectedPendingLapTime) {
+            const currentFilledTime = selectedPendingLapTime;
+            input.value = currentFilledTime;
+            onTcBatchScoreInput(input, cls);
+
+            const removeIndex = swLaps.indexOf(currentFilledTime);
+            if (removeIndex > -1) {
+                swLaps.splice(removeIndex, 1);
+            }
+
+            if (swLaps.length > 0) {
+                setPendingLapTime(swLaps[0]);
+                showToast(`✅【${input.getAttribute('data-name')}】已录入！请点下一名 (${swLaps[0]})`);
+            } else {
+                selectedPendingLapTime = null;
+                renderStopwatchLapsList();
+                clearPendingTargetHighlight();
+                showToast(`🎉 计次名次已全部录入完毕！`);
+            }
+            return;
+        }
+
+        const studentName = input.getAttribute('data-name');
+        openScoreModal(cls, studentName);
     }
 
     function importExcel(e) {
         const file = e.target.files[0];
         if (!file) return;
-        document.getElementById('fileStatus').innerText = "正在智能追加解析...";
+        
         const reader = new FileReader();
+        const isCSV = file.name.endsWith('.csv');
+        document.getElementById('fileStatus').innerText = "正在智能解析导入...";
+
         reader.onload = function(evt) {
             try {
                 const data = evt.target.result;
-                const workbook = XLSX.read(data, { type: 'binary' });
+                let workbook = isCSV ? XLSX.read(data, { type: 'string' }) : XLSX.read(data, { type: 'binary' });
                 const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                if (json.length === 0) { alert('Excel内容为空！'); return; }
-                
-                const firstRow = json[0];
-                if (!('班级' in firstRow) || !('姓名' in firstRow)) {
-                    alert('导入失败！Excel表头必须包含“班级”和“姓名”！');
+                if (json.length === 0) { alert('表格内容为空！'); return; }
+
+                const firstRowKeys = Object.keys(json[0]);
+                let classField = "", nameField = "", genderField = "";
+
+                firstRowKeys.forEach(key => {
+                    let cleanedKey = String(key).replace(/\s+/g, ""); 
+                    if (cleanedKey.includes("班级")) classField = key;
+                    if (cleanedKey.includes("姓名") || cleanedKey.includes("学生")) nameField = key;
+                    if (cleanedKey.includes("性别")) genderField = key;
+                });
+
+                if (!classField || !nameField) {
+                    alert('导入失败！未识别到“班级”和“姓名”表头');
+                    document.getElementById('fileStatus').innerText = "❌ 导入失败(表头不对)";
                     return;
                 }
-
-                const keys = Object.keys(firstRow);
-                const projectKeys = keys.filter(k => k !== '班级' && k !== '姓名' && k !== '性别' && k !== '__rowNum__');
 
                 let addStuCount = 0;
                 let updateScoreCount = 0;
 
                 json.forEach(row => {
-                    const cls = String(row['班级']).trim();
-                    const name = String(row['姓名']).trim();
-                    const gender = row['性别'] ? String(row['性别']).trim() : '男';
+                    const cls = row[classField] ? String(row[classField]).trim() : '';
+                    const name = row[nameField] ? String(row[nameField]).trim() : '';
+                    const gender = (genderField && row[genderField]) ? String(row[genderField]).trim() : '男';
 
                     if (!cls || !name) return;
-                    if (!students[cls]) students[cls] = [];
 
-                    let studentObj = students[cls].find(s => s.name === name);
-                    if (!studentObj) {
-                        studentObj = { name: name, gender: gender, scores: {} };
-                        students[cls].push(studentObj);
-                        addStuCount++;
+                    if (currentUser && currentUser.role === 'teacher') {
+                        if (!currentUser.classes.includes(cls)) {
+                            currentUser.classes.push(cls);
+                            localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
+                            if (teacherAccounts[currentUser.username]) {
+                                teacherAccounts[currentUser.username].classes = currentUser.classes;
+                                localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
+                            }
+                        }
                     }
 
-                    projectKeys.forEach(proj => {
-                        if (row[proj] !== undefined && row[proj] !== null && String(row[proj]).trim() !== '') {
-                            studentObj.scores[proj] = String(row[proj]).trim();
+                    if (!students[cls]) students[cls] = [];
+
+                    let sObj = students[cls].find(s => s.name === name);
+                    if (!sObj) {
+                        sObj = { name: name, gender: gender, scores: {} };
+                        students[cls].push(sObj);
+                        addStuCount++;
+                    } else if (!sObj.scores) {
+                        sObj.scores = {};
+                    }
+
+                    firstRowKeys.forEach(k => {
+                        let valStr = row[k] !== undefined && row[k] !== null ? String(row[k]).trim() : '';
+                        if (valStr !== '' && k !== classField && k !== nameField && k !== genderField) {
+                            sObj.scores[k] = valStr;
                             updateScoreCount++;
                         }
                     });
+
+                    let rawHeight = null, rawWeight = null;
+                    firstRowKeys.forEach(k => {
+                        let cleanK = String(k).replace(/\s+/g, "");
+                        let valStr = row[k] !== undefined && row[k] !== null ? String(row[k]).trim() : '';
+                        if (valStr !== '') {
+                            if (cleanK.includes("身高")) rawHeight = parseFloat(valStr);
+                            if (cleanK.includes("体重") && !cleanK.toUpperCase().includes("BMI") && !cleanK.includes("指数")) rawWeight = parseFloat(valStr);
+                        }
+                    });
+
+                    if (rawHeight && rawWeight && !isNaN(rawHeight) && !isNaN(rawWeight)) {
+                        let heightInMeter = rawHeight > 3 ? (rawHeight / 100) : rawHeight;
+                        if (heightInMeter > 0) {
+                            sObj.scores["体重指数(BMI)"] = (rawWeight / (heightInMeter * heightInMeter)).toFixed(1);
+                            sObj.scores["身高"] = String(rawHeight);
+                            sObj.scores["体重"] = String(rawWeight);
+                        }
+                    }
                 });
 
-                localStorage.setItem('pe_v6_students', JSON.stringify(students));
-                alert(`🎉 数据并轨完成！\n新增登记：${addStuCount} 人\n识别并追加更新项目成绩：${updateScoreCount} 项次`);
-                document.getElementById('fileStatus').innerText = "🟢 导入/追加 Excel";
-                renderAccordion();
+                localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+                alert(`🎉 导入成功！\n新增学生：${addStuCount} 人\n更新项目：${updateScoreCount} 项次`);
+                document.getElementById('fileStatus').innerText = "🟠 导入体测名册 / 历史数据 Excel";
+                initTcClassOptions();
             } catch (err) {
-                alert('解析失败：' + err);
+                alert('解析文件出错：' + err);
+                document.getElementById('fileStatus').innerText = "❌ 导入故障";
             }
         };
-        reader.readAsBinaryString(file);
+
+        if (isCSV) reader.readAsText(file, "gbk");
+        else reader.readAsBinaryString(file);
     }
 
-    function quickAddStudent(className) {
-        const nameInput = document.getElementById(`add-name-${className}`);
-        const genderSelect = document.getElementById(`add-gender-${className}`);
-        const name = nameInput.value.trim();
-        const gender = genderSelect.value;
+    function exportFitnessReportToExcel() {
+        let classNames = Object.keys(students);
+        if (classNames.length === 0) { alert('暂无体测数据可导出！'); return; }
 
-        if (!name) { alert('请输入姓名！'); return; }
-        if (students[className].some(s => s.name === name)) { alert(`学生已存在！`); return; }
-
-        students[className].push({ name: name, gender: gender, scores: {} });
-        localStorage.setItem('pe_v6_students', JSON.stringify(students));
-        
-        nameInput.value = '';
-        showToast(`已追加：${name}`);
-        renderAccordion();
-    }
-
-    function renderAccordion() {
-        const container = document.getElementById('accordionContainer');
-        container.innerHTML = '';
-        const currentDate = document.getElementById('datePicker').value;
-        const dateRecord = records[currentDate] || {};
-        const classNames = Object.keys(students);
-
-        if (classNames.length === 0) {
-            container.innerHTML = '<p style="color:#999; text-align:center; font-size:14px; padding:10px;">暂无班级名册，请点上方按钮导入 Excel 文件。</p>';
-            return;
+        if (currentUser && currentUser.role === 'teacher') {
+            classNames = classNames.filter(c => (currentUser.classes || []).includes(c));
         }
 
-        const classTotalDays = calculateAllStats();
-
-        classNames.forEach(className => {
-            const classGroup = document.createElement('div');
-            classGroup.className = 'class-group';
-            classGroup.id = `group-${className}`;
-            
-            if (openedClassesState[className]) {
-                classGroup.classList.add('open');
-            }
-
-            const totalClasses = classTotalDays[className] || 0;
-
-            const header = document.createElement('div');
-            header.className = 'class-header';
-            header.innerText = `${className} (${students[className].length}人 / 累积上课${totalClasses}节)`;
-            header.onclick = () => toggleClass(classGroup, className);
-
-            const content = document.createElement('div');
-            content.className = 'class-content';
-            const classTodayRecord = dateRecord[className] || {};
-
-           
-            let activeClassProjs = new Set();
-            students[className].forEach(s => {
-                if(s.scores) {
-                    Object.keys(s.scores).forEach(p => {
-                        if(s.scores[p] !== undefined && s.scores[p] !== null && String(s.scores[p]).trim() !== '') {
-                            activeClassProjs.add(p);
-                        }
-                    });
-                }
-            });
-
-            students[className].forEach((studentObj, index) => {
-                const sName = studentObj.name;
-                const sGender = studentObj.gender;
-                const currentStatus = classTodayRecord[sName] || 'normal'; 
-                
-                const s = cachedStats[className][sName] || { leave: 0, absent: 0, late: 0, early: 0 };
-                const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
-                let effectiveAttendance = totalClasses - totalMissedScore;
-                if (effectiveAttendance < 0) effectiveAttendance = 0;
-                const rate = totalClasses > 0 ? ((effectiveAttendance / totalClasses) * 100).toFixed(0) : 100;
-                const isDanger = parseFloat(rate) < 85;
-
-                // 🚀 核心升级：判断该生在已开展项目中是否缺失专属成绩
-                let isUnrecorded = false;
-                let missingProjectNames = [];
-                activeClassProjs.forEach(proj => {
-                    // 性别专属项屏障过滤
-                    if (sGender === '男' && (proj.includes("800米") || proj.includes("仰卧起坐"))) return;
-                    if (sGender === '女' && (proj.includes("1000米") || proj.includes("引体向上"))) return;
-
-                    // 若已开考科目为空，判定为未录
-                    if (!studentObj.scores || studentObj.scores[proj] === undefined || studentObj.scores[proj] === null || String(studentObj.scores[proj]).trim() === '') {
-                        isUnrecorded = true;
-                        missingProjectNames.push(proj);
-                    }
-                });
-
-                let alertBadgeHtml = isUnrecorded ? `<span class="unrecorded-alert-badge" title="未录科目: ${missingProjectNames.join('、')}">● 未录</span>` : '';
-
-                const item = document.createElement('div');
-                item.className = 'student-item';
-                item.innerHTML = `
-                    <div class="student-info">
-                        <span style="color:#aaa; font-size:12px;">${index + 1}</span>
-                        <span class="student-name" onclick="openScoreModal('${className}', '${sName}')" title="点击录入/修改成绩">${sName}</span>
-                        <span class="gender-tag">${sGender}</span>
-                        <span class="rate-badge ${isDanger ? 'danger-rate' : ''}" onclick="event.stopPropagation(); showStudentCalendar('${className}', '${sName}')">出勤:${rate}%</span>
-                        ${alertBadgeHtml}
-                        <span class="btn-del-student" onclick="deleteStudent('${className}', '${sName}')" title="彻底删除">🗑️</span>
-                    </div>
-                    <button class="status-cycle-btn" 
-                            data-class="${className}" 
-                            data-student="${sName}" 
-                            data-status="${currentStatus}" 
-                            onclick="cycleStatus(this)">
-                        ${statusTextMap[currentStatus]}
-                    </button>
-                `;
-                content.appendChild(item);
-            });
-
-            const quickAddDiv = document.createElement('div');
-            quickAddDiv.className = 'quick-add-form';
-            quickAddDiv.innerHTML = `
-                <span style="font-size:16px; margin: 0 4px; color:#009688; font-weight:bold;">➕</span>
-                <input type="text" id="add-name-${className}" placeholder="追加学生姓名" onclick="event.stopPropagation()">
-                <select id="add-gender-${className}" onclick="event.stopPropagation()">
-                    <option value="男">男</option>
-                    <option value="女">女</option>
-                </select>
-                <button onclick="event.stopPropagation(); quickAddStudent('${className}')">添加</button>
-            `;
-            content.appendChild(quickAddDiv);
-
-            const actionBlock = document.createElement('div');
-            actionBlock.className = 'action-block';
-            actionBlock.innerHTML = `
-                <button onclick="submitClassAttendance('${className}')" style="background-color: var(--accent); flex: 3; margin:0;">确认并提交 ${className} 考勤</button>
-                <button onclick="deleteClass('${className}')" style="background-color: #90A4AE; flex: 1; margin:0; font-size:13px;">🗑️ 删班</button>
-            `;
-            content.appendChild(actionBlock);
-
-            classGroup.appendChild(header);
-            classGroup.appendChild(content);
-            container.appendChild(classGroup);
-        });
-    }
-
-    function openScoreModal(className, studentName) {
-        event.stopPropagation();
-        const studentObj = students[className].find(s => s.name === studentName);
-        if(!studentObj) return;
-
-        let gender = studentObj.gender || '男';
-        let allowedProjs = ["50米", "立定跳远", "坐位体前屈"];
-        if (gender === '男') {
-            allowedProjs.push("引体向上", "1000米");
-        } else {
-            allowedProjs.push("仰卧起坐", "800米");
-        }
-
-        Object.keys(students).forEach(c => {
-            students[c].forEach(s => {
-                if (s.scores) {
-                    Object.keys(s.scores).forEach(p => {
-                        if (gender === '男' && (p.includes("800米") || p.includes("仰卧起坐"))) return;
-                        if (gender === '女' && (p.includes("1000米") || p.includes("引体向上"))) return;
-                        if (!allowedProjs.includes(p)) allowedProjs.push(p);
-                    });
-                }
-            });
-        });
-
-        let modalBody = document.getElementById('modalCalendarBody');
-        let currentScores = studentObj.scores || {};
-
-        let fieldsHtml = '';
-        allowedProjs.forEach(proj => {
-            let val = currentScores[proj] !== undefined ? currentScores[proj] : '';
-            let initialScore = queryStandardScore(proj, val, className, gender);
-            
-            let displayScore = initialScore !== null ? initialScore : 0;
-            let badgeCls = initialScore !== null && initialScore > 0 ? 'has-val' : '';
-
-            fieldsHtml += `
-                <div class="score-row">
-                    <label>${proj}:</label>
-                    <input type="text" id="modal-score-${proj}" class="student-score-field" 
-                           inputmode="decimal"
-                           data-proj="${proj}" value="${val}" placeholder="未录入"
-                           oninput="updateLiveScore(this, '${className}', '${gender}')">
-                    <div class="live-score-badge ${badgeCls}" id="live-badge-${proj}">${displayScore}分</div>
-                </div>
-            `;
-        });
-
-        modalBody.innerHTML = `
-            <h3 style="margin-top:5px; text-align:center;">🏆 个人成绩单轨录入</h3>
-            <p style="text-align:center; font-size:14px; margin-bottom:10px;">学生：<b>${studentName}</b> (${className} / <span style="color:#e91e63;font-weight:bold;">${gender}</span>)</p>
-            
-            <div class="live-total-score-wrapper">
-                <span style="font-size: 14px; font-weight: 500;">期末总分：</span>
-                <b id="modalLiveTotalScore" style="font-size: 22px;">--</b>
-                <span id="modalLiveTotalLevel" style="font-size: 13px; font-weight: bold; margin-left:6px; background:#fff; padding:2px 6px; border-radius:4px;">--</span>
-                <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">(计算公式：项目平均分×80% + 考勤分×20%)</p>
-            </div>
-
-            <div id="modalScoreFieldsContainer" style="max-height:240px; overflow-y:auto; padding-right:5px; border-bottom:1px dashed #eee; margin-bottom:10px;">
-                ${fieldsHtml}
-            </div>
-
-            <div class="quick-add-form" style="border-bottom:none; padding: 5px 0 15px 0;">
-                <input type="text" id="newProjNameInput" placeholder="自定义附加测试科目(仅记录)" style="flex:2;">
-                <button onclick="addNewScoreFieldIntoModal('${className}', '${gender}')" style="flex:1; margin:0; background:#009688; padding:8px;">+ 科目</button>
-            </div>
-
-            <button onclick="saveStudentSingleScores('${className}', '${studentName}')" style="background-color: #2E7D32; font-weight: bold; margin-top:5px;">💾 保存并更新</button>
-        `;
-
-        document.getElementById('calendarModal').style.display = 'flex';
-        
-        // 打开时，首次触发实时总分计算
-        refreshModalTotalScore(className, gender);
-    }
-
-    function updateLiveScore(inputElem, className, gender) {
-        const proj = inputElem.getAttribute('data-proj');
-        const val = inputElem.value.trim();
-        const badge = document.getElementById(`live-badge-${proj}`);
-        
-        const calculated = queryStandardScore(proj, val, className, gender);
-        let displayScore = calculated !== null ? calculated : 0;
-        badge.innerText = `${displayScore}分`;
-        if (displayScore > 0) {
-            badge.classList.add('has-val');
-        } else {
-            badge.classList.remove('has-val');
-        }
-
-        refreshModalTotalScore(className, gender);
-    }
-
-    
-    function refreshModalTotalScore(className, gender) {
-        const fields = document.querySelectorAll('.student-score-field');
-        
-
-        let activeClassProjs = new Set();
-        if (students[className]) {
-            students[className].forEach(s => {
-                if (s.scores) {
-                    Object.keys(s.scores).forEach(p => {
-                        let val = s.scores[p];
-                        if (val !== undefined && val !== null && String(val).trim() !== '') {
-                            // 过滤性别专属项干扰
-                            if (gender === '男' && (p.includes("800米") || p.includes("仰卧起坐"))) return;
-                            if (gender === '女' && (p.includes("1000米") || p.includes("引体向上"))) return;
-                            activeClassProjs.add(p);
-                        }
-                    });
-                }
-            });
-        }
-
-        let validProjectsSum = 0;
-   
-        let validProjectsCount = activeClassProjs.size; 
-
-        fields.forEach(f => {
-            const proj = f.getAttribute('data-proj');
-            const val = f.value.trim();
-
-            if (activeClassProjs.has(proj)) {
-                const calculatedPoints = queryStandardScore(proj, val, className, gender);
-                if (calculatedPoints !== null) {
-                    validProjectsSum += calculatedPoints;
-                } else {
-                    validProjectsSum += 0; // 该同学未录入此项（缺考），计 0 分
-                }
-            }
-        });
-
-        // 2. 提取考勤扣分逻辑
-        const studentName = document.querySelector('#modalCalendarBody b').innerText;
-        const classTotalDays = calculateAllStats();
-        const totalClasses = classTotalDays[className] || 0;
-        
-        const s = cachedStats[className][studentName] || { leave: 0, absent: 0, late: 0, early: 0 };
-        const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
-        let effectiveAttendance = totalClasses - totalMissedScore;
-        if (effectiveAttendance < 0) effectiveAttendance = 0;
-        const attendanceRateNum = totalClasses > 0 ? (effectiveAttendance / totalClasses) : 1.0;
-        const attendanceFinalScore = Math.round(attendanceRateNum * 100);
-
-        // 3. 汇算最终成绩：如果班级还没开始任何考试，分母为 0 时平均分按 0 算
-        let sportsAverageScore = validProjectsCount > 0 ? (validProjectsSum / validProjectsCount) : 0;
-        let finalTotalScore = Math.round((sportsAverageScore * 0.8) + (attendanceFinalScore * 0.2));
-
-        // 4. 更新看板渲染
-        document.getElementById('modalLiveTotalScore').innerText = `${finalTotalScore} 分`;
-        const levelText = getLevelText(finalTotalScore);
-        const lvlBadge = document.getElementById('modalLiveTotalLevel');
-        lvlBadge.innerText = levelText;
-
-        // 根据等级微调小标签颜色
-        if(levelText === "优秀") { lvlBadge.style.color = "#2E7D32"; }
-        else if(levelText === "良好") { lvlBadge.style.color = "#1565C0"; }
-        else if(levelText === "及格") { lvlBadge.style.color = "#EF6C00"; }
-        else { lvlBadge.style.color = "#C62828"; }
-    }
-
-    function addNewScoreFieldIntoModal(className, gender) {
-        const input = document.getElementById('newProjNameInput');
-        const projName = input.value.trim();
-        if(!projName) { alert('请输入科目名称！'); return; }
-        
-        if (gender === '男' && (projName.includes("800米") || projName.includes("仰卧起坐"))) { alert('男生无需添加此科目！'); return; }
-        if (gender === '女' && (projName.includes("1000米") || projName.includes("引体向上"))) { alert('女生无需添加此科目！'); return; }
-
-        if(document.getElementById(`modal-score-${projName}`)) { alert('该项目输入框已存在'); return; }
-
-        const container = document.getElementById('modalScoreFieldsContainer');
-        const div = document.createElement('div');
-        div.className = 'score-row';
-        div.innerHTML = `
-            <label>${projName}:</label>
-            <input type="text" id="modal-score-${projName}" class="student-score-field" 
-                   inputmode="decimal"
-                   data-proj="${projName}" value="" placeholder="手动录入值"
-                   oninput="updateLiveScore(this, '${className}', '${gender}')">
-            <div class="live-score-badge" id="live-badge-${projName}">0分</div>
-        `;
-        container.appendChild(div);
-        input.value = '';
-        container.scrollTop = container.scrollHeight;
-
-        // 联动刷新
-        refreshModalTotalScore(className, gender);
-    }
-
-    function saveStudentSingleScores(className, studentName) {
-        const studentObj = students[className].find(s => s.name === studentName);
-        if(!studentObj) return;
-
-        if(!studentObj.scores) studentObj.scores = {};
-        
-        const fields = document.querySelectorAll('.student-score-field');
-        fields.forEach(f => {
-            const proj = f.getAttribute('data-proj');
-            const val = f.value.trim();
-            if(val === '') {
-                delete studentObj.scores[proj];
-            } else {
-                studentObj.scores[proj] = val;
-            }
-        });
-
-        localStorage.setItem('pe_v6_students', JSON.stringify(students));
-        document.getElementById('calendarModal').style.display = 'none';
-        showToast(`已成功同步 ${studentName} 的个人期末成绩`);
-        renderAccordion(); // 重新渲染，依然保持原展开状态，红点自动计算刷新
-    }
-
-    function cycleStatus(btn) {
-        const currentStatus = btn.getAttribute('data-status') || 'normal';
-        let currentIndex = statusSequence.indexOf(currentStatus);
-        let nextIndex = (currentIndex + 1) % statusSequence.length;
-        const nextStatus = statusSequence[nextIndex];
-        btn.setAttribute('data-status', nextStatus);
-        btn.innerText = statusTextMap[nextStatus];
-    }
-
-    function deleteStudent(className, studentName) {
-        event.stopPropagation();
-        if (confirm(`确定要彻底删除学生【${studentName}】吗？`)) {
-            students[className] = students[className].filter(s => s.name !== studentName);
-            localStorage.setItem('pe_v6_students', JSON.stringify(students));
-            renderAccordion();
-        }
-    }
-
-    function deleteClass(className) {
-        if (confirm(`⚠️ 确定要清空删除【${className}】吗？`)) {
-            delete students[className];
-            localStorage.setItem('pe_v6_students', JSON.stringify(students));
-            renderAccordion();
-        }
-    }
-
-    function toggleClass(classGroup, className) { 
-        classGroup.classList.toggle('open'); 
-        if (classGroup.classList.contains('open')) {
-            openedClassesState[className] = true;
-        } else {
-            delete openedClassesState[className];
-        }
-        localStorage.setItem('pe_v6_open_state', JSON.stringify(openedClassesState));
-    }
-
-    document.getElementById('datePicker').addEventListener('change', renderAccordion);
-
-    function submitClassAttendance(className) {
-        const date = document.getElementById('datePicker').value;
-        if (!date) return;
-        if (!records[date]) records[date] = {};
-        if (!records[date][className]) records[date][className] = {};
-
-        const cycleButtons = document.querySelectorAll(`.status-cycle-btn[data-class="${className}"]`);
-        cycleButtons.forEach(btn => {
-            const student = btn.getAttribute('data-student');
-            const status = btn.getAttribute('data-status') || 'normal';
-            records[date][className][student] = status;
-        });
-
-        localStorage.setItem('pe_v6_records', JSON.stringify(records));
-        showToast(`已提交 ${className} 考勤并实时归档`);
-        renderAccordion();
-    }
-
-    function exportStatsToExcel() {
-        const classNames = Object.keys(students);
-        if (classNames.length === 0) { alert('暂无班级数据'); return; }
-
-        const classTotalDays = calculateAllStats();
-
-        let baseProjects = ["50米", "立定跳远", "坐位体前屈", "1000米", "800米", "仰卧起坐", "引体向上"];
-        let activeProjectsList = [];
-
-        baseProjects.forEach(proj => {
-            let hasAnyData = false;
-            classNames.forEach(c => {
-                students[c].forEach(s => {
-                    if (s.scores && s.scores[proj] !== undefined && s.scores[proj] !== null && String(s.scores[proj]).trim() !== '') {
-                        hasAnyData = true;
-                    }
-                });
-            });
-            if (hasAnyData) activeProjectsList.push(proj);
-        });
-
+        const orderedProjects = ["身高", "体重", "肺活量", "50米跑", "坐位体前屈", "仰卧起坐", "立定跳远", "引体向上", "1000米", "800米"];
         let row1 = ["序号", "班级", "姓名", "性别"];
         let row2 = ["", "", "", ""];
 
-        activeProjectsList.forEach(proj => {
-            row1.push(proj, "");  
-            row2.push("成绩", "得分");
+        orderedProjects.forEach(p => {
+            if (p === "身高" || p === "体重") {
+                row1.push(p);
+                row2.push(p === "身高" ? "厘米(cm)" : "公斤(kg)");
+            } else {
+                row1.push(p, "");
+                row2.push("成绩", "得分");
+            }
         });
 
-        row1.push("考勤分", "总分", "等级");
-        row2.push("", "", "");
-
+        row1.push("BMI数值", "BMI得分", "基础得分", "附加加分", "总分(含附加)", "评定等级");
+        row2.push("", "", "(满分100)", "(最高20分)", "", "");
         let dataRows = [row1, row2];
 
-        let columnWidths = [ {wch: 4.5}, {wch: 6}, {wch: 8.5}, {wch: 4.5} ];
-        
-        activeProjectsList.forEach(() => {
-            columnWidths.push({wch: 5.5}, {wch: 5.5});
-        });
-
-        columnWidths.push({wch: 6}, {wch: 4.5}, {wch: 6});
+        const getScoreVal = (scores, keywords) => {
+            if (!scores) return "";
+            for (let k in scores) {
+                let cleanK = k.replace(/\s+/g, "");
+                if (keywords.some(kw => cleanK.includes(kw))) {
+                    let v = scores[k];
+                    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+                }
+            }
+            return "";
+        };
 
         classNames.forEach(className => {
-            const totalClasses = classTotalDays[className] || 0;
-
             students[className].forEach((studentObj, index) => {
                 const sName = studentObj.name;
                 const sGender = studentObj.gender;
                 const sScores = studentObj.scores || {};
-
                 let rowCells = [index + 1, className, sName, sGender];
-                let validProjectsSum = 0;
-                let validProjectsCount = 0;
 
-                activeProjectsList.forEach(proj => {
-                    if (sGender === '男' && (proj.includes("800米") || proj.includes("仰卧起坐"))) {
-                        rowCells.push("/", "/");
-                        return;
-                    }
-                    if (sGender === '女' && (proj.includes("1000米") || proj.includes("引体向上"))) {
-                        rowCells.push("/", "/");
-                        return;
-                    }
+                rowCells.push(sScores["身高"] || "-");
+                rowCells.push(sScores["体重"] || "-");
 
-                    const rawValue = sScores[proj];
-                    const calculatedPoints = queryStandardScore(proj, rawValue, className, sGender);
-                    
-                    if (calculatedPoints !== null) {
-                        rowCells.push(rawValue, calculatedPoints);
-                        validProjectsSum += calculatedPoints;
-                    } else {
-                        rowCells.push("-", 0);
-                        validProjectsSum += 0;
-                    }
-                    validProjectsCount++;
-                });
+                let valLung = getScoreVal(sScores, ["肺活量"]);
+                rowCells.push(valLung || "-", valLung ? (queryStandardScore("肺活量", valLung, className, sGender) || 0) : "-");
 
-                const s = cachedStats[className][sName] || { leave: 0, absent: 0, late: 0, early: 0 };
-                const totalMissedScore = (s.absent * 1.0) + (s.leave * 0.5) + (s.late * 0.25) + (s.early * 0.25);
-                let effectiveAttendance = totalClasses - totalMissedScore;
-                if (effectiveAttendance < 0) effectiveAttendance = 0;
-                const attendanceRateNum = totalClasses > 0 ? (effectiveAttendance / totalClasses) : 1.0;
-                const attendanceFinalScore = Math.round(attendanceRateNum * 100);
+                let val50 = getScoreVal(sScores, ["50米", "50"]);
+                rowCells.push(val50 || "-", val50 ? (queryStandardScore("50米", val50, className, sGender) || 0) : "-");
 
-                let sportsAverageScore = validProjectsCount > 0 ? (validProjectsSum / validProjectsCount) : 0;
-                let finalTotalScore = Math.round((sportsAverageScore * 0.8) + (attendanceFinalScore * 0.2));
+                let valSit = getScoreVal(sScores, ["体前屈"]);
+                rowCells.push(valSit || "-", valSit ? (queryStandardScore("坐位体前屈", valSit, className, sGender) || 0) : "-");
 
-                rowCells.push(
-                    attendanceFinalScore, 
-                    finalTotalScore, 
-                    getLevelText(finalTotalScore)
-                );
+                let valSitUp = getScoreVal(sScores, ["仰卧"]);
+                if (sGender === '男' && !valSitUp) rowCells.push("/", "/");
+                else rowCells.push(valSitUp || "-", valSitUp ? (queryStandardScore("仰卧起坐", valSitUp, className, sGender) || 0) : "-");
+
+                let valJump = getScoreVal(sScores, ["跳远"]);
+                rowCells.push(valJump || "-", valJump ? (queryStandardScore("立定跳远", valJump, className, sGender) || 0) : "-");
+
+                let valPullUp = getScoreVal(sScores, ["引体"]);
+                if (sGender === '女' && !valPullUp) rowCells.push("/", "/");
+                else rowCells.push(valPullUp || "-", valPullUp ? (queryStandardScore("引体向上", valPullUp, className, sGender) || 0) : "-");
+
+                let val1000 = getScoreVal(sScores, ["1000米", "1000"]);
+                if (sGender === '女' && !val1000) rowCells.push("/", "/");
+                else rowCells.push(val1000 || "-", val1000 ? (queryStandardScore("1000米", val1000, className, sGender) || 0) : "-");
+
+                let val800 = getScoreVal(sScores, ["800米", "800"]);
+                if (sGender === '男' && !val800) rowCells.push("/", "/");
+                else rowCells.push(val800 || "-", val800 ? (queryStandardScore("800米", val800, className, sGender) || 0) : "-");
+
+                let valBMI = sScores["体重指数(BMI)"] || sScores["BMI"] || "";
+                let scoreBMI = valBMI ? (queryStandardScore("体重指数(BMI)", valBMI, className, sGender) || 0) : "-";
+                rowCells.push(valBMI || "-", scoreBMI);
+
+                const fit = calculateFitnessTotalScore(sScores, className, sGender);
+                rowCells.push(fit.baseScore, fit.bonusScore, fit.score, fit.level);
 
                 dataRows.push(rowCells);
             });
         });
 
         const ws = XLSX.utils.aoa_to_sheet(dataRows);
-        
-        const range = XLSX.utils.decode_range(ws['!ref']);
-        for (let R = range.s.r; R <= range.e.r; ++R) {
-            for (let C = range.s.c; C <= range.e.c; ++C) {
-                const cell_address = { c: C, r: R };
-                const cell_ref = XLSX.utils.encode_cell(cell_address);
-                if (!ws[cell_ref]) continue;
-                if (!ws[cell_ref].s) ws[cell_ref].s = {};
-                ws[cell_ref].s.alignment = { horizontal: "center", vertical: "center", wrapText: true };
-            }
-        }
-
-        const merges = [];
-        for(let i=0; i<4; i++) {
-            merges.push({ s: { r: 0, c: i }, e: { r: 1, c: i } });
-        }
-        let startCol = 4;
-        activeProjectsList.forEach(() => {
-            merges.push({ s: { r: 0, c: startCol }, e: { r: 0, c: startCol + 1 } });
-            startCol += 2;
-        });
-        for(let i=0; i<3; i++) {
-            merges.push({ s: { r: 0, c: startCol + i }, e: { r: 1, c: startCol + i } });
-        }
-
-        ws['!merges'] = merges;
-        ws['!cols'] = columnWidths; 
-
         const wb = XLSX.utils.book_new();
-        XLSX.utils.book_append_sheet(wb, ws, "期末体育成绩册");
-        const dateStr = new Date().toISOString().slice(0, 10);
-        XLSX.writeFile(wb, `体育期末成绩册_${dateStr}.xlsx`);
+        XLSX.utils.book_append_sheet(wb, ws, "体质测试总表");
+        XLSX.writeFile(wb, `国家学生体质健康测试总表_${new Date().toISOString().slice(0, 10)}.xlsx`);
     }
 
-    function showStudentCalendar(className, studentName) {
-        event.stopPropagation(); 
-        let allDates = Object.keys(records).filter(date => records[date][className]);
-        if (allDates.length === 0) { alert("暂无打卡日志"); return; }
-        allDates.sort();
-        let uniqueMonths = [...new Set(allDates.map(d => d.substring(0, 7)))].sort();
-        let modalBody = document.getElementById('modalCalendarBody');
-        
-        modalBody.innerHTML = `
-            <h3 style="margin-top:5px; text-align:center;">📅 考勤轨迹细则</h3>
-            <p style="text-align:center; font-size:14px;">学生：<b>${studentName}</b> (${className})</p>
-            <div class="calendar-legend">
-                <div class="legend-item"><div class="legend-box" style="background:var(--normal);"></div>正常</div>
-                <div class="legend-item"><div class="legend-box" style="background:var(--leave)"></div>请假</div>
-                <div class="legend-item"><div class="legend-box" style="background:var(--absent)"></div>旷课</div>
-                <div class="legend-item"><div class="legend-box" style="background:var(--late)"></div>迟到</div>
-                <div class="legend-item"><div class="legend-box" style="background:var(--early)"></div>早退</div>
-            </div>
-            <div class="slider-wrapper">
-                <button class="nav-arrow left" onclick="scrollCalendarContainer(-1)">◀</button>
-                <div class="calendar-slider" id="calendarSlider"></div>
-                <button class="nav-arrow right" onclick="scrollCalendarContainer(1)">▶</button>
-            </div>
-        `;
-        let sliderContainer = document.getElementById('calendarSlider');
-        uniqueMonths.forEach(ym => {
-            let [year, month] = ym.split('-').map(Number);
-            let firstDayIndex = new Date(year, month - 1, 1).getDay();
-            let daysInMonth = new Date(year, month, 0).getDate();
-            let monthHtml = `<div class="month-container"><div class="month-title">📍 ${year}年${month}月</div><div class="calendar-weekdays"><div>日</div><div>一</div><div>二</div><div>三</div><div>四</div><div>五</div><div>六</div></div><div class="calendar-days">`;
-            for (let i = 0; i < firstDayIndex; i++) monthHtml += `<div class="day-cell pad"></div>`;
-            for (let day = 1; day <= daysInMonth; day++) {
-                let dateStr = `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-                let status = (records[dateStr] && records[dateStr][className]) ? (records[dateStr][className][studentName] || 'normal') : 'none';
-                let cls = '';
-                if (status === 'normal') cls = 'cal-recorded';
-                else if (status === 'leave') cls = 'cal-leave';
-                else if (status === 'absent') cls = 'cal-absent';
-                else if (status === 'late') cls = 'cal-late';
-                else if (status === 'early') cls = 'cal-early';
-                monthHtml += `<div class="day-cell ${cls}"><span>${day}</span></div>`;
-            }
-            monthHtml += `</div></div>`; sliderContainer.innerHTML += monthHtml;
-        });
-        document.getElementById('calendarModal').style.display = 'flex';
-        setTimeout(() => { sliderContainer.scrollLeft = sliderContainer.scrollWidth; }, 60);
-    }
-
-    function scrollCalendarContainer(dir) { const s = document.getElementById('calendarSlider'); if (s) s.scrollBy({ left: dir * s.clientWidth, behavior: 'smooth' }); }
-    function closeModal(e) { if(e.target.id === 'calendarModal') document.getElementById('calendarModal').style.display = 'none'; }
     function exportBackupData() {
-        const d = JSON.stringify({ students: students, records: records });
-        const blob = new Blob([d], { type: "application/json" });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement("a"); a.href = url; a.download = `系统全量备份_${new Date().toISOString().slice(0, 10)}.json`; a.click();
+        const payload = { 
+            standaloneTcBackup: true,
+            backupDate: new Date().toISOString(),
+            students: students,
+            standards: currentTYStandards,
+            teacherAccounts: teacherAccounts
+        };
+        const blob = new Blob([JSON.stringify(payload)], { type: "application/json" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `体测采集站全量数据备份_${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
     }
+
     function importBackupData(e) {
-        const file = e.target.files[0]; if (!file) return;
+        const file = e.target.files[0]; 
+        if (!file) return;
         const reader = new FileReader();
         reader.onload = function(evt) {
             try {
                 const backData = JSON.parse(evt.target.result);
                 if (backData.students) {
-                    students = backData.students; records = backData.records || {};
-                    localStorage.setItem('pe_v6_students', JSON.stringify(students));
-                    localStorage.setItem('pe_v6_records', JSON.stringify(records));
-                    alert("🎉 考勤及成绩恢复成功！"); renderAccordion();
+                    students = backData.students;
+                    localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+                } else if (backData.tc_students) {
+                    students = backData.tc_students;
+                    localStorage.setItem('tc_standalone_students', JSON.stringify(students));
                 }
-            } catch(err) { alert("文件解析失败"); }
+                if (backData.standards || backData.sys_ty_standards) {
+                    currentTYStandards = backData.standards || backData.sys_ty_standards;
+                    localStorage.setItem('tc_standalone_standards', JSON.stringify(currentTYStandards));
+                }
+                if (backData.teacherAccounts || backData.sys_teacher_accounts) {
+                    teacherAccounts = backData.teacherAccounts || backData.sys_teacher_accounts;
+                    localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
+                }
+                initTcClassOptions();
+                renderTcBatchEntryTable();
+                alert('🎉 体测系统及账号分配数据恢复成功！');
+            } catch(err) { 
+                alert("备份文件解析失败：" + err); 
+            }
+            document.getElementById('importFile').value = '';
         };
         reader.readAsText(file);
     }
+
+    function clearAllScoresOnly() {
+        if (!confirm('⚠️ 确定要清空所有学生的体测成绩吗？\n（班级名册将保留）')) return;
+        Object.keys(students).forEach(cls => {
+            students[cls].forEach(s => { s.scores = {}; });
+        });
+        localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+        showToast('已清空全部体测成绩');
+        renderTcBatchEntryTable();
+    }
+
     function systemReset() {
-        if (prompt("数据清空请输入 admin:") === "admin" && confirm("确定清空系统数据吗？")) {
-            localStorage.removeItem('pe_v6_students'); localStorage.removeItem('pe_v6_records');
-            localStorage.removeItem('pe_v6_open_state');
-            students = {}; records = {}; location.reload();
+        if (confirm('🚨 确定要全部初始化清空吗？所有名册、成绩及教师分配将被删除！')) {
+            localStorage.removeItem('tc_standalone_students');
+            localStorage.removeItem('tc_standalone_standards');
+            localStorage.removeItem('tc_sys_current_user');
+            localStorage.removeItem('tc_sys_teacher_accounts');
+            location.reload();
         }
     }
+
     function showToast(msg) {
         const tip = document.createElement('div');
-        tip.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); color:white; padding:8px 16px; border-radius:20px; font-size:13px; z-index:9999;";
-        tip.innerText = msg; document.body.appendChild(tip); setTimeout(() => tip.remove(), 1200);
+        tip.style = "position:fixed; bottom:20px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.85); color:white; padding:8px 16px; border-radius:20px; font-size:13px; z-index:99999;";
+        tip.innerText = msg; 
+        document.body.appendChild(tip); 
+        setTimeout(() => tip.remove(), 1500);
     }
+
+    function closeModal(e) { 
+        if(e.target.id === 'calendarModal') document.getElementById('calendarModal').style.display = 'none'; 
+    }
+
+    window.onload = () => {
+        checkUserLoginState();
+        initTcClassOptions();
+    };
 </script>
 </body>
 </html>
