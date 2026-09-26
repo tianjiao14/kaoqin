@@ -112,7 +112,7 @@
 
         @media (max-width: 900px) {
     .view-viewport {
-        padding: 8px 6px 100px 6px !important;
+        padding: 8px 6px 120px 6px !important;
         -webkit-overflow-scrolling: touch;
     }
             .menu-toggle-btn {
@@ -568,7 +568,33 @@
                         </table>
                     </div>
                 </div>
-                <div class="dashboard-card">
+<div class="dashboard-card">
+    <div style="font-size:14px; font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+        <span style="color:#BF360C;">📋 各年级各单项优良率统计 (男女分项, ≥80分)</span>
+        <span style="font-size:11px; color:#888; font-weight:normal;">点击 ➕/➖ 可展开/折叠对应班级明细</span>
+    </div>
+    <div style="overflow-x:auto; -webkit-overflow-scrolling:touch;">
+        <table class="analysis-table" style="text-align:center; min-width:880px;">
+            <thead>
+                <tr style="background:#f1f8e9;">
+                    <th style="width:110px; text-align:left; padding-left:14px;">年级 / 班级</th>
+                    <th style="width:50px;">性别</th>
+                    <th>样本数</th>
+                    <th>50米跑</th>
+                    <th>立定跳远</th>
+                    <th>坐位体前屈</th>
+                    <th>肺活量</th>
+                    <th>800/1000m</th>
+                    <th>引体/仰卧</th>
+                    <th>体重指数 (BMI)</th>
+                </tr>
+            </thead>
+            <tbody id="analysisGradeItemExcelTbody">
+                <tr><td colspan="10" style="color:#999; padding:15px;">暂无统计数据</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>                <div class="dashboard-card">
                     <div style="font-size:14px; font-weight:bold; margin-bottom:8px;">📋 各单项平均成绩与及格情况</div>
                     <div style="overflow-x:auto;">
                         <table class="analysis-table">
@@ -1198,25 +1224,32 @@ function realGetScore(val, table, mode) {
 }
 
 function getBonus(val, table, ruleArr, mode) {
-    if (!val || !table || !ruleArr || !Array.isArray(ruleArr)) return 0;
-    const maxStd = table[0][0]; // 100分基准
-    const diff = (mode === 1) ? (val - maxStd) : (maxStd - val);
-    if (diff <= 0) return 0;
+    if (val === undefined || val === null || !table || !table.length || !ruleArr || !Array.isArray(ruleArr)) return 0;
+    
+    const numVal = parseFloat(val);
+    if (isNaN(numVal) || numVal <= 0) return 0;
+
+    const base100Std = table[0][0]; // 100分基准线 (如 220 秒，或 15 次)
+    const diff = (mode === 1) ? (numVal - base100Std) : (base100Std - numVal);
+    
+    if (diff <= 0) return 0; // 没有超过 100 分标准，不加分
+
     let points = 0;
     for (let i = ruleArr.length - 1; i >= 0; i--) {
-        if (diff >= ruleArr[i]) { 
-            points = i + 1; 
-            break; 
+        if (diff >= ruleArr[i]) {
+            points = i + 1; // 档位下标对应 1~10 分
+            break;
         }
     }
-    return points;
+    return Math.min(10, points); // 单项最高加 10 分
 }
-
 // ==========================================
 // 3. 单项查分标准化适配
 // ==========================================
 function queryStandardScore(projectName, rawValue, className, gender, gradeId = '') {
-    if (rawValue === undefined || rawValue === null || String(rawValue).trim() === '' || String(rawValue).trim() === '-') return 0;
+    if (rawValue === undefined || rawValue === null) return 0;
+    let sVal = String(rawValue).trim();
+    if (sVal === '' || sVal === '-') return 0;
     
     // 严格以 A 列年级编号为第一优先级
     const gradeInput = gradeId || className;
@@ -1226,18 +1259,18 @@ function queryStandardScore(projectName, rawValue, className, gender, gradeId = 
     const key = getSafeKey(grade, realGender);
     if (!key) return 0;
 
-    let sVal = String(rawValue).trim();
-
     // 1. 长跑耐力类
     if (projectName.includes("1000") || projectName.includes("800") || projectName.includes("耐力") || projectName === "runL") {
         const sec = parseTime(sVal);
         return sec > 0 ? realGetScore(sec, currentTYStandards.runL[key], -1) : 0;
     }
 
+    // 🌟 核心：在此处直接统一转换为浮点数，供 BMI、肺活量、跳远等单项安全使用
     let val = parseFloat(sVal);
+    if (isNaN(val)) return 0;
 
-    // 2. BMI
-    if (projectName.includes("BMI") || projectName.includes("体重指数")) {
+    // 2. 体重指数 (BMI)
+    if (projectName.toUpperCase().includes("BMI") || projectName.includes("体重指数")) {
         const lim = currentTYStandards.bmi[key];
         if (lim && !isNaN(val)) {
             if (val <= lim[0]) return 80;
@@ -1253,7 +1286,6 @@ function queryStandardScore(projectName, rawValue, className, gender, gradeId = 
     if (projectName.includes("50米")) return realGetScore(val, currentTYStandards.run50[key], -1);
     if (projectName.includes("体前屈")) return realGetScore(val, currentTYStandards.sit[key], 1);
     if (projectName.includes("跳远")) {
-        // 自动识别米与厘米
         if (val > 0 && val < 5) val = Math.round(val * 100);
         return realGetScore(val, currentTYStandards.jump[key], 1);
     }
@@ -1263,7 +1295,6 @@ function queryStandardScore(projectName, rawValue, className, gender, gradeId = 
 
     return 0;
 }
-
 function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') {
         if (!scoresObj) return { score: 0, level: '不及格', baseScore: 0, bonusScore: 0 };
 
@@ -1327,33 +1358,57 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         }
         const sJump = realGetScore(jumpVal, currentTYStandards.jump[key], 1);
 
-        // 3. 力量与耐力跑评分及附加分核算
+        // 3. 力量与耐力跑评分及附加分核算 (修正版)
         let sStr = 0, sRun = 0, bStr = 0, bRun = 0;
         const bonusRule = currentTYStandards.bonusRule || DEFAULT_TY_STDS.bonusRule;
 
         if (isMale) {
-            const pullVal = getVal(["引体"]);
-            sStr = realGetScore(pullVal, currentTYStandards.str[key], 1);
-            if (sStr === 100 && bonusRule.str && bonusRule.str["男"]) {
-                bStr = getBonus(parseFloat(pullVal), currentTYStandards.str[key], bonusRule.str["男"], 1);
+            // 男生：引体向上 (str)
+            const rawPull = getVal(["引体向上", "引体"]);
+            const pullCount = parseFloat(rawPull);
+            if (!isNaN(pullCount)) {
+                sStr = realGetScore(pullCount, currentTYStandards.str[key], 1);
+                // 只有满分 100 分且达到基准线以上才算附加分
+                const base100Pull = currentTYStandards.str[key][0][0];
+                if (pullCount > base100Pull && bonusRule.str && bonusRule.str["男"]) {
+                    bStr = getBonus(pullCount, currentTYStandards.str[key], bonusRule.str["男"], 1);
+                }
             }
 
-            const tRun = parseTime(getVal(["1000米", "1000", "耐力跑"]));
-            sRun = tRun > 0 ? realGetScore(tRun, currentTYStandards.runL[key], -1) : 0;
-            if (sRun === 100 && bonusRule.run && bonusRule.run["男"]) {
-                bRun = getBonus(tRun, currentTYStandards.runL[key], bonusRule.run["男"], -1);
+            // 男生：1000米跑 (runL)
+            const rawRun1000 = getVal(["1000米", "1000", "耐力跑"]);
+            const tRun = parseTime(rawRun1000); // 转换为纯秒数
+            if (tRun > 0) {
+                sRun = realGetScore(tRun, currentTYStandards.runL[key], -1);
+                // 满分用时基准 (例如初三男为 220 秒)
+                const base100Run = currentTYStandards.runL[key][0][0];
+                // 🌟 核心：只要实际用时小于 100 分基准秒数，即刻启动附加分核算
+                if (tRun < base100Run && bonusRule.run && bonusRule.run["男"]) {
+                    bRun = getBonus(tRun, currentTYStandards.runL[key], bonusRule.run["男"], -1);
+                }
             }
         } else {
-            const situpVal = getVal(["仰卧"]);
-            sStr = realGetScore(situpVal, currentTYStandards.str[key], 1);
-            if (sStr === 100 && bonusRule.str && bonusRule.str["女"]) {
-                bStr = getBonus(parseFloat(situpVal), currentTYStandards.str[key], bonusRule.str["女"], 1);
+            // 女生：一分钟仰卧起坐 (str)
+            const rawSitup = getVal(["仰卧起坐", "仰卧"]);
+            const situpCount = parseFloat(rawSitup);
+            if (!isNaN(situpCount)) {
+                sStr = realGetScore(situpCount, currentTYStandards.str[key], 1);
+                const base100Situp = currentTYStandards.str[key][0][0];
+                if (situpCount > base100Situp && bonusRule.str && bonusRule.str["女"]) {
+                    bStr = getBonus(situpCount, currentTYStandards.str[key], bonusRule.str["女"], 1);
+                }
             }
 
-            const tRun = parseTime(getVal(["800米", "800", "耐力跑"]));
-            sRun = tRun > 0 ? realGetScore(tRun, currentTYStandards.runL[key], -1) : 0;
-            if (sRun === 100 && bonusRule.run && bonusRule.run["女"]) {
-                bRun = getBonus(tRun, currentTYStandards.runL[key], bonusRule.run["女"], -1);
+            // 女生：800米跑 (runL)
+            const rawRun800 = getVal(["800米", "800", "耐力跑"]);
+            const tRun = parseTime(rawRun800); // 转换为纯秒数
+            if (tRun > 0) {
+                sRun = realGetScore(tRun, currentTYStandards.runL[key], -1);
+                const base100Run = currentTYStandards.runL[key][0][0];
+                // 实际用时快于满分基准秒数计算附加分
+                if (tRun < base100Run && bonusRule.run && bonusRule.run["女"]) {
+                    bRun = getBonus(tRun, currentTYStandards.runL[key], bonusRule.run["女"], -1);
+                }
             }
         }
 
@@ -1363,11 +1418,11 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
                           (sJump * W.jump) + (sSit * W.sit) + (sStr * W.str) + (sRun * W.runL);
         const finalBaseScore = parseFloat(baseScore.toFixed(1));
 
-        // 5. 合并附加分并生成最终总分
+        // 5. 附加分最高封顶 20 分（耐力跑最高 10 分 + 力量类最高 10 分）
         const bonusScore = Math.min(20, bStr + bRun);
         const finalTotalScore = parseFloat((baseScore + bonusScore).toFixed(1));
 
-        // 🌟 核心：附加分计入评定等级，严格按最终总分核定优良
+        // 评定等级
         let levelText = '不及格';
         if (finalTotalScore >= 90) levelText = '优秀';
         else if (finalTotalScore >= 80) levelText = '良好';
@@ -1375,12 +1430,12 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
 
         return {
             score: finalTotalScore,      // 最终总分 (含附加分)
-            baseScore: finalBaseScore,   // 基础标准分
-            bonusScore: bonusScore,      // 附加分
-            level: levelText             // 等级 (按含附加分的总分评定)
+            baseScore: finalBaseScore,   // 基础得分 (满分100)
+            bonusScore: bonusScore,      // 附加加分 (最高20)
+            level: levelText
         };
-    }
-    // 班级与数据采集工作区[cite: 1]
+}
+  
     function initTcClassOptions() {
         const clsSelect = document.getElementById('tcClassSelect');
         if (!clsSelect) return;
@@ -2151,12 +2206,12 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
                 else countNL++;
 
                 // 实时精准计算或提取 BMI
-                let currentBmiVal = sScores["体重指数(BMI)"] || sScores["BMI"] || sScores["体重指数"] || '';
+               let currentBmiVal = sScores["体重指数(BMI)"] || sScores["BMI"] || sScores["体重指数"] || '';
                 if (!currentBmiVal && sScores["身高"] && sScores["体重"]) {
                     let h = parseFloat(sScores["身高"]);
                     let w = parseFloat(sScores["体重"]);
                     if (h > 0 && w > 0) {
-                        let hM = h > 3 ? (h / 100) : h;
+                        let hM = h > 3 ? (h / 100) : h; // 自动兼容米与厘米
                         currentBmiVal = (w / (hM * hM)).toFixed(1);
                     }
                 }
@@ -2246,6 +2301,7 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
 
         // 🌟 2. 关键修复：计算完成后自动执行学段及年级分布表的渲染
         renderStageGradeReportTable();
+renderGradeItemExcellenceTable();
     }
 
     // ================== 数据上报专区核心功能（移植整合） ==================
@@ -2403,24 +2459,29 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
     // 微调原始数据快照存储 Key
     const OPTIMIZE_BACKUP_KEY = 'tc_sys_students_before_optimize';
 
-    // 2. 黑科技 (梯度微调：自动快照备份 + 数据分析深度联动)
+// 2. 黑科技 (梯度微调：纳入男生引体向上、女生仰卧起坐)
+   // 2. 黑科技 (双梯度两阶段微调：74~79.9 优先，不足则启用 70~73.9)
     function openOptimizeDialogOnReport() {
         let rateInput = prompt("请输入全校或当前负责班级【目标优良率 %】\n例如输入 85 代表通过梯度微调让优良率达到 85%：", "85");
         if (!rateInput) return;
         let targetRate = parseFloat(rateInput);
-        if (isNaN(targetRate) || targetRate <= 0 || targetRate > 100) { alert('请输入有效的百分比 (1-100)！'); return; }
+        if (isNaN(targetRate) || targetRate <= 0 || targetRate > 100) { 
+            alert('请输入有效的百分比 (1-100)！'); 
+            return; 
+        }
 
         let classList = Object.keys(students);
         if (currentUser && currentUser.role === 'teacher') {
             classList = classList.filter(c => (currentUser.classes || []).includes(c));
         }
 
-        // 🌟 1. 微调前自动建立原始快照（仅在首次微调或未撤销时备份）
+        // 微调前自动建立原始快照备份
         if (!localStorage.getItem(OPTIMIZE_BACKUP_KEY)) {
             localStorage.setItem(OPTIMIZE_BACKUP_KEY, JSON.stringify(students));
         }
 
-        let allCandidates = [];
+        let tier1Candidates = []; // 第一梯队：74.0 ~ 79.9 分
+        let tier2Candidates = []; // 第二梯队：70.0 ~ 73.9 分
         let totalCount = 0;
         let initialGoodCount = 0;
 
@@ -2430,13 +2491,18 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
                 let fit = calculateFitnessTotalScore(s.scores || {}, cls, s.gender || '男', s.gradeId || '');
                 if (fit.score >= 80) {
                     initialGoodCount++;
-                } else if (fit.score >= 74) {
-                    allCandidates.push({ student: s, className: cls, currentScore: fit.score });
+                } else if (fit.score >= 74.0 && fit.score < 80.0) {
+                    tier1Candidates.push({ student: s, className: cls, currentScore: fit.score });
+                } else if (fit.score >= 70.0 && fit.score < 74.0) {
+                    tier2Candidates.push({ student: s, className: cls, currentScore: fit.score });
                 }
             });
         });
 
-        if (totalCount === 0) { alert('无学生数据！'); return; }
+        if (totalCount === 0) { 
+            alert('无学生数据！'); 
+            return; 
+        }
 
         let currentRate = (initialGoodCount / totalCount) * 100;
         if (currentRate >= targetRate) {
@@ -2444,27 +2510,66 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             return;
         }
 
-        allCandidates.sort((a, b) => b.currentScore - a.currentScore);
+        // 🌟 核心：两梯队内部均按“从高分到低分”严格降序排列
+        tier1Candidates.sort((a, b) => b.currentScore - a.currentScore);
+        tier2Candidates.sort((a, b) => b.currentScore - a.currentScore);
 
         let modifiedStudentsCount = 0;
-        for (let item of allCandidates) {
-            let curGoodRate = (initialGoodCount / totalCount) * 100;
-            if (curGoodRate >= targetRate) break;
+        let tier1UsedCount = 0;
+        let tier2UsedCount = 0;
 
+        // 单个学生微调流水线函数（达成80分即返回true）
+        const optimizeSingleStudent = (item) => {
             let s = item.student;
             let cls = item.className;
             if (!s.scores) s.scores = {};
+            const isMale = (s.gender === '男' || s.gender === '1');
 
-            // 50米跑 (减少 0.1~0.35s)
+            // 1. 调整 50米跑 (减少 0.1~0.35s)
             if (s.scores['50米']) {
                 let v = parseFloat(s.scores['50米']);
                 if (!isNaN(v) && v > 7.0) {
                     s.scores['50米'] = (v - (Math.random() * 0.25 + 0.1)).toFixed(2);
                 }
             }
+            if (calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '').score >= 80) return true;
 
-            // 耐力跑 (缩短 3~10秒)
-            let runProj = (s.gender === '男' || s.gender === '1') ? '1000米' : '800米';
+            // 2. 男生引体向上 (增加 1~5 次) / 女生一分钟仰卧起坐 (增加 2~5 次)
+            if (isMale) {
+                let rawPull = s.scores['引体向上'] || s.scores['引体'] || s.scores['str'];
+                let pullCount = rawPull !== undefined && rawPull !== '' ? parseFloat(rawPull) : 0;
+                if (!isNaN(pullCount)) {
+                    let addCount = Math.floor(Math.random() * 5) + 1; // 1~5次
+                    let newPull = pullCount + addCount;
+                    s.scores['引体向上'] = String(newPull);
+                    if (s.scores['引体']) s.scores['引体'] = String(newPull);
+                    if (s.scores['str']) s.scores['str'] = String(newPull);
+                }
+            } else {
+                let rawSitup = s.scores['仰卧起坐'] || s.scores['仰卧'] || s.scores['str'];
+                let situpCount = rawSitup !== undefined && rawSitup !== '' ? parseFloat(rawSitup) : 0;
+                if (!isNaN(situpCount)) {
+                    let addCount = Math.floor(Math.random() * 4) + 2; // 2~5次
+                    let newSitup = situpCount + addCount;
+                    s.scores['仰卧起坐'] = String(newSitup);
+                    if (s.scores['仰卧']) s.scores['仰卧'] = String(newSitup);
+                    if (s.scores['str']) s.scores['str'] = String(newSitup);
+                }
+            }
+            if (calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '').score >= 80) return true;
+
+            // 3. 调整立定跳远 (+3~9cm)
+            if (s.scores['立定跳远']) {
+                let j = parseFloat(s.scores['立定跳远']);
+                if (!isNaN(j)) {
+                    if (j < 5) j = Math.round(j * 100);
+                    s.scores['立定跳远'] = String(Math.round(j + Math.random() * 6 + 3));
+                }
+            }
+            if (calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '').score >= 80) return true;
+
+            // 4. 调整耐力跑 (缩短 3~10秒)
+            let runProj = isMale ? '1000米' : '800米';
             let rawRun = s.scores[runProj] || s.scores['耐力跑'];
             if (rawRun) {
                 let totalSec = parseTime(rawRun);
@@ -2477,37 +2582,61 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
                     if (s.scores['耐力跑']) s.scores['耐力跑'] = newRunStr;
                 }
             }
+            if (calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '').score >= 80) return true;
 
-            // 立定跳远 (+3~9cm)
-            if (s.scores['立定跳远']) {
-                let j = parseFloat(s.scores['立定跳远']);
-                if (!isNaN(j)) {
-                    if (j < 5) j = Math.round(j * 100);
-                    s.scores['立定跳远'] = String(Math.round(j + Math.random() * 6 + 3));
-                }
-            }
-
-            // 肺活量 (+100~300ml)
+            // 5. 调整肺活量 (+200~500ml)
             if (s.scores['肺活量']) {
                 let l = parseFloat(s.scores['肺活量']);
                 if (!isNaN(l)) {
-                    s.scores['肺活量'] = String(Math.round(l + Math.random() * 200 + 100));
+                    s.scores['肺活量'] = String(Math.round(l + Math.random() * 300 + 200));
                 }
             }
+            return calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '').score >= 80;
+        };
 
-            let newFit = calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '');
-            if (newFit.score >= 80) {
+        // 🌟 阶段一：优先从第一梯队 (74.0 ~ 79.9 分) 从高到低填补
+        for (let item of tier1Candidates) {
+            let curGoodRate = (initialGoodCount / totalCount) * 100;
+            if (curGoodRate >= targetRate) break;
+
+            if (optimizeSingleStudent(item)) {
                 initialGoodCount++;
                 modifiedStudentsCount++;
+                tier1UsedCount++;
             }
         }
 
-        // 保存微调后的数据
+        // 🌟 阶段二：若第一梯队全部补完仍未达标，启动第二梯队 (70.0 ~ 73.9 分) 从高到低接力填补
+        let curGoodRateAfterTier1 = (initialGoodCount / totalCount) * 100;
+        if (curGoodRateAfterTier1 < targetRate && tier2Candidates.length > 0) {
+            for (let item of tier2Candidates) {
+                let curGoodRate = (initialGoodCount / totalCount) * 100;
+                if (curGoodRate >= targetRate) break;
+
+                if (optimizeSingleStudent(item)) {
+                    initialGoodCount++;
+                    modifiedStudentsCount++;
+                    tier2UsedCount++;
+                }
+            }
+        }
+
+        // 持久化存储微调结果
         localStorage.setItem('tc_standalone_students', JSON.stringify(students));
         let finalRate = (initialGoodCount / totalCount) * 100;
-        alert(`⚡ 梯度微调完成！\n微调达标人数: ${modifiedStudentsCount} 人\n原优良率: ${currentRate.toFixed(1)}% ➔ 现优良率: ${finalRate.toFixed(1)}%\n\n提示：数据分析看板与导出上报表已即时同步！`);
+        
+        let reportMsg = `⚡ 双梯度微调执行完成！\n` +
+                        `---------------------------------\n` +
+                        `🎯 目标优良率：${targetRate}%\n` +
+                        `📈 优良率变化：${currentRate.toFixed(1)}% ➔ ${finalRate.toFixed(1)}%\n` +
+                        `👥 累计微调达标：${modifiedStudentsCount} 人\n` +
+                        `   • 第一梯队 (74~79.9分)：微调 ${tier1UsedCount} 人\n` +
+                        `   • 第二梯队 (70~73.9分)：微调 ${tier2UsedCount} 人\n` +
+                        `---------------------------------\n` +
+                        `提示：数据分析看板与导出上报表已即时同步！`;
+        alert(reportMsg);
 
-        // 🌟 核心：无条件强制刷新分析看板与当前采集视图
+        // 刷新看板与当前采集表格
         computeAndRenderAnalysisDashboard();
         const clsSelect = document.getElementById('tcClassSelect');
         if (clsSelect && clsSelect.value) {
@@ -2623,6 +2752,7 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
     }
 
     // 4. 导出测试环境信息配置[cite: 4]
+   // 打开测试环境配置弹窗：根据教师班级分配自动回显各班负责老师
     function openEnvSettingsModal() {
         let classList = Object.keys(students);
         if (classList.length === 0) { alert('暂无班级数据！'); return; }
@@ -2631,6 +2761,25 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             classList = classList.filter(c => (currentUser.classes || []).includes(c));
         }
 
+        // 1. 读取本地存储的教师账号分配关系
+        teacherAccounts = JSON.parse(localStorage.getItem('tc_sys_teacher_accounts')) || {
+            "admin": { password: "admin", role: "admin", classes: [] }
+        };
+
+        // 建立【班级名称 -> 负责教师】映射字典
+        const classToTeacherMap = {};
+        Object.keys(teacherAccounts).forEach(tName => {
+            if (tName === 'admin') return;
+            const assignedClasses = teacherAccounts[tName].classes || [];
+            assignedClasses.forEach(c => {
+                if (classToTeacherMap[c]) {
+                    classToTeacherMap[c] += `、${tName}`; // 如有多位老师负责同班则合并
+                } else {
+                    classToTeacherMap[c] = tName;
+                }
+            });
+        });
+
         const savedConfig = JSON.parse(localStorage.getItem(ENV_STORAGE_KEY) || '{}');
         const today = new Date().toISOString().split('T')[0];
         document.getElementById('env-modal-start-date').value = savedConfig.startDate || today;
@@ -2638,12 +2787,19 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
 
         const container = document.getElementById('envClassTeacherInputsContainer');
         container.innerHTML = '';
+
         classList.forEach(cls => {
-            const savedT = (savedConfig.classTeachers && savedConfig.classTeachers[cls]) || savedConfig.defaultTeacher || '';
+            // 🌟 优先级：系统账号分配 > 手动单独配置记忆 > 全局默认测试员
+            const autoAssignedTeacher = classToTeacherMap[cls] || '';
+            const finalTeacherName = autoAssignedTeacher || (savedConfig.classTeachers && savedConfig.classTeachers[cls]) || savedConfig.defaultTeacher || '';
+
             container.innerHTML += `
-                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px dashed #eee;">
-                    <span style="font-size:13px; font-weight:bold; color:#333;">${cls}</span>
-                    <input type="text" class="env-cls-teacher-input" data-cls="${cls}" value="${savedT}" placeholder="教师姓名" style="width:140px; margin:0; padding:4px 6px; font-size:12px;">
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:6px 0; border-bottom:1px dashed #eee;">
+                    <div style="display:flex; align-items:center; gap:6px;">
+                        <span style="font-size:13px; font-weight:bold; color:#333;">${cls}</span>
+                        ${autoAssignedTeacher ? '<span style="font-size:10px; background:#E8F5E9; color:#2E7D32; padding:1px 4px; border-radius:3px;">已分配</span>' : ''}
+                    </div>
+                    <input type="text" class="env-cls-teacher-input" data-cls="${cls}" value="${finalTeacherName}" placeholder="教师姓名" style="width:140px; margin:0; padding:4px 6px; font-size:12px; border:1px solid #ccc; border-radius:4px; text-align:center;">
                 </div>
             `;
         });
@@ -3297,6 +3453,215 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         }
 
         tbody.innerHTML = finalTbodyHtml;
+    }
+// 渲染各年级各项目男女分项优良率表格
+   // 记录年级下属班级展开/折叠状态，默认折叠
+    let gradeClassesAccordionState = {
+        '初一': false, '初二': false, '初三': false,
+        '高一': false, '高二': false, '高三': false
+    };
+
+    function toggleGradeClassesAccordion(gradeName) {
+        gradeClassesAccordionState[gradeName] = !gradeClassesAccordionState[gradeName];
+        renderGradeItemExcellenceTable();
+    }
+
+    // 渲染各年级及下属各班各项目男女优良率表（支持层级展开）
+    function renderGradeItemExcellenceTable() {
+        const tbody = document.getElementById('analysisGradeItemExcelTbody');
+        if (!tbody) return;
+
+        const selectedScope = document.getElementById('analysisClassSelect') ? document.getElementById('analysisClassSelect').value : 'ALL';
+        let classList = Object.keys(students);
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+        if (selectedScope !== 'ALL') {
+            classList = [selectedScope];
+        }
+
+        const standardGrades = ['初一', '初二', '初三', '高一', '高二', '高三'];
+        const itemKeys = ['50米', '立定跳远', '坐位体前屈', '肺活量', 'runL', 'str', 'bmi'];
+
+        const createStatNode = () => {
+            const node = { tot: 0 };
+            itemKeys.forEach(k => { node[k] = { c: 0, t: 0 }; });
+            return node;
+        };
+
+        // 数据结构：gradeData[年级] 包含年级汇总与各班级独立明细
+        const gradeData = {};
+        standardGrades.forEach(g => {
+            gradeData[g] = {
+                summary: { '男': createStatNode(), '女': createStatNode() },
+                classes: {} // 存储具体班级: { '初一1班': { '男': ..., '女': ... } }
+            };
+        });
+
+        const activeGrades = new Set();
+
+        classList.forEach(cls => {
+            const list = students[cls] || [];
+            list.forEach(s => {
+                const sScores = s.scores || {};
+                const g = s.grade || normalizeGrade(s.gradeId || cls);
+                const gender = (s.gender === '女' || s.gender === '2') ? '女' : '男';
+
+                if (!gradeData[g]) return;
+                activeGrades.add(g);
+
+                // 初始化当前班级节点
+                if (!gradeData[g].classes[cls]) {
+                    gradeData[g].classes[cls] = { '男': createStatNode(), '女': createStatNode() };
+                }
+
+                const sumGrp = gradeData[g].summary[gender];
+                const clsGrp = gradeData[g].classes[cls][gender];
+
+                sumGrp.tot++;
+                clsGrp.tot++;
+
+                // 1. BMI 换算
+                let currentBmiVal = sScores["体重指数(BMI)"] || sScores["BMI"] || sScores["体重指数"] || '';
+                if (!currentBmiVal && sScores["身高"] && sScores["体重"]) {
+                    let h = parseFloat(sScores["身高"]);
+                    let w = parseFloat(sScores["体重"]);
+                    if (h > 0 && w > 0) {
+                        let hM = h > 3 ? (h / 100) : h;
+                        currentBmiVal = (w / (hM * hM)).toFixed(1);
+                    }
+                }
+
+                // 2. 统计各项目优良人次 (≥80分)
+                itemKeys.forEach(k => {
+                    let val = null;
+                    let projName = k;
+
+                    if (k === 'bmi') {
+                        val = currentBmiVal;
+                        projName = '体重指数(BMI)';
+                    } else if (k === 'runL') {
+                        val = gender === '男' ? (sScores['1000米'] || sScores['耐力跑'] || sScores['runL']) 
+                                              : (sScores['800米'] || sScores['耐力跑'] || sScores['runL']);
+                        projName = gender === '男' ? '1000米' : '800米';
+                    } else if (k === 'str') {
+                        val = gender === '男' ? (sScores['引体向上'] || sScores['引体'] || sScores['str']) 
+                                              : (sScores['仰卧起坐'] || sScores['仰卧'] || sScores['str']);
+                        projName = gender === '男' ? '引体向上' : '仰卧起坐';
+                    } else {
+                        val = sScores[k];
+                    }
+
+                    if (val !== undefined && val !== null && String(val).trim() !== '' && String(val).trim() !== '-') {
+                        let pts = queryStandardScore(projName, val, cls, gender, s.gradeId || '');
+                        if (pts !== null && !isNaN(pts)) {
+                            sumGrp[k].t++;
+                            clsGrp[k].t++;
+                            if (pts >= 80) {
+                                sumGrp[k].c++;
+                                clsGrp[k].c++;
+                            }
+                        }
+                    }
+                });
+            });
+        });
+
+        const fmtCell = (c, t) => {
+            if (!t || t === 0) return '<span style="color:#aaa;">-</span>';
+            const rate = ((c / t) * 100).toFixed(1);
+            const isHigh = parseFloat(rate) >= 50;
+            return `<span style="font-weight:bold; color:${isHigh ? '#2E7D32' : '#333'};">${c}</span> <span style="font-size:11px; color:#666;">(${rate}%)</span>`;
+        };
+
+        let html = '';
+        standardGrades.forEach(g => {
+            if (!activeGrades.has(g)) return;
+
+            const sumM = gradeData[g].summary['男'];
+            const sumF = gradeData[g].summary['女'];
+            const isOpen = gradeClassesAccordionState[g];
+            const icon = isOpen ? '－' : '＋';
+
+            // 1. 年级汇总行 (男/女)
+            html += `
+                <tr style="border-top:2px solid #cfd8dc; background:#fff;">
+                    <td rowspan="2" style="vertical-align:middle; text-align:left; padding-left:10px; font-weight:bold; background:#fafafa; border-right:1px solid #eee;">
+                        <button onclick="toggleGradeClassesAccordion('${g}')" style="background:#fff; border:1px solid #FF9800; color:#E65100; border-radius:4px; padding:1px 5px; font-size:11px; cursor:pointer; margin-right:4px; font-weight:bold; line-height:14px;">${icon}</button>
+                        <span>${g}</span>
+                    </td>
+                    <td style="color:#1976D2; font-weight:bold; background:#f4f9fd;">男</td>
+                    <td style="font-weight:bold;">${sumM.tot}</td>
+                    <td>${fmtCell(sumM['50米'].c, sumM['50米'].t)}</td>
+                    <td>${fmtCell(sumM['立定跳远'].c, sumM['立定跳远'].t)}</td>
+                    <td>${fmtCell(sumM['坐位体前屈'].c, sumM['坐位体前屈'].t)}</td>
+                    <td>${fmtCell(sumM['肺活量'].c, sumM['肺活量'].t)}</td>
+                    <td>${fmtCell(sumM['runL'].c, sumM['runL'].t)}</td>
+                    <td>${fmtCell(sumM['str'].c, sumM['str'].t)}</td>
+                    <td>${fmtCell(sumM['bmi'].c, sumM['bmi'].t)}</td>
+                </tr>
+                <tr style="background:#fff; border-bottom:1px solid #e0e0e0;">
+                    <td style="color:#E91E63; font-weight:bold; background:#fdf4f7;">女</td>
+                    <td style="font-weight:bold;">${sumF.tot}</td>
+                    <td>${fmtCell(sumF['50米'].c, sumF['50米'].t)}</td>
+                    <td>${fmtCell(sumF['立定跳远'].c, sumF['立定跳远'].t)}</td>
+                    <td>${fmtCell(sumF['坐位体前屈'].c, sumF['坐位体前屈'].t)}</td>
+                    <td>${fmtCell(sumF['肺活量'].c, sumF['肺活量'].t)}</td>
+                    <td>${fmtCell(sumF['runL'].c, sumF['runL'].t)}</td>
+                    <td>${fmtCell(sumF['str'].c, sumF['str'].t)}</td>
+                    <td>${fmtCell(sumF['bmi'].c, sumF['bmi'].t)}</td>
+                </tr>
+            `;
+
+            // 2. 展开状态：生成各下属班级明细
+            if (isOpen) {
+                const classNames = Object.keys(gradeData[g].classes).sort((a, b) => {
+                    const numA = (a.match(/\d+/) || [0])[0];
+                    const numB = (b.match(/\d+/) || [0])[0];
+                    return parseInt(numA, 10) - parseInt(numB, 10);
+                });
+
+                classNames.forEach(cName => {
+                    const cM = gradeData[g].classes[cName]['男'];
+                    const cF = gradeData[g].classes[cName]['女'];
+
+                    html += `
+                        <tr style="background:#fcfcfc; border-top:1px dashed #e0e0e0;">
+                            <td rowspan="2" style="vertical-align:middle; text-align:left; padding-left:28px; font-size:12px; color:#455A64; background:#f5f7f8; border-right:1px solid #eee;">
+                                 ${cName}
+                            </td>
+                            <td style="font-size:12px; color:#1976D2; background:#f9fbfe;">男</td>
+                            <td>${cM.tot}</td>
+                            <td>${fmtCell(cM['50米'].c, cM['50米'].t)}</td>
+                            <td>${fmtCell(cM['立定跳远'].c, cM['立定跳远'].t)}</td>
+                            <td>${fmtCell(cM['坐位体前屈'].c, cM['坐位体前屈'].t)}</td>
+                            <td>${fmtCell(cM['肺活量'].c, cM['肺活量'].t)}</td>
+                            <td>${fmtCell(cM['runL'].c, cM['runL'].t)}</td>
+                            <td>${fmtCell(cM['str'].c, cM['str'].t)}</td>
+                            <td>${fmtCell(cM['bmi'].c, cM['bmi'].t)}</td>
+                        </tr>
+                        <tr style="background:#fcfcfc; border-bottom:1px solid #eceff1;">
+                            <td style="font-size:12px; color:#E91E63; background:#fef9fb;">女</td>
+                            <td>${cF.tot}</td>
+                            <td>${fmtCell(cF['50米'].c, cF['50米'].t)}</td>
+                            <td>${fmtCell(cF['立定跳远'].c, cF['立定跳远'].t)}</td>
+                            <td>${fmtCell(cF['坐位体前屈'].c, cF['坐位体前屈'].t)}</td>
+                            <td>${fmtCell(cF['肺活量'].c, cF['肺活量'].t)}</td>
+                            <td>${fmtCell(cF['runL'].c, cF['runL'].t)}</td>
+                            <td>${fmtCell(cF['str'].c, cF['str'].t)}</td>
+                            <td>${fmtCell(cF['bmi'].c, cF['bmi'].t)}</td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+
+        if (!html) {
+            html = '<tr><td colspan="10" style="color:#999; padding:15px;">暂无匹配数据</td></tr>';
+        }
+
+        tbody.innerHTML = html;
     }
 </script>
 </body>
