@@ -111,9 +111,8 @@
         }
 
         @media (max-width: 900px) {
-    /* 增加视口底部安全边距，防止最后一行被底栏遮挡 */
     .view-viewport {
-        padding: 8px 6px 60px 6px !important;
+        padding: 8px 6px 100px 6px !important;
         -webkit-overflow-scrolling: touch;
     }
             .menu-toggle-btn {
@@ -850,9 +849,8 @@
         if (backdrop) backdrop.classList.remove('active');
     }
 
-    // 视图切换控制器：增加点击后自动关闭移动端抽屉
-    function switchMainView(viewType) {
-        closeSidebarDrawer(); // 🌟 移动端选完栏目后自动收起左边栏，直接显示页面
+   function switchMainView(viewType) {
+        closeSidebarDrawer();
 
         ['collect', 'analysis', 'report'].forEach(v => {
             const btn = document.getElementById(`nav-btn-${v}`);
@@ -867,12 +865,12 @@
         if (curPanel) curPanel.style.display = 'block';
 
         if (viewType === 'collect') {
-            // 采集中秒表按需显示
+            // 采集视图
         } else {
-            removeStopwatchPanel(); // 其余视图收起秒表
+            removeStopwatchPanel(); 
             if (viewType === 'analysis') {
                 populateAnalysisClassFilter();
-                computeAndRenderAnalysisDashboard();
+                computeAndRenderAnalysisDashboard(); // 会自动连带刷新 renderStageGradeReportTable
             }
         }
     }
@@ -2105,7 +2103,7 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         select.innerHTML = html;
     }
 
-   function computeAndRenderAnalysisDashboard() {
+  function computeAndRenderAnalysisDashboard() {
         const selectedScope = document.getElementById('analysisClassSelect') ? document.getElementById('analysisClassSelect').value : 'ALL';
         let classList = Object.keys(students);
 
@@ -2121,7 +2119,7 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         let sumTotalScore = 0;
         let countYX = 0, countYL = 0, countBK = 0, countNL = 0;
 
-        // 包含各项及 BMI
+        // 🌟 1. 修复键名：使用标准的 "体重指数(BMI)"，避免查分返回 0.0
         const projectKeys = [
             { key: "50米", label: "50米跑" },
             { key: "1000米", label: "1000米跑" },
@@ -2131,7 +2129,7 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             { key: "立定跳远", label: "立定跳远" },
             { key: "坐位体前屈", label: "坐位体前屈" },
             { key: "肺活量", label: "肺活量" },
-            { key: "bmi", label: "体重指数(BMI)" }
+            { key: "体重指数(BMI)", label: "体重指数(BMI)" }
         ];
 
         let projectStats = {};
@@ -2144,15 +2142,15 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             list.forEach(s => {
                 totalStudents++;
                 const sScores = s.scores || {};
-                const fit = calculateFitnessTotalScore(sScores, cls, s.gender || '男');
+                const fit = calculateFitnessTotalScore(sScores, cls, s.gender || '男', s.gradeId || '');
                 sumTotalScore += fit.score;
 
-                if (fit.level === '优') countYX++;
+                if (fit.level === '优秀') countYX++;
                 else if (fit.level === '良好') countYL++;
                 else if (fit.level === '及格') countBK++;
                 else countNL++;
 
-                // 🌟 核心：计算或提取 BMI
+                // 实时精准计算或提取 BMI
                 let currentBmiVal = sScores["体重指数(BMI)"] || sScores["BMI"] || sScores["体重指数"] || '';
                 if (!currentBmiVal && sScores["身高"] && sScores["体重"]) {
                     let h = parseFloat(sScores["身高"]);
@@ -2163,10 +2161,10 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
                     }
                 }
 
-                // 统计各项目有效人数与得分
+                // 统计各项目有效人数与真实标准分
                 projectKeys.forEach(p => {
                     let val = null;
-                    if (p.key === 'bmi') {
+                    if (p.key === '体重指数(BMI)') {
                         val = currentBmiVal;
                     } else if (p.key === '1000米') {
                         if (s.gender === '男') val = sScores['1000米'] || sScores['耐力跑'] || sScores['runL'];
@@ -2180,10 +2178,9 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
                         val = sScores[p.key] || sScores[p.label];
                     }
 
-                    if (val !== undefined && val !== null && String(val).trim() !== '') {
-                        let projCode = p.key === 'bmi' ? 'bmi' : p.key;
-                        let pts = queryStandardScore(projCode, val, cls, s.gender);
-                        if (pts !== null) {
+                    if (val !== undefined && val !== null && String(val).trim() !== '' && String(val).trim() !== '-') {
+                        let pts = queryStandardScore(p.key, val, cls, s.gender, s.gradeId || '');
+                        if (pts !== null && !isNaN(pts)) {
                             projectStats[p.key].testedCount++;
                             projectStats[p.key].sumScore += pts;
                             if (pts >= 60) projectStats[p.key].passCount++;
@@ -2194,25 +2191,25 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             });
         });
 
-        // 渲染基础指标卡片
+        // 渲染顶部统计卡片
         const anTotEl = document.getElementById('an-total-students');
         if (anTotEl) anTotEl.innerText = totalStudents;
         let avgScore = totalStudents > 0 ? (sumTotalScore / totalStudents).toFixed(1) : "0.0";
         const anAvgEl = document.getElementById('an-avg-score');
         if (anAvgEl) anAvgEl.innerText = avgScore;
 
-        let passRate = totalStudents > 0 ? (((countYX + countYL + countBK) / totalStudents) * 100).toFixed(1) : 0;
-        let excelRate = totalStudents > 0 ? (((countYX + countYL) / totalStudents) * 100).toFixed(1) : 0;
+        let passRate = totalStudents > 0 ? (((countYX + countYL + countBK) / totalStudents) * 100).toFixed(1) : "0.0";
+        let excelRate = totalStudents > 0 ? (((countYX + countYL) / totalStudents) * 100).toFixed(1) : "0.0";
         const anPassEl = document.getElementById('an-pass-rate');
         if (anPassEl) anPassEl.innerText = `${passRate}%`;
         const anExcEl = document.getElementById('an-excellent-rate');
         if (anExcEl) anExcEl.innerText = `${excelRate}%`;
 
-        // 渲染进度条
-        let pYX = totalStudents > 0 ? ((countYX / totalStudents) * 100).toFixed(1) : 0;
-        let pYL = totalStudents > 0 ? ((countYL / totalStudents) * 100).toFixed(1) : 0;
-        let pBK = totalStudents > 0 ? ((countBK / totalStudents) * 100).toFixed(1) : 0;
-        let pNL = totalStudents > 0 ? ((countNL / totalStudents) * 100).toFixed(1) : 0;
+        // 渲染进度条与统计标签
+        let pYX = totalStudents > 0 ? ((countYX / totalStudents) * 100).toFixed(1) : "0.0";
+        let pYL = totalStudents > 0 ? ((countYL / totalStudents) * 100).toFixed(1) : "0.0";
+        let pBK = totalStudents > 0 ? ((countBK / totalStudents) * 100).toFixed(1) : "0.0";
+        let pNL = totalStudents > 0 ? ((countNL / totalStudents) * 100).toFixed(1) : "0.0";
 
         if (document.getElementById('bar-yx')) document.getElementById('bar-yx').style.width = `${pYX}%`;
         if (document.getElementById('bar-yl')) document.getElementById('bar-yl').style.width = `${pYL}%`;
@@ -2224,7 +2221,7 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         if (document.getElementById('tag-bk')) document.getElementById('tag-bk').innerText = `${countBK}人 (${pBK}%)`;
         if (document.getElementById('tag-nl')) document.getElementById('tag-nl').innerText = `${countNL}人 (${pNL}%)`;
 
-        // 渲染单项汇总表格（包含及格率与优良率）
+        // 渲染单项均分表
         const tbody = document.getElementById('analysisProjectTbody');
         if (tbody) {
             let tableRowsHtml = '';
@@ -2236,9 +2233,9 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
 
                 tableRowsHtml += `
                     <tr>
-                        <td style="font-weight:bold; text-align:left; padding-left:10px;">${stat.label}</td>
+                        <td style="font-weight:bold; text-align:left; padding-left:12px;">${stat.label}</td>
                         <td>${stat.testedCount}</td>
-                        <td style="color:${parseFloat(itemAvg) < 60 ? '#D32F2F' : '#2E7D32'}; font-weight:bold;">${itemAvg}</td>
+                        <td style="color:${itemAvg !== '-' && parseFloat(itemAvg) < 60 ? '#D32F2F' : '#2E7D32'}; font-weight:bold;">${itemAvg}</td>
                         <td>${itemPass}</td>
                         <td>${itemGood}</td>
                     </tr>
@@ -2246,6 +2243,9 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             });
             tbody.innerHTML = tableRowsHtml;
         }
+
+        // 🌟 2. 关键修复：计算完成后自动执行学段及年级分布表的渲染
+        renderStageGradeReportTable();
     }
 
     // ================== 数据上报专区核心功能（移植整合） ==================
