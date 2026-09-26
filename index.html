@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>国家学生体质健康测试采集站</title>
-    
+    <title>国家学生体质健康测试工作台</title>
     <link rel="icon" href="https://cdn-icons-png.flaticon.com/512/179/179249.png">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
@@ -13,27 +12,183 @@
             --primary: #E65100;
             --primary-bg: #FFF3E0;
             --primary-border: #FFB74D;
-            --bg: #f4f7f6;
-            --success: #2E7D32;
+            --sidebar-bg: #212121;
+            --sidebar-active: #E65100;
+            --content-bg: #F4F6F9;
+            --text-main: #333333;
+            --card-bg: #ffffff;
+            --card-border: #E0E0E0;
         }
+
+        * { box-sizing: border-box; }
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            background-color: var(--bg);
             margin: 0;
-            padding: 10px;
-            color: #333;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--content-bg);
+            color: var(--text-main);
+            display: flex;
+            height: 100vh;
+            overflow: hidden;
+            position: relative;
         }
-        .container {
-            max-width: 650px;
+
+        /* 侧边栏桌面端基础样式 */
+        .app-sidebar {
+            width: 170px;
+            background-color: var(--sidebar-bg);
+            color: #fff;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+            z-index: 2000;
+            transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* 移动端抽屉遮罩层 */
+        .sidebar-backdrop {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1999;
+        }
+        .sidebar-backdrop.active { display: block; }
+
+        /* 移动端汉堡菜单按钮 */
+        .menu-toggle-btn {
+            display: none;
+            background: #E65100;
+            color: white;
+            border: none;
+            font-size: 15px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-right: 8px;
+            font-weight: bold;
+            line-height: 1;
+            flex-shrink: 0;
+        }
+
+        .sidebar-brand {
+            padding: 16px 10px;
+            font-size: 14px;
+            font-weight: 800;
+            color: #FF9800;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+            text-align: center;
+            letter-spacing: 0.5px;
+        }
+        .sidebar-nav {
+            list-style: none;
+            margin: 12px 0;
+            padding: 0;
+            flex: 1;
+        }
+        .sidebar-nav-item {
+            padding: 14px 16px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #BDBDBD;
+            transition: all 0.2s ease;
+        }
+        .sidebar-nav-item:hover {
+            color: #fff;
+            background: rgba(255,255,255,0.06);
+        }
+        .sidebar-nav-item.active {
+            background-color: var(--sidebar-active);
+            color: #ffffff;
+        }
+
+        /* 🌟 核心：移动端屏幕强制收起抽屉样式 */
+        @media (max-width: 900px) {
+            .menu-toggle-btn {
+                display: inline-flex !important;
+                align-items: center;
+                justify-content: center;
+            }
+
+            .app-sidebar {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                height: 100vh !important;
+                width: 220px !important;
+                transform: translateX(-100%);
+                box-shadow: 4px 0 20px rgba(0, 0, 0, 0.4);
+            }
+
+            .app-sidebar.open {
+                transform: translateX(0) !important;
+            }
+
+            .app-header {
+                padding: 4px 8px !important;
+                font-size: 12px !important;
+            }
+
+            .view-viewport {
+                padding: 8px 6px !important;
+            }
+
+            .dashboard-card {
+                padding: 10px 8px !important;
+                margin-bottom: 10px !important;
+            }
+        }
+
+        /* 主视口布局 */
+        .app-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .app-header {
+            background: #fff;
+            height: 52px;
+            padding: 0 16px;
+            border-bottom: 1px solid var(--card-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+
+        .view-viewport {
+            flex: 1;
+            overflow-y: auto;
+            padding: 16px;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .container-box {
+            max-width: 900px;
             margin: 0 auto;
-            background: white;
-            padding: 15px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
         }
-        h2 { text-align: center; color: #BF360C; margin: 5px 0 15px 0; font-size: 20px; }
-        .section { margin-bottom: 15px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
-        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+
+        /* 公共组件与表单卡片 */
+        .dashboard-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 16px;
+            margin-bottom: 14px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+        }
 
         .file-input-wrapper {
             border: 2px dashed var(--primary);
@@ -42,7 +197,6 @@
             background: var(--primary-bg);
             border-radius: 6px;
             cursor: pointer;
-            margin-top: 5px;
             font-size: 13px;
             font-weight: bold;
             color: #BF360C;
@@ -50,8 +204,7 @@
         .file-input-wrapper input[type="file"] { display: none; }
 
         input[type="text"], input[type="password"], input[type="date"], input[type="number"], select {
-            padding: 8px;
-            margin-top: 5px;
+            padding: 8px 10px;
             border: 1px solid #ccc;
             border-radius: 5px;
             box-sizing: border-box;
@@ -61,16 +214,22 @@
             background-color: var(--primary);
             color: white;
             border: none;
-            padding: 10px 15px;
-            margin-top: 10px;
+            padding: 10px 14px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 15px;
-            width: 100%;
+            font-size: 14px;
             font-weight: bold;
         }
         button:active { opacity: 0.85; }
 
+        .btn-green { background-color: #2E7D32; }
+        .btn-blue { background-color: #1976D2; }
+        .btn-purple { background-color: #7B1FA2; }
+        .btn-orange { background-color: #EF6C00; }
+        .btn-secondary { background-color: #607D8B; }
+        .btn-danger-sys { background-color: #D32F2F; }
+
+        /* 徽章与评级 */
         .level-badge { font-size: 11px; padding: 2px 6px; border-radius: 4px; font-weight: bold; color: white; }
         .lvl-yl { background-color: #4CAF50; }
         .lvl-yx { background-color: #00BCD4; }
@@ -99,120 +258,94 @@
             background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 10000;
         }
         .modal-content {
-            background: white; padding: 20px 15px; border-radius: 10px; width: 95%; max-width: 480px;
+            background: white; padding: 20px 15px; border-radius: 10px; width: 95%; max-width: 520px;
             max-height: 90vh; overflow-y: auto; position: relative; box-sizing: border-box;
         }
         .close-modal { position: absolute; top: 8px; right: 14px; font-size: 24px; cursor: pointer; color: #aaa; user-select: none; }
 
-        .backup-btn-group { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
-        .btn-secondary { background-color: #78909C; font-size: 13px; padding: 8px; flex: 1; min-width: 90px; }
-        .btn-danger-sys { background-color: #d32f2f; font-size: 13px; padding: 8px; flex: 1; min-width: 90px; }
-/* ================== 秒表放大调整后的样式 ================== */
-.stopwatch-float-panel {
-    position: fixed;
-    z-index: 12000;
-    background: rgba(28, 28, 30, 0.96);
-    backdrop-filter: blur(12px);
-    border: 2.5px solid #FF9800;
-    border-radius: 16px;
-    padding: 12px 14px 14px 14px; /* 内边距加大 */
-    box-shadow: 0 12px 35px rgba(0,0,0,0.55);
-    display: flex;
-    flex-direction: column;
-    gap: 10px; /* 各组件间距拉大 */
-    width: 210px; /* 面板总宽度加宽（原 140~155px） */
-    user-select: none;
-    touch-action: none;
-    box-sizing: border-box;
-}
+        /* 秒表悬浮面板 */
+        .stopwatch-float-panel {
+            position: fixed;
+            z-index: 12000;
+            background: rgba(28, 28, 30, 0.96);
+            backdrop-filter: blur(12px);
+            border: 2.5px solid #FF9800;
+            border-radius: 16px;
+            padding: 12px 14px 14px 14px;
+            box-shadow: 0 12px 35px rgba(0,0,0,0.55);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            width: 210px;
+            user-select: none;
+            touch-action: none;
+            box-sizing: border-box;
+        }
+        .sw-drag-handle {
+            cursor: move;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 2px 0 5px 0;
+            font-size: 13px;
+            border-bottom: 1px dashed rgba(255,255,255,0.25);
+        }
+        .sw-timer-display {
+            font-family: ui-monospace, SFMono-Regular, "Courier New", monospace;
+            color: #00E676;
+            background: #000;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 800;
+            padding: 10px 4px;
+            border-radius: 8px;
+            letter-spacing: 1px;
+        }
+        .sw-btn-row {
+            border: none;
+            border-radius: 10px;
+            color: white;
+            font-weight: 800;
+            padding: 14px 0;
+            font-size: 17px;
+            margin: 0;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 3px 6px rgba(0,0,0,0.25);
+            transition: all 0.15s ease;
+        }
+        .sw-btn-row:active { transform: scale(0.95); opacity: 0.9; }
 
-.sw-drag-handle {
-    cursor: move;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 2px 0 5px 0;
-    font-size: 13px; /* 拖拽栏字号加大 */
-    border-bottom: 1px dashed rgba(255,255,255,0.25);
-}
-
-.sw-timer-display {
-    font-family: ui-monospace, SFMono-Regular, "Courier New", monospace;
-    color: #00E676;
-    background: #000;
-    text-align: center;
-    font-size: 28px; /* 计时数字字号放大（原 22~24px） */
-    font-weight: 800;
-    padding: 10px 4px; /* 计时屏高度增加 */
-    border-radius: 8px;
-    letter-spacing: 1px;
-}
-
-.sw-btn-row {
-    border: none;
-    border-radius: 10px;
-    color: white;
-    font-weight: 800;
-    padding: 14px 0; /* 按钮上下高度加厚（原 9px），更方便户外大拇指盲按 */
-    font-size: 17px; /* 按钮字号放大（原 14px） */
-    margin: 0;
-    width: 100%;
-    cursor: pointer;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 0 3px 6px rgba(0,0,0,0.25);
-    transition: all 0.15s ease;
-}
-.btn-start-state { background: #00C853; }
+        .btn-start-state { background: #00C853; }
         .btn-lap-state { background: #1976D2; }
         .btn-stop-state { background: #D50000; }
         .btn-reset-state { background: #546E7A; }
-.sw-btn-row:active { 
-    transform: scale(0.95); 
-    opacity: 0.9; 
-}
 
-/* 计次流水列表同步微调（防止字体过小） */
-.sw-laps-container {
-    max-height: 120px;
-    overflow-y: auto;
-    background: rgba(0, 0, 0, 0.45);
-    border-radius: 8px;
-    padding: 4px;
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-}
-.sw-lap-item {
-    font-size: 13px; /* 计次项字号加大（原 11px） */
-    padding: 6px 8px; /* 计次点击条加高，方便点选 */
-}
-.sw-laps-container::-webkit-scrollbar { width: 3px; }
-        .sw-laps-container::-webkit-scrollbar-thumb { background: #555; border-radius: 3px; }
+        .sw-laps-container {
+            max-height: 120px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.45);
+            border-radius: 8px;
+            padding: 4px;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
         .sw-lap-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 11px;
-            padding: 4px 6px;
+            font-size: 13px;
+            padding: 6px 8px;
             border-radius: 4px;
             background: rgba(255, 255, 255, 0.1);
             color: #eee;
             cursor: pointer;
         }
-        .sw-lap-item.active-lap {
-            background: #FF9800;
-            color: #000;
-            font-weight: bold;
-        }
-
-        .awaiting-target-name { 
-            background-color: #FFF9C4 !important; 
-            outline: 2px dashed #FF9800 !important; 
-            animation: pulse-border 1.2s infinite;
-        }
-
+        .sw-lap-item.active-lap { background: #FF9800; color: #000; font-weight: bold; }
         .awaiting-target-name { 
             background-color: #FFF9C4 !important; 
             outline: 2px dashed #FF9800 !important; 
@@ -223,100 +356,367 @@
             50% { outline-color: #D50000; }
             100% { outline-color: #FF9800; }
         }
+
+        /* 数据分析看板布局 */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+        .metric-card {
+            background: #fff;
+            border: 1px solid var(--card-border);
+            border-radius: 8px;
+            padding: 12px;
+            text-align: center;
+        }
+        .metric-title { font-size: 12px; color: #757575; margin-bottom: 4px; }
+        .metric-val { font-size: 24px; font-weight: 800; color: #212121; }
+
+        .rate-progress-bar-wrap {
+            display: flex;
+            height: 14px;
+            border-radius: 7px;
+            overflow: hidden;
+            background: #eee;
+            margin: 10px 0;
+        }
+        .rate-slice { height: 100%; transition: width 0.3s ease; }
+
+        .analysis-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            text-align: center;
+        }
+        .analysis-table th, .analysis-table td {
+            border: 1px solid #eee;
+            padding: 8px 6px;
+        }
+        .analysis-table th { background: #FAFAFA; font-weight: bold; color: #555; }
+
+        /* 上报模块工具组网格 */
+        .report-tools-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 12px;
+        }
+        .report-tool-box {
+            background: #FAFAFA;
+            border: 1px solid #E0E0E0;
+            border-radius: 8px;
+            padding: 12px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+        .report-tool-title { font-size: 14px; font-weight: bold; margin-bottom: 4px; }
+        .report-tool-desc { font-size: 12px; color: #666; margin-bottom: 10px; line-height: 1.4; }
     </style>
 </head>
 <body>
 
-<div id="userStatusBar" style="max-width: 650px; margin: 0 auto 10px auto; display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px 15px; border-radius: 8px; font-size: 13px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">
-    <div>当前登录: <b id="currentUserDisplay" style="color: #E65100;">未登录</b> (<span id="currentUserRole">游客</span>)</div>
-    <div style="display:flex; gap:6px;">
-        <button id="adminManageBtn" onclick="openTeacherAdminModal()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; background:#673AB7; display:none;">⚙️ 教师班级分配</button>
-        <button onclick="handleLogout()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; background:#e53935;">退出账号</button>
-    </div>
+    <!-- 移动端侧边栏遮罩层 -->
+<div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebarDrawer()"></div>
+
+<!-- 侧边导航栏（移动端支持抽屉划出） -->
+<div class="app-sidebar" id="appSidebar">
+    <div class="sidebar-brand">📊 体测数字工作台</div>
+    <ul class="sidebar-nav">
+        <li class="sidebar-nav-item active" id="nav-btn-collect" onclick="switchMainView('collect')">
+            <span>📝</span> 数据采集
+        </li>
+        <li class="sidebar-nav-item" id="nav-btn-analysis" onclick="switchMainView('analysis')">
+            <span>📈</span> 数据分析
+        </li>
+        <li class="sidebar-nav-item" id="nav-btn-report" onclick="switchMainView('report')" style="display: none;">
+            <span>🚀</span> 数据上报
+        </li>
+    </ul>
 </div>
 
-<div class="modal-overlay" id="loginModal" style="z-index: 20000;">
-    <div class="modal-content" style="max-width: 320px; text-align: center;">
-        <h3 style="margin-top:0; color:#BF360C;">🔐 体测系统账号登录</h3>
-        <p style="font-size: 12px; color: #666; margin-bottom: 12px;">
-        <input type="text" id="loginUsername" placeholder="账号 / 教师姓名" style="width: 100%; margin-bottom: 12px;">
-        <input type="password" id="loginPassword" placeholder="密码" style="width: 100%; margin-bottom: 12px;">
-        <button onclick="handleLoginSubmit()" style="background-color: var(--primary); font-weight: bold; margin:0;">立即登录</button>
+<!-- 核心主视口 -->
+<div class="app-main">
+    <!-- 顶部状态栏：增加移动端 ☰ 菜单按钮 -->
+    <div class="app-header">
+        <div style="display: flex; align-items: center;">
+            <button class="menu-toggle-btn" onclick="toggleSidebarDrawer()" title="切换侧边栏">☰</button>
+            <div>当前登录: <b id="currentUserDisplay" style="color: #E65100;">未登录</b> (<span id="currentUserRole">游客</span>)</div>
+        </div>
+        <div style="display:flex; gap:6px; align-items:center;">
+            <button id="adminManageBtn" onclick="openTeacherAdminModal()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; background:#673AB7; display:none;">⚙️ 教师分配</button>
+            <!-- 增加登录按钮，由 JS 自动控制登录/退出状态 -->
+            <button id="loginActionBtn" onclick="openLoginModal()" style="width:auto; margin:0; padding:4px 10px; font-size:12px; background:#E65100;">登录账号</button>
+            <button id="logoutActionBtn" onclick="handleLogout()" style="width:auto; margin:0; padding:4px 8px; font-size:12px; background:#e53935; display:none;">退出</button>
+        </div>
     </div>
-</div>
+    
 
-<div class="modal-overlay" id="teacherAdminModal" style="z-index: 15000;" onclick="if(event.target.id==='teacherAdminModal') this.style.display='none'">
-    <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="document.getElementById('teacherAdminModal').style.display='none'">&times;</span>
-        <h3 style="text-align: center; margin-top: 0; color:#333;">👥 教师班级分配后台</h3>
-        
-        <div style="background: #f1f8e9; border: 1px dashed #8bc34a; padding: 10px; border-radius: 6px; margin-bottom: 12px;">
-            <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #33691e;">➕ 添加/更新教师账号</h4>
-            <div style="display: flex; gap: 6px; margin-bottom: 6px;">
-                <input type="text" id="newTeacherName" placeholder="教师姓名/账号" style="flex:1; margin:0; padding:6px; font-size:12px;">
-                <input type="text" id="newTeacherPwd" placeholder="登录密码" style="flex:1; margin:0; padding:6px; font-size:12px;" value="123456">
+        <!-- 视口容器 -->
+        <div class="view-viewport">
+            
+            <!-- 视图 1：数据采集工作区 -->
+            <div id="view-collect" class="container-box">
+                <div class="dashboard-card">
+                    <div class="file-input-wrapper" onclick="document.getElementById('excelFile').click()">
+                        <span id="fileStatus">🟠 导入体测名册 / 历史数据 Excel</span>
+                        <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="importExcel(event)">
+                    </div>
+                </div>
+
+                <div class="dashboard-card" style="background:#FFF3E0; border-color:#FFE0B2;">
+                    <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
+                        <select id="tcClassSelect" style="flex:1 1 140px; font-weight:bold; color:#E65100; border-color:#FFB74D;" onchange="renderTcProjectList()">
+                            <option value="">-- ① 选班级 --</option>
+                        </select>
+                        <select id="tcProjectSelect" style="flex:1 1 140px; font-weight:bold; color:#E65100; border-color:#FFB74D;" onchange="renderTcBatchEntryTable()">
+                            <option value="">-- ② 选项目 --</option>
+                        </select>
+                    </div>
+                    <div id="tcBatchWorkspace" style="display:none;"></div>
+                </div>
+
+                <div class="dashboard-card" style="padding: 10px;">
+                    <button onclick="exportFitnessReportToExcel()" style="width:100%; font-size:15px; margin:0;">📊 导出【国家体质健康测试总表】 Excel</button>
+                </div>
+
+                <div class="dashboard-card" style="background: #fafafa; border-style: dashed;">
+                    <div style="font-size: 12px; font-weight: bold; color: #666; margin-bottom: 8px;">⚙️ 数据管理与备份</div>
+                    <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                        <button class="btn-secondary" style="flex:1; min-width:80px; padding:6px 8px; font-size:12px;" onclick="exportBackupData()">📥 导出备份</button>
+                        <button class="btn-secondary" style="flex:1; min-width:80px; padding:6px 8px; font-size:12px; background-color: #5c6bc0;" onclick="document.getElementById('importFile').click()">📤 导入备份</button>
+                        <button class="btn-secondary" style="flex:1; min-width:80px; padding:6px 8px; font-size:12px; background-color: #FF7043;" onclick="clearAllScoresOnly()">🧹 清空成绩</button>
+                        <button class="btn-danger-sys" style="flex:1; min-width:80px; padding:6px 8px; font-size:12px;" onclick="systemReset()">🚨 全部重置</button>
+                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importBackupData(event)">
+                    </div>
+                </div>
             </div>
-            <div style="font-size: 11px; color: #555; margin-bottom: 4px;">勾选负责班级（可多选）:</div>
-            <div id="adminClassCheckboxList" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; background: #fff; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>
-            <button onclick="saveTeacherAccount()" style="background: #558b2f; padding: 6px; font-size: 13px; margin-top: 6px;">💾 保存该教师账号及分配</button>
-        </div>
 
-        <h4 style="margin: 10px 0 6px 0; font-size: 13px;">📋 已分配教师列表</h4>
-        <div id="teacherAccountListContainer" style="max-height: 200px; overflow-y: auto;"></div>
-    </div>
-</div>
+            <!-- 视图 2：数据分析看板 -->
+            <div id="view-analysis" class="container-box" style="display:none;">
+                <div class="dashboard-card" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div style="font-size:15px; font-weight:bold; color:#BF360C;">📈 体质健康数据综合研判</div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <span style="font-size:13px; color:#666;">范围筛选:</span>
+                        <select id="analysisClassSelect" onchange="computeAndRenderAnalysisDashboard()" style="padding:4px 8px; font-size:13px;">
+                            <option value="ALL">全部班级 (全校汇总)</option>
+                        </select>
+                    </div>
+                </div>
 
-<div class="container">
-    <h2>🏃 国家学生体质健康测试采集站</h2>
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="metric-title">实测总人数</div>
+                        <div class="metric-val" id="an-total-students">0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">总平均分</div>
+                        <div class="metric-val" id="an-avg-score" style="color:#E65100;">0.0</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">及格率 (≥60)</div>
+                        <div class="metric-val" id="an-pass-rate" style="color:#2E7D32;">0%</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="metric-title">优良率 (≥80)</div>
+                        <div class="metric-val" id="an-excellent-rate" style="color:#1976D2;">0%</div>
+                    </div>
+                </div>
 
-    <div class="section">
-        <div class="file-input-wrapper" onclick="document.getElementById('excelFile').click()">
-            <span id="fileStatus">🟠 导入体测名册 / 历史数据 Excel</span>
-            <input type="file" id="excelFile" accept=".xlsx, .xls" onchange="importExcel(event)">
-        </div>
-        <p style="font-size: 11px; color:#777; margin: 4px 0 0 0; text-align: center;">
-            支持表头：班级、姓名、性别、身高、体重、肺活量、50米、立定跳远、体前屈、仰卧/引体、800/1000米。
-        </p>
-    </div>
-
-    <div class="section">
-        <div style="background:#FFF3E0; border:1px solid #FFE0B2; border-radius:8px; padding:10px; box-sizing:border-box;">
-            <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px;">
-                <select id="tcClassSelect" style="flex:1 1 130px; font-weight:bold; color:#E65100; border:1px solid #FFB74D; border-radius:6px;" onchange="renderTcProjectList()">
-                    <option value="">-- ① 选班级 --</option>
-                </select>
-                <select id="tcProjectSelect" style="flex:1 1 130px; font-weight:bold; color:#E65100; border:1px solid #FFB74D; border-radius:6px;" onchange="renderTcBatchEntryTable()">
-                    <option value="">-- ② 选项目 --</option>
-                </select>
+                <div class="dashboard-card">
+                    <div style="font-size:14px; font-weight:bold; margin-bottom:6px;">📊 等级占比结构</div>
+                    <div class="rate-progress-bar-wrap">
+                        <div id="bar-yx" class="rate-slice" style="background:#00BCD4; width:0%;" title="优秀"></div>
+                        <div id="bar-yl" class="rate-slice" style="background:#4CAF50; width:0%;" title="良好"></div>
+                        <div id="bar-bk" class="rate-slice" style="background:#FF9800; width:0%;" title="及格"></div>
+                        <div id="bar-nl" class="rate-slice" style="background:#9E9E9E; width:0%;" title="不及格"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; font-size:12px; color:#555; flex-wrap:wrap; gap:6px;">
+                        <span><b style="color:#00BCD4;">■</b> 优秀: <span id="tag-yx">0人 (0%)</span></span>
+                        <span><b style="color:#4CAF50;">■</b> 良好: <span id="tag-yl">0人 (0%)</span></span>
+                        <span><b style="color:#FF9800;">■</b> 及格: <span id="tag-bk">0人 (0%)</span></span>
+                        <span><b style="color:#9E9E9E;">■</b> 不及格: <span id="tag-nl">0人 (0%)</span></span>
+                    </div>
+                </div>
+<!-- 新增：学段与年级等级分布统计 (含折叠/展开与分性别汇总) -->
+                <div class="dashboard-card">
+                    <div style="font-size:14px; font-weight:bold; margin-bottom:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <span>📋 各学段及年级体质等级分布表 (男女分项)</span>
+                        <span style="font-size:11px; color:#888; font-weight:normal;">点击 ➕/➖ 可展开/折叠年级</span>
+                    </div>
+                    <div style="overflow-x:auto;">
+                        <table class="analysis-table" style="text-align:center;">
+                            <thead>
+                                <tr style="background:#f8f9fa;">
+                                    <th style="text-align:left; padding-left:14px; width:120px;">年级</th>
+                                    <th style="width:60px;">性别</th>
+                                    <th>样本数</th>
+                                    <th>优良(%)</th>
+                                    <th>优秀(%)</th>
+                                    <th>良好(%)</th>
+                                    <th>及格(%)</th>
+                                    <th>不及格(%)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analysisStageGradeTbody">
+                                <tr><td colspan="7" style="color:#999; padding:15px;">暂无统计数据</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <div style="font-size:14px; font-weight:bold; margin-bottom:8px;">📋 各单项平均成绩与及格情况</div>
+                    <div style="overflow-x:auto;">
+                        <table class="analysis-table">
+                            <thead>
+                                <tr>
+                                    <th>测试项目</th>
+                                    <th>有效测试人数</th>
+                                    <th>单项平均得分</th>
+                                    <th>单项及格率 (≥60分)</th>
+                                    <th>单项优良率 (≥80分)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="analysisProjectTbody">
+                                <tr><td colspan="5" style="color:#999;">暂无统计数据</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-            <div id="tcBatchWorkspace" style="display:none;"></div>
+
+            <!-- 视图 3：数据上报模块 -->
+            <div id="view-report" class="container-box" style="display:none;">
+                <div class="dashboard-card">
+                    <div style="font-size:16px; font-weight:800; color:#E65100; margin-bottom:6px;">🚀 国家体质健康标准数据上报专区</div>
+                    <div style="font-size:12px; color:#666; line-height:1.5;">
+                     </div>
+                </div>
+
+                <div class="report-tools-grid">
+             
+                    <div class="report-tool-box" style="border-left: 4px solid #EF6C00;">
+                        <div>
+                            <div class="report-tool-title" style="color:#EF6C00;">🔍 智能数据校验</div>
+                            <div class="report-tool-desc">
+                            </div>
+                        </div>
+                        <button class="btn-orange" onclick="runSmartCheckOnReport()">立即执行智能校验</button>
+                    </div>
+
+                   <div class="report-tool-box" style="border-left: 4px solid #7B1FA2;">
+                        <div>
+                            <div class="report-tool-title" style="color:#7B1FA2;">⚡ 达标微调</div>
+                            <div class="report-tool-desc">
+                                自动针对潜力生进行单项梯度微调，提振优良率；支持一键撤销并回滚原始成绩。
+                            </div>
+                        </div>
+                        <div style="display:flex; gap:8px;">
+                            <button class="btn-purple" style="flex:2; margin:0;" onclick="openOptimizeDialogOnReport()">启动梯度微调</button>
+                            <button class="btn-secondary" id="btnRollbackOptimize" style="flex:1; margin:0; padding:8px 4px; font-size:12px; background:#78909C;" onclick="rollbackOptimization()">↩️ 撤销微调</button>
+                        </div>
+                    </div>
+                    <div class="report-tool-box" style="border-left: 4px solid #2E7D32;">
+                        <div>
+                            <div class="report-tool-title" style="color:#2E7D32;">📤 导出国家标准上报表</div>
+                            <div class="report-tool-desc">
+
+                            </div>
+                        </div>
+                        <button class="btn-green" onclick="exportNationalStandardReport()">导出上报表 (Excel)</button>
+                    </div>
+                    <div class="report-tool-box" style="border-left: 4px solid #1976D2;">
+                        <div>
+                            <div class="report-tool-title" style="color:#1976D2;">📅 导出测试环境信息</div>
+                            <div class="report-tool-desc">
+                               
+                            </div>
+                        </div>
+                        <button class="btn-blue" onclick="openEnvSettingsModal()">配置并导出环境信息</button>
+                    </div>
+                </div>
+                <div class="dashboard-card" style="margin-top: 14px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:8px;">
+                    <div>
+                        <div style="font-size:14px; font-weight:bold;">📋 导出全校班级信息对照表</div>
+                        <div style="font-size:12px; color:#666;"></div>
+                    </div>
+                    <button class="btn-secondary" style="width:auto; padding:8px 16px; margin:0;" onclick="exportClassInfoTable()">导出班级信息</button>
+                </div>
+            </div>
+
         </div>
     </div>
 
-    <div class="section">
-        <button onclick="exportFitnessReportToExcel()" style="margin: 0; font-size: 16px;">📊 导出【国家体质健康测试总表】 Excel</button>
-    </div>
-
-    <div class="section" style="background: #fafafa; padding: 10px; border-radius: 6px; border: 1px dashed #ccc;">
-        <div style="font-size: 12px; font-weight: bold; color: #666; margin-bottom: 6px;">⚙️ 数据管理与备份</div>
-        <div class="backup-btn-group">
-            <button class="btn-secondary" onclick="exportBackupData()">📥 导出备份</button>
-            <button class="btn-secondary" onclick="document.getElementById('importFile').click()" style="background-color: #5c6bc0;">📤 导入备份</button>
-            <button class="btn-secondary" onclick="clearAllScoresOnly()" style="background-color: #FF7043;">🧹 清空成绩</button>
-            <button class="btn-danger-sys" onclick="systemReset()">🚨 全部重置</button>
-            <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importBackupData(event)">
+    <!-- 登录弹窗 -->
+    <div class="modal-overlay" id="loginModal" style="z-index: 20000;">
+        <div class="modal-content" style="max-width: 320px; text-align: center;">
+            <h3 style="margin-top:0; color:#BF360C;">🔐 体测系统账号登录</h3>
+            <p style="font-size: 12px; color: #666; margin-bottom: 12px;">管理员初始账号: admin 密码: admin</p>
+            <input type="text" id="loginUsername" placeholder="账号 / 教师姓名" style="width: 100%; margin-bottom: 12px;">
+            <input type="password" id="loginPassword" placeholder="密码" style="width: 100%; margin-bottom: 12px;">
+            <button onclick="handleLoginSubmit()" style="background-color: var(--primary); font-weight: bold; width:100%; margin:0;">立即登录</button>
         </div>
     </div>
-</div>
+    <div class="modal-overlay" id="teacherAdminModal" style="z-index: 15000;" onclick="if(event.target.id==='teacherAdminModal') this.style.display='none'">
+        <div class="modal-content" style="max-width: 500px;" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="document.getElementById('teacherAdminModal').style.display='none'">&times;</span>
+            <h3 style="text-align: center; margin-top: 0; color:#333;">👥 教师班级分配后台</h3>
+            
+            <div style="background: #f1f8e9; border: 1px dashed #8bc34a; padding: 10px; border-radius: 6px; margin-bottom: 12px;">
+                <h4 style="margin: 0 0 6px 0; font-size: 13px; color: #33691e;">➕ 添加/更新教师账号</h4>
+                <div style="display: flex; gap: 6px; margin-bottom: 6px;">
+                    <input type="text" id="newTeacherName" placeholder="教师姓名/账号" style="flex:1; margin:0; padding:6px; font-size:12px;">
+                    <input type="text" id="newTeacherPwd" placeholder="登录密码" style="flex:1; margin:0; padding:6px; font-size:12px;" value="123456">
+                </div>
+                <div style="font-size: 11px; color: #555; margin-bottom: 4px;">勾选负责班级（可多选）:</div>
+                <div id="adminClassCheckboxList" style="display: flex; flex-wrap: wrap; gap: 6px; max-height: 110px; overflow-y: auto; background: #fff; padding: 6px; border: 1px solid #ddd; border-radius: 4px;"></div>
+                <button onclick="saveTeacherAccount()" style="background: #558b2f; padding: 6px; font-size: 13px; margin-top: 6px; width:100%;">💾 保存该教师账号及分配</button>
+            </div>
 
-<div class="modal-overlay" id="calendarModal" onclick="closeModal(event)">
-    <div class="modal-content" onclick="event.stopPropagation()">
-        <span class="close-modal" onclick="document.getElementById('calendarModal').style.display='none'">&times;</span>
-        <div id="modalCalendarBody"></div>
+            <h4 style="margin: 10px 0 6px 0; font-size: 13px;">📋 已分配教师列表</h4>
+            <div id="teacherAccountListContainer" style="max-height: 200px; overflow-y: auto;"></div>
+        </div>
     </div>
-</div>
+
+    <!-- 个人体测档案卡片 -->
+    <div class="modal-overlay" id="calendarModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="document.getElementById('calendarModal').style.display='none'">&times;</span>
+            <div id="modalCalendarBody"></div>
+        </div>
+    </div>
+
+    <!-- 环境信息配置弹窗 -->
+    <div class="modal-overlay" id="envSettingsModal" onclick="if(event.target.id==='envSettingsModal') this.style.display='none'">
+        <div class="modal-content" style="max-width: 520px;" onclick="event.stopPropagation()">
+            <span class="close-modal" onclick="document.getElementById('envSettingsModal').style.display='none'">&times;</span>
+            <h3 style="margin-top:0; color:#1976D2; text-align:center;">📅 测试环境信息参数配置</h3>
+            
+            <div style="background:#F5F5F5; padding:10px; border-radius:6px; margin-bottom:12px;">
+                <div style="display:flex; align-items:center; gap:8px; margin-bottom:8px;">
+                    <label style="font-size:13px; font-weight:bold; width:80px;">起始测试日:</label>
+                    <input type="date" id="env-modal-start-date" style="flex:1; margin:0;">
+                </div>
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <label style="font-size:13px; font-weight:bold; width:80px;">默认测试员:</label>
+                    <input type="text" id="env-modal-def-teacher" placeholder="批量填充教师姓名" style="flex:1; margin:0;">
+                    <button class="btn-blue" style="width:auto; padding:7px 12px; margin:0; font-size:12px;" onclick="applyDefaultTeacherToAllInputs()">应用全部</button>
+                </div>
+            </div>
+
+            <div style="font-size:12px; font-weight:bold; color:#555; margin-bottom:4px;">各班负责测试员名单 (支持单独调整):</div>
+            <div id="envClassTeacherInputsContainer" style="max-height:200px; overflow-y:auto; border:1px solid #ddd; border-radius:6px; padding:6px; background:#fff; margin-bottom:12px;"></div>
+
+            <div style="display:flex; gap:8px;">
+                <button class="btn-secondary" style="flex:1; margin:0;" onclick="document.getElementById('envSettingsModal').style.display='none'">取消</button>
+                <button class="btn-green" style="flex:2; margin:0;" onclick="executeExportEnvExcel()">📤 保存配置并生成 Excel</button>
+            </div>
+        </div>
+    </div>
 
 <script>
+    // 基础标准库
     const DEFAULT_TY_STDS = {
         weights: { bmi: 0.15, lung: 0.15, run50: 0.20, jump: 0.10, sit: 0.10, runL: 0.20, str: 0.10 },
         bonusRule: {
@@ -417,38 +817,116 @@
         }
     };
 
+    // 存储与会话状态[cite: 1, 4]
     let students = JSON.parse(localStorage.getItem('tc_standalone_students')) || {};
     let currentTYStandards = JSON.parse(localStorage.getItem('tc_standalone_standards')) || DEFAULT_TY_STDS;
-
     let currentUser = JSON.parse(localStorage.getItem('tc_sys_current_user')) || null;
     let teacherAccounts = JSON.parse(localStorage.getItem('tc_sys_teacher_accounts')) || {
         "admin": { password: "admin", role: "admin", classes: [] }
     };
+    const ENV_STORAGE_KEY = 'tc_sys_env_config';
 
+   // 移动端侧边抽屉收展控制
+    function toggleSidebarDrawer() {
+        const sidebar = document.getElementById('appSidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        const isOpen = sidebar.classList.contains('open');
+        if (isOpen) {
+            closeSidebarDrawer();
+        } else {
+            sidebar.classList.add('open');
+            backdrop.classList.add('active');
+        }
+    }
+
+    function closeSidebarDrawer() {
+        const sidebar = document.getElementById('appSidebar');
+        const backdrop = document.getElementById('sidebarBackdrop');
+        if (sidebar) sidebar.classList.remove('open');
+        if (backdrop) backdrop.classList.remove('active');
+    }
+
+    // 视图切换控制器：增加点击后自动关闭移动端抽屉
+    function switchMainView(viewType) {
+        closeSidebarDrawer(); // 🌟 移动端选完栏目后自动收起左边栏，直接显示页面
+
+        ['collect', 'analysis', 'report'].forEach(v => {
+            const btn = document.getElementById(`nav-btn-${v}`);
+            const panel = document.getElementById(`view-${v}`);
+            if (btn) btn.classList.remove('active');
+            if (panel) panel.style.display = 'none';
+        });
+
+        const curBtn = document.getElementById(`nav-btn-${viewType}`);
+        const curPanel = document.getElementById(`view-${viewType}`);
+        if (curBtn) curBtn.classList.add('active');
+        if (curPanel) curPanel.style.display = 'block';
+
+        if (viewType === 'collect') {
+            // 采集中秒表按需显示
+        } else {
+            removeStopwatchPanel(); // 其余视图收起秒表
+            if (viewType === 'analysis') {
+                populateAnalysisClassFilter();
+                computeAndRenderAnalysisDashboard();
+            }
+        }
+    }
+  function openLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (!modal) return;
+        document.getElementById('loginUsername').value = '';
+        document.getElementById('loginPassword').value = '';
+        modal.style.display = 'flex';
+        // 自动聚焦账号输入框
+        setTimeout(() => {
+            const uInput = document.getElementById('loginUsername');
+            if (uInput) uInput.focus();
+        }, 100);
+    }
     function checkUserLoginState() {
         const userDisplay = document.getElementById('currentUserDisplay');
         const roleDisplay = document.getElementById('currentUserRole');
         const adminBtn = document.getElementById('adminManageBtn');
+        const reportNavBtn = document.getElementById('nav-btn-report');
+        const loginBtn = document.getElementById('loginActionBtn');
+        const logoutBtn = document.getElementById('logoutActionBtn');
         
+        // 未登录状态
         if (!currentUser) {
             if (userDisplay) userDisplay.innerText = '未登录';
             if (roleDisplay) roleDisplay.innerText = '游客';
             if (adminBtn) adminBtn.style.display = 'none';
+            if (reportNavBtn) reportNavBtn.style.display = 'none';
+            if (loginBtn) loginBtn.style.display = 'inline-block';
+            if (logoutBtn) logoutBtn.style.display = 'none';
+            
+            // 自动唤出登录弹窗
             openLoginModal();
             return;
         }
 
+        // 已登录状态
+        const isAdmin = (currentUser.role === 'admin');
+
         if (userDisplay && roleDisplay) {
             userDisplay.innerText = currentUser.username;
-            roleDisplay.innerText = currentUser.role === 'admin' ? '管理员' : '任课教师';
-            if (adminBtn) adminBtn.style.display = currentUser.role === 'admin' ? 'block' : 'none';
+            roleDisplay.innerText = isAdmin ? '管理员' : '任课教师';
+            if (adminBtn) adminBtn.style.display = isAdmin ? 'inline-block' : 'none';
         }
-    }
 
-    function openLoginModal() {
-        document.getElementById('loginUsername').value = '';
-        document.getElementById('loginPassword').value = '';
-        document.getElementById('loginModal').style.display = 'flex';
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+
+        // 仅管理员展示数据上报入口
+        if (reportNavBtn) {
+            reportNavBtn.style.display = isAdmin ? 'flex' : 'none';
+        }
+
+        const reportPanel = document.getElementById('view-report');
+        if (!isAdmin && reportPanel && reportPanel.style.display === 'block') {
+            switchMainView('collect');
+        }
     }
 
     function handleLoginSubmit() {
@@ -456,8 +934,14 @@
         const p = document.getElementById('loginPassword').value.trim();
         if (!u || !p) { alert('请输入账号和密码！'); return; }
 
+        // 每次登录前先重新读取一次本地持久化存储，防止数据未同步
+        teacherAccounts = JSON.parse(localStorage.getItem('tc_sys_teacher_accounts')) || {
+            "admin": { password: "admin", role: "admin", classes: [] }
+        };
+
+        // 管理员登录通道
         if (u === 'admin') {
-            let adminPwd = teacherAccounts["admin"] ? teacherAccounts["admin"].password : "admin";
+            let adminPwd = teacherAccounts["admin"] ? String(teacherAccounts["admin"].password).trim() : "admin";
             if (p === adminPwd || p === "admin888") {
                 currentUser = { username: 'admin', role: 'admin', classes: [] };
                 localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
@@ -471,39 +955,50 @@
                 return;
             }
         }
-
-        if (teacherAccounts[u] && teacherAccounts[u].password === p) {
-            currentUser = { username: u, role: 'teacher', classes: teacherAccounts[u].classes || [] };
+        const teacherData = teacherAccounts[u];
+        if (teacherData && String(teacherData.password).trim() === p) {
+            currentUser = { 
+                username: u, 
+                role: 'teacher', 
+                classes: teacherData.classes || [] 
+            };
             localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
             document.getElementById('loginModal').style.display = 'none';
             showToast(`欢迎教师：${u}`);
             checkUserLoginState();
             initTcClassOptions();
         } else {
-            alert('账号不存在或密码错误！');
+            alert('账号不存在或密码错误');
         }
     }
 
-    function handleLogout() {
+   function handleLogout() {
+        if (!currentUser) {
+            openLoginModal();
+            return;
+        }
         if (confirm('确定要退出当前账号吗？')) {
             localStorage.removeItem('tc_sys_current_user');
             currentUser = null;
+            
+            const reportNavBtn = document.getElementById('nav-btn-report');
+            if (reportNavBtn) reportNavBtn.style.display = 'none';
+
             checkUserLoginState();
             initTcClassOptions();
             const workspace = document.getElementById('tcBatchWorkspace');
             if (workspace) workspace.style.display = 'none';
-            openLoginModal();
+            switchMainView('collect');
         }
     }
 
     function openTeacherAdminModal() {
         if (!currentUser || currentUser.role !== 'admin') { alert('无权限访问管理后台！'); return; }
-        
         const container = document.getElementById('adminClassCheckboxList');
         container.innerHTML = '';
         const allCls = Object.keys(students);
         if (allCls.length === 0) {
-            container.innerHTML = '<span style="color:#999;font-size:11px;">系统暂无班级，请先在主页导入名单Excel</span>';
+            container.innerHTML = '<span style="color:#999;font-size:11px;">系统暂无班级，请先导入名册Excel</span>';
         } else {
             allCls.forEach(c => {
                 container.innerHTML += `
@@ -526,7 +1021,16 @@
         const chks = document.querySelectorAll('input[name="assignClassChk"]:checked');
         const selectedClasses = Array.from(chks).map(el => el.value);
 
-        teacherAccounts[tName] = { password: tPwd, role: 'teacher', classes: selectedClasses };
+        // 重新同步并写入
+        teacherAccounts = JSON.parse(localStorage.getItem('tc_sys_teacher_accounts')) || {
+            "admin": { password: "admin", role: "admin", classes: [] }
+        };
+
+        teacherAccounts[tName] = { 
+            password: String(tPwd), // 强制存为字符串
+            role: 'teacher', 
+            classes: selectedClasses 
+        };
         localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
 
         document.getElementById('newTeacherName').value = '';
@@ -570,6 +1074,7 @@
         });
     }
 
+    // 核心算法与评分引擎[cite: 1]
     function getLevelText(score) {
         if (score >= 90) return "优";
         if (score >= 80) return "良好";
@@ -586,176 +1091,294 @@
         }
     }
 
-    function queryStandardScore(projectName, rawValue, className, gender) {
-        if (rawValue === undefined || rawValue === null || String(rawValue).trim() === '') return null;
-        let strVal = String(rawValue).trim();
-        let val = parseFloat(strVal);
-        if (isNaN(val)) return null;
+// 核心：严格优先以 A 列年级编码(21~23, 31~33)为准
+function normalizeGrade(str) {
+    if (!str) return '';
+    const s = String(str).trim();
 
-        let gradeKey = "初一"; 
-        ["初一","初二","初三","高一","高二","高三"].forEach(g => { if(className.includes(g)) gradeKey = g; });
-        const stdKey = `${gradeKey}${gender}`; 
+    // 🌟 第一优先级：国家标准年级编号代码映射[cite: 16]
+    const codeMap = {
+        '21': '初一', '22': '初二', '23': '初三',
+        '31': '高一', '32': '高二', '33': '高三'
+    };
+    if (codeMap[s]) return codeMap[s]; // 只要给了 21-33，立刻返回，不看任何年份计算[cite: 16]
 
-        let targetProjectCode = "";
-        if (projectName.toUpperCase().includes("BMI") || projectName.includes("体重指数")) targetProjectCode = "bmi";
-        else if (projectName.includes("肺活量")) targetProjectCode = "lung";
-        else if (projectName.includes("50米")) targetProjectCode = "run50";
-        else if (projectName.includes("跳远")) targetProjectCode = "jump";
-        else if (projectName.includes("体前屈")) targetProjectCode = "sit";
-        else if (projectName.includes("仰卧起坐") || projectName.includes("引体向上")) targetProjectCode = "str";
-        else if (projectName.includes("1000米") || projectName.includes("800米") || projectName.includes("耐力跑") || projectName === "runL") {
-            targetProjectCode = "runL";
-            if (strVal.includes(':')) {
-                let parts = strVal.split(':');
-                val = (parseInt(parts[0], 10) || 0) * 60 + (parseFloat(parts[1]) || 0);
-            } else if (strVal.includes('.')) {
-                let parts = strVal.split('.');
-                // 兼容 分.秒.毫秒 (例如 3.45.28) 与 分.秒 (例如 3.45)
-                let minutes = parseInt(parts[0], 10) || 0;
-                let seconds = parseFloat(parts[1]) || 0;
-                let ms = parts[2] ? (parseFloat(parts[2]) / 100) : 0;
-                val = minutes * 60 + seconds + ms;
-            }
-        } else {
-            targetProjectCode = projectName;
-        }
-
-        const activePool = currentTYStandards[targetProjectCode];
-        if (!activePool || !activePool[stdKey]) return null;
-
-        const ruleList = activePool[stdKey];
-        if (!ruleList || ruleList.length === 0) return 0;
-
-        if (targetProjectCode === "bmi") {
-            if (Array.isArray(ruleList) && typeof ruleList[0] === 'number') {
-                if (val <= ruleList[0]) return 80;
-                if (val <= ruleList[1]) return 100;
-                if (val <= ruleList[2]) return 80;
-                return 60;
-            }
-        }
-
-        let isTimeType = targetProjectCode.includes("run") || targetProjectCode.includes("50") || targetProjectCode.includes("米");
-        if (isTimeType) {
-            if (val <= ruleList[0][0]) return ruleList[0][1];
-            if (val > ruleList[ruleList.length - 1][0]) return 0;
-            for (let i = 0; i < ruleList.length; i++) {
-                if (val <= ruleList[i][0]) return ruleList[i][1];
-            }
-            return 0;
-        } else {
-            let actualVal = val;
-            if (targetProjectCode === "jump" && val < 5) actualVal = Math.round(val * 100); 
-            if (actualVal >= ruleList[0][0]) return ruleList[0][1];
-            if (actualVal < ruleList[ruleList.length - 1][0]) return 0;
-            for (let i = 0; i < ruleList.length; i++) {
-                if (actualVal >= ruleList[i][0]) return ruleList[i][1];
-            }
-            return 0;
-        }
+    // 第二优先级：兼容 7 位班级编号 (如 2023201，第 5 位是学段代码 2=初中, 3=高中)
+    if (/^\d{7}$/.test(s)) {
+        const stage = s.charAt(4);
+        const year = s.substring(0, 4);
+        if (year === '2023') return stage === '3' ? '高三' : '初三';
+        if (year === '2024') return stage === '3' ? '高二' : '初二';
+        if (year === '2025') return stage === '3' ? '高一' : '初一';
     }
 
-    function calculateFitnessTotalScore(scoresObj, className, gender) {
+    // 第三优先级：中文年级字样
+    if (s.includes('高三') || s.includes('高3')) return '高三';
+    if (s.includes('高二') || s.includes('高2')) return '高二';
+    if (s.includes('高一') || s.includes('高1')) return '高一';
+    if (s.includes('初三') || s.includes('初3') || s.includes('九')) return '初三';
+    if (s.includes('初二') || s.includes('初2') || s.includes('八')) return '初二';
+    if (s.includes('初一') || s.includes('初1') || s.includes('七')) return '初一';
+
+    // 第四优先级：届别年份回退推算
+    const isHigh = s.includes('高') || s.includes('职');
+    if (s.includes('2023') || s.includes('23级')) return isHigh ? '高三' : '初三';
+    if (s.includes('2024') || s.includes('24级')) return isHigh ? '高二' : '初二';
+    if (s.includes('2025') || s.includes('25级')) return isHigh ? '高一' : '初一';
+
+    return isHigh ? '高一' : '初一';
+}
+function getSafeKey(grade, gender) {
+    if (!grade) return null;
+    const k = grade + gender;
+    return currentTYStandards.lung[k] ? k : null;
+}
+   // ==========================================
+// 1. 严格时间转换函数（修复个位秒误放大 Bug）
+// ==========================================
+function parseTime(v) {
+    if (v === undefined || v === null) return 0;
+    let s = String(v).trim();
+    if (s === '' || s === '-' || s === '0') return 0;
+
+    // 清洗字符，将分、秒、引号、冒号统一为点
+    s = s.replace(/分/g, '.').replace(/[秒"”″]/g, '').trim();
+    s = s.replace(/['’‘′:：]/g, '.');
+
+    if (s.includes('.')) {
+        let parts = s.split('.');
+        let m = parseInt(parts[0], 10) || 0;
+        let sStr = parts[1] || '0';
+        
+        // 只有当录入格式类似 4.5 且明确不是两位时，按标准秒数处理
+        let sec = parseInt(sStr.substring(0, 2), 10) || 0;
+        if (sStr.length === 1 && sec < 6) {
+            // 如果只有一位且小于6（如 4.3），按常规分秒简写为 30 秒处理；若为 4.05 已经在 sStr 体现为 05
+            sec = sec * 10;
+        }
+        return m * 60 + sec;
+    }
+
+    let num = parseFloat(s);
+    if (isNaN(num)) return 0;
+
+    // 三位以上整数识别 (如 412 -> 4分12秒)
+    if (num >= 100) {
+        let m = Math.floor(num / 100);
+        let sec = num % 100;
+        return m * 60 + sec;
+    }
+
+    // 纯分钟数 (如 4 -> 4分00秒)
+    if (num > 0 && num <= 15) {
+        return Math.round(num * 60);
+    }
+
+    return Math.round(num);
+}
+
+// ==========================================
+// 2. 查分及附加分核心引擎
+// ==========================================
+function realGetScore(val, table, mode) {
+    if (val === '' || val === null || val === undefined || isNaN(parseFloat(val))) return 0;
+    val = parseFloat(val);
+    if (!table || table.length === 0) return 0;
+
+    // mode === 1: 越大越好 (降序排列); mode === -1: 越小越好 (升序排列)
+    for (let i = 0; i < table.length; i++) {
+        const [lim, sc] = table[i];
+        if ((mode === 1 && val >= lim) || (mode === -1 && val <= lim)) {
+            return sc;
+        }
+    }
+    return 0; // 超出最低下限计 0 分
+}
+
+function getBonus(val, table, ruleArr, mode) {
+    if (!val || !table || !ruleArr || !Array.isArray(ruleArr)) return 0;
+    const maxStd = table[0][0]; // 100分基准
+    const diff = (mode === 1) ? (val - maxStd) : (maxStd - val);
+    if (diff <= 0) return 0;
+    let points = 0;
+    for (let i = ruleArr.length - 1; i >= 0; i--) {
+        if (diff >= ruleArr[i]) { 
+            points = i + 1; 
+            break; 
+        }
+    }
+    return points;
+}
+
+// ==========================================
+// 3. 单项查分标准化适配
+// ==========================================
+function queryStandardScore(projectName, rawValue, className, gender, gradeId = '') {
+    if (rawValue === undefined || rawValue === null || String(rawValue).trim() === '' || String(rawValue).trim() === '-') return 0;
+    
+    // 严格以 A 列年级编号为第一优先级
+    const gradeInput = gradeId || className;
+    const grade = normalizeGrade(gradeInput);
+    const isMale = (gender === '男' || gender === '1');
+    const realGender = isMale ? '男' : '女';
+    const key = getSafeKey(grade, realGender);
+    if (!key) return 0;
+
+    let sVal = String(rawValue).trim();
+
+    // 1. 长跑耐力类
+    if (projectName.includes("1000") || projectName.includes("800") || projectName.includes("耐力") || projectName === "runL") {
+        const sec = parseTime(sVal);
+        return sec > 0 ? realGetScore(sec, currentTYStandards.runL[key], -1) : 0;
+    }
+
+    let val = parseFloat(sVal);
+
+    // 2. BMI
+    if (projectName.includes("BMI") || projectName.includes("体重指数")) {
+        const lim = currentTYStandards.bmi[key];
+        if (lim && !isNaN(val)) {
+            if (val <= lim[0]) return 80;
+            if (val <= lim[1]) return 100;
+            if (val <= lim[2]) return 80;
+            return 60;
+        }
+        return 0;
+    }
+
+    // 3. 常规体测单项
+    if (projectName.includes("肺活量")) return realGetScore(val, currentTYStandards.lung[key], 1);
+    if (projectName.includes("50米")) return realGetScore(val, currentTYStandards.run50[key], -1);
+    if (projectName.includes("体前屈")) return realGetScore(val, currentTYStandards.sit[key], 1);
+    if (projectName.includes("跳远")) {
+        // 自动识别米与厘米
+        if (val > 0 && val < 5) val = Math.round(val * 100);
+        return realGetScore(val, currentTYStandards.jump[key], 1);
+    }
+    if (projectName.includes("引体") || projectName.includes("仰卧")) {
+        return realGetScore(val, currentTYStandards.str[key], 1);
+    }
+
+    return 0;
+}
+
+function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') {
         if (!scoresObj) return { score: 0, level: '不及格', baseScore: 0, bonusScore: 0 };
 
-        let gradeKey = "初一"; 
-        ["初一","初二","初三","高一","高二","高三"].forEach(g => { if(className.includes(g)) gradeKey = g; });
-        const stdKey = `${gradeKey}${gender}`;
+        const gradeInput = gradeId || className;
+        const grade = normalizeGrade(gradeInput);
+        const isMale = (gender === '男' || gender === '1');
+        const realGender = isMale ? '男' : '女';
+        const key = getSafeKey(grade, realGender);
+
+        if (!key) {
+            return { score: 0, level: '标准缺失', baseScore: 0, bonusScore: 0 };
+        }
 
         const getVal = (keywords) => {
-            for (let key in scoresObj) {
-                if (keywords.some(kw => key.includes(kw))) {
-                    let v = scoresObj[key];
-                    if (v !== undefined && v !== null && String(v).trim() !== '') return String(v).trim();
+            for (let k in scoresObj) {
+                if (keywords.some(kw => k.includes(kw))) {
+                    let v = scoresObj[k];
+                    if (v !== undefined && v !== null && String(v).trim() !== '' && String(v).trim() !== '-') {
+                        return String(v).trim();
+                    }
                 }
             }
             return '';
         };
 
-        const getPts = (proj, rawVal) => {
-            if (!rawVal) return 0;
-            let s = queryStandardScore(proj, rawVal, className, gender);
-            return s !== null ? s : 0;
-        };
+        // 1. BMI 得分 (按 1 位小数查表)
+        let bmiS = 0;
+        const rawH = parseFloat(getVal(["身高"]));
+        const rawW = parseFloat(getVal(["体重"]));
+        const rawBMI = getVal(["BMI", "体重指数"]);
 
-        const sBMI = getPts("体重指数(BMI)", getVal(["BMI", "体重指数"]));
-        const sVital = getPts("肺活量", getVal(["肺活量"]));
-        const s50m = getPts("50米", getVal(["50米", "50"]));
-        const sSit = getPts("坐位体前屈", getVal(["体前屈"]));
-        const sJump = getPts("立定跳远", getVal(["跳远"]));
-
-        const strProjName = gender === '男' ? "引体向上" : "仰卧起坐";
-        const rawStrVal = getVal(["引体", "仰卧"]);
-        const sStr = getPts(strProjName, rawStrVal);
-
-        const runLProjName = gender === '男' ? "1000米" : "800米";
-        const rawRunLVal = getVal(["1000米", "800米", "1000", "800"]);
-        const sRunL = getPts(runLProjName, rawRunLVal);
-
-        const baseTotal = (sBMI * 0.15) + (sVital * 0.15) + (s50m * 0.20) + (sSit * 0.10) + 
-                          (sJump * 0.10) + (sStr * 0.10) + (sRunL * 0.20);
-        const finalBaseScore = Math.round(baseTotal * 10) / 10;
-
-        let bonusRun = 0;
-        let bonusStr = 0;
-        const bonusRule = currentTYStandards.bonusRule || DEFAULT_TY_STDS.bonusRule;
-
-        if (bonusRule) {
-            if (sRunL >= 100 && rawRunLVal && currentTYStandards.runL && currentTYStandards.runL[stdKey]) {
-               let actualSeconds = 0;
-                if (String(rawRunLVal).includes(':')) {
-                    let p = String(rawRunLVal).split(':');
-                    actualSeconds = (parseInt(p[0], 10) || 0) * 60 + (parseFloat(p[1]) || 0);
-                } else if (String(rawRunLVal).includes('.')) {
-                    let p = String(rawRunLVal).split('.');
-                    let minutes = parseInt(p[0], 10) || 0;
-                    let seconds = parseFloat(p[1]) || 0;
-                    let ms = p[2] ? (parseFloat(p[2]) / 100) : 0;
-                    actualSeconds = minutes * 60 + seconds + ms;
-                } else {
-                    actualSeconds = parseFloat(rawRunLVal) || 0;
-                }
-
-                const base100Time = currentTYStandards.runL[stdKey][0][0];
-                const diffSec = base100Time - actualSeconds;
-                if (diffSec > 0 && bonusRule.run && bonusRule.run[gender]) {
-                    const ladder = bonusRule.run[gender];
-                    for (let i = ladder.length - 1; i >= 0; i--) {
-                        if (diffSec >= ladder[i]) {
-                            bonusRun = i + 1;
-                            break;
-                        }
-                    }
-                }
+        if (rawH > 0 && rawW > 0) {
+            const hCm = rawH > 3 ? rawH : rawH * 100;
+            const bmi = parseFloat((rawW / ((hCm / 100) ** 2)).toFixed(1));
+            const lim = currentTYStandards.bmi[key];
+            if (lim) {
+                if (bmi <= lim[0]) bmiS = 80;
+                else if (bmi <= lim[1]) bmiS = 100;
+                else if (bmi <= lim[2]) bmiS = 80;
+                else bmiS = 60;
             }
-
-            if (sStr >= 100 && rawStrVal && currentTYStandards.str && currentTYStandards.str[stdKey]) {
-                const actualCount = parseFloat(rawStrVal) || 0;
-                const base100Count = currentTYStandards.str[stdKey][0][0];
-                const diffCount = actualCount - base100Count;
-                if (diffCount > 0 && bonusRule.str && bonusRule.str[gender]) {
-                    const ladder = bonusRule.str[gender];
-                    for (let i = ladder.length - 1; i >= 0; i--) {
-                        if (diffCount >= ladder[i]) {
-                            bonusStr = i + 1;
-                            break;
-                        }
-                    }
-                }
+        } else if (rawBMI) {
+            const bmi = parseFloat(parseFloat(rawBMI).toFixed(1));
+            const lim = currentTYStandards.bmi[key];
+            if (lim && !isNaN(bmi)) {
+                if (bmi <= lim[0]) bmiS = 80;
+                else if (bmi <= lim[1]) bmiS = 100;
+                else if (bmi <= lim[2]) bmiS = 80;
+                else bmiS = 60;
             }
         }
 
-        const totalBonus = bonusRun + bonusStr;
-        const finalScore = Math.round((finalBaseScore + totalBonus) * 10) / 10;
+        // 2. 常规单项查分
+        const sLung = realGetScore(getVal(["肺活量"]), currentTYStandards.lung[key], 1);
+        const s50 = realGetScore(getVal(["50米", "50"]), currentTYStandards.run50[key], -1);
+        const sSit = realGetScore(getVal(["体前屈"]), currentTYStandards.sit[key], 1);
+
+        let jumpVal = getVal(["跳远"]);
+        if (jumpVal && parseFloat(jumpVal) > 0 && parseFloat(jumpVal) < 5) {
+            jumpVal = Math.round(parseFloat(jumpVal) * 100);
+        }
+        const sJump = realGetScore(jumpVal, currentTYStandards.jump[key], 1);
+
+        // 3. 力量与耐力跑评分及附加分核算
+        let sStr = 0, sRun = 0, bStr = 0, bRun = 0;
+        const bonusRule = currentTYStandards.bonusRule || DEFAULT_TY_STDS.bonusRule;
+
+        if (isMale) {
+            const pullVal = getVal(["引体"]);
+            sStr = realGetScore(pullVal, currentTYStandards.str[key], 1);
+            if (sStr === 100 && bonusRule.str && bonusRule.str["男"]) {
+                bStr = getBonus(parseFloat(pullVal), currentTYStandards.str[key], bonusRule.str["男"], 1);
+            }
+
+            const tRun = parseTime(getVal(["1000米", "1000", "耐力跑"]));
+            sRun = tRun > 0 ? realGetScore(tRun, currentTYStandards.runL[key], -1) : 0;
+            if (sRun === 100 && bonusRule.run && bonusRule.run["男"]) {
+                bRun = getBonus(tRun, currentTYStandards.runL[key], bonusRule.run["男"], -1);
+            }
+        } else {
+            const situpVal = getVal(["仰卧"]);
+            sStr = realGetScore(situpVal, currentTYStandards.str[key], 1);
+            if (sStr === 100 && bonusRule.str && bonusRule.str["女"]) {
+                bStr = getBonus(parseFloat(situpVal), currentTYStandards.str[key], bonusRule.str["女"], 1);
+            }
+
+            const tRun = parseTime(getVal(["800米", "800", "耐力跑"]));
+            sRun = tRun > 0 ? realGetScore(tRun, currentTYStandards.runL[key], -1) : 0;
+            if (sRun === 100 && bonusRule.run && bonusRule.run["女"]) {
+                bRun = getBonus(tRun, currentTYStandards.runL[key], bonusRule.run["女"], -1);
+            }
+        }
+
+        // 4. 权重计算
+        const W = currentTYStandards.weights || DEFAULT_TY_STDS.weights;
+        const baseScore = (bmiS * W.bmi) + (sLung * W.lung) + (s50 * W.run50) + 
+                          (sJump * W.jump) + (sSit * W.sit) + (sStr * W.str) + (sRun * W.runL);
+        const finalBaseScore = parseFloat(baseScore.toFixed(1));
+
+        // 5. 合并附加分并生成最终总分
+        const bonusScore = Math.min(20, bStr + bRun);
+        const finalTotalScore = parseFloat((baseScore + bonusScore).toFixed(1));
+
+        // 🌟 核心：附加分计入评定等级，严格按最终总分核定优良
+        let levelText = '不及格';
+        if (finalTotalScore >= 90) levelText = '优秀';
+        else if (finalTotalScore >= 80) levelText = '良好';
+        else if (finalTotalScore >= 60) levelText = '及格';
 
         return {
-            score: finalScore,
-            baseScore: finalBaseScore,
-            bonusScore: totalBonus,
-            level: getLevelText(finalBaseScore)
+            score: finalTotalScore,      // 最终总分 (含附加分)
+            baseScore: finalBaseScore,   // 基础标准分
+            bonusScore: bonusScore,      // 附加分
+            level: levelText             // 等级 (按含附加分的总分评定)
         };
     }
-
+    // 班级与数据采集工作区[cite: 1]
     function initTcClassOptions() {
         const clsSelect = document.getElementById('tcClassSelect');
         if (!clsSelect) return;
@@ -772,6 +1395,7 @@
         clsSelect.innerHTML = html;
     }
 
+    // 1. 项目下拉选项拆分：男女专属项目独立显示
     function renderTcProjectList() {
         const cls = document.getElementById('tcClassSelect').value;
         const projSelect = document.getElementById('tcProjectSelect');
@@ -786,16 +1410,19 @@
         projSelect.innerHTML = `
             <option value="">-- ② 选项目 --</option>
             <option value="50米">50米跑 (秒)</option>
-            <option value="runL">耐力跑 (男生1000m / 女生800m)</option>
+            <option value="1000米">1000米跑 (分.秒)</option>
+            <option value="800米">800米跑 (分.秒)</option>
+            <option value="引体向上">引体向上 (次)</option>
+            <option value="仰卧起坐">一分钟仰卧起坐 (次)</option>
             <option value="立定跳远">立定跳远 (cm)</option>
             <option value="坐位体前屈">坐位体前屈 (cm)</option>
             <option value="肺活量">肺活量 (ml)</option>
             <option value="身高">身高 (cm)</option>
             <option value="体重">体重 (kg)</option>
-            <option value="str">力量类 (男生引体 / 女生仰卧)</option>
         `;
     }
 
+    // 2. 批量录入表格渲染：根据性别自动过滤学生名册
     function renderTcBatchEntryTable() {
         const cls = document.getElementById('tcClassSelect').value;
         const proj = document.getElementById('tcProjectSelect').value;
@@ -806,22 +1433,35 @@
             return;
         }
 
-        const studentList = students[cls] || [];
-        if (studentList.length === 0) {
+        const rawList = students[cls] || [];
+        if (rawList.length === 0) {
             workspace.innerHTML = `<div style="text-align:center; color:#888; padding:15px;">该班暂无学生，请先导入名册。</div>`;
             workspace.style.display = 'block';
             removeStopwatchPanel();
             return;
         }
 
-        let isRunningProject = (proj === '50米' || proj === 'runL');
+        // 🌟 核心：按项目性别属性严格过滤名单
+        let studentList = rawList;
+        if (proj === '引体向上' || proj === '1000米') {
+            studentList = rawList.filter(s => s.gender === '男');
+        } else if (proj === '仰卧起坐' || proj === '800米') {
+            studentList = rawList.filter(s => s.gender === '女');
+        }
+
+        if (studentList.length === 0) {
+            workspace.innerHTML = `<div style="text-align:center; color:#888; padding:20px;">该班暂无符合本项目的学生（无${proj === '引体向上' || proj === '1000米' ? '男生' : '女生'}）。</div>`;
+            workspace.style.display = 'block';
+            removeStopwatchPanel();
+            return;
+        }
+
+        // 跑步类（50米、800米、1000米）均支持秒表快速填录
+        let isRunningProject = (proj === '50米' || proj === '800米' || proj === '1000米');
 
         let rowsHtml = '';
         studentList.forEach((s, idx) => {
-            let actualProjName = proj;
-            if (proj === 'str') actualProjName = s.gender === '男' ? '引体向上' : '仰卧起坐';
-            if (proj === 'runL') actualProjName = s.gender === '男' ? '1000米' : '800米';
-
+            const actualProjName = proj;
             const sScores = s.scores || {};
             const curVal = sScores[actualProjName] || '';
             let initialPts = (actualProjName === '身高' || actualProjName === '体重') ? '' : (queryStandardScore(actualProjName, curVal, cls, s.gender) || 0);
@@ -832,7 +1472,7 @@
                     <td style="padding:10px 4px; font-weight:800; font-size:15px; color:#0D47A1; cursor:pointer;" 
                         class="tc-student-click-target" onclick="handleTcNameClick(${idx})">
                         ${s.name}
-                        <span style="font-size:11px; display:block; color:#777; font-weight:normal;">${s.gender}</span>
+                        <span style="font-size:11px; display:block; color:${s.gender === '男' ? '#1976D2' : '#E91E63'}; font-weight:normal;">${s.gender}</span>
                     </td>
                     <td style="padding:6px 4px;">
                         <input type="text" inputmode="decimal" class="tc-batch-input" 
@@ -852,13 +1492,14 @@
         });
 
         workspace.innerHTML = `
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px; padding:0 2px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <div style="font-size:13px; font-weight:bold; color:#BF360C;">
-                    ⚡ 当前采集：<span style="font-size:15px; color:#E65100;">${proj === 'str' ? '力量类' : (proj === 'runL' ? '耐力跑(800/1000m)' : proj)}</span>
+                    ⚡ 当前采集：<span style="font-size:15px; color:#E65100;">${proj}</span>
+                    <span style="font-size:12px; color:#666; margin-left:4px;">(共 ${studentList.length} 人)</span>
                 </div>
-                <button onclick="saveAndExitTcProject()" style="background:#E65100; margin:0; width:auto; padding:6px 14px; font-size:13px; font-weight:bold; border-radius:6px;">💾 完成保存</button>
+                <button onclick="saveAndExitTcProject()" style="background:#E65100; margin:0; width:auto; padding:6px 14px; font-size:13px;">💾 完成保存</button>
             </div>
-            <div style="max-height:55vh; overflow-y:auto; border:1px solid #FFE0B2; border-radius:8px; background:#fff; -webkit-overflow-scrolling:touch;">
+            <div style="max-height:52vh; overflow-y:auto; border:1px solid #FFE0B2; border-radius:8px; background:#fff; -webkit-overflow-scrolling:touch;">
                 <table style="width:100%; border-collapse:collapse;">
                     <thead style="position:sticky; top:0; background:#FFE0B2; color:#BF360C; font-size:12px; z-index:2;">
                         <tr>
@@ -871,19 +1512,21 @@
                     <tbody>${rowsHtml}</tbody>
                 </table>
             </div>
-            <button onclick="saveAndExitTcProject()" style="background:#2E7D32; font-size:15px; font-weight:bold; margin-top:10px; padding:12px; border-radius:8px;">💾 保存当前成绩并选下一项</button>
+            <button onclick="saveAndExitTcProject()" style="background:#2E7D32; font-size:15px; font-weight:bold; margin-top:10px; padding:10px; width:100%;">💾 保存当前成绩并选下一项</button>
         `;
         workspace.style.display = 'block';
 
-        // 🌟 核心：50米或耐力跑(800m/1000m)均唤起秒表面板
-        if (isRunningProject) {
-            renderStopwatchFloatPanel(proj);
+        // 唤起对应类型秒表
+        if (proj === '50米') {
+            renderStopwatchFloatPanel('50米');
+        } else if (proj === '800米' || proj === '1000米') {
+            renderStopwatchFloatPanel('runL');
         } else {
             removeStopwatchPanel();
         }
     }
 
-   function onTcBatchScoreInput(inputElem, className) {
+    function onTcBatchScoreInput(inputElem, className) {
         const idx = inputElem.getAttribute('data-idx');
         const gender = inputElem.getAttribute('data-gender');
         const proj = inputElem.getAttribute('data-proj');
@@ -891,7 +1534,7 @@
         const val = inputElem.value.trim();
         const badge = document.getElementById(`tc-badge-${idx}`);
 
-        // 🌟 1. 即时同步到内存对象与缓存，确保弹窗随时能读到最新成绩
+        let currentGradeId = '';
         if (students[className]) {
             const sObj = students[className].find(s => s.name === sName);
             if (sObj) {
@@ -901,6 +1544,7 @@
                 } else {
                     sObj.scores[proj] = val;
                 }
+                currentGradeId = sObj.gradeId || '';
                 localStorage.setItem('tc_standalone_students', JSON.stringify(students));
             }
         }
@@ -910,7 +1554,7 @@
             return;
         }
 
-        const calculated = queryStandardScore(proj, val, className, gender);
+        const calculated = queryStandardScore(proj, val, className, gender, currentGradeId);
         let pts = calculated !== null ? calculated : 0;
         if (badge) {
             badge.innerText = pts + "分";
@@ -1045,12 +1689,12 @@
                 </div>
                 <div class="score-row">
                     <label>${gender==='男'?'1000米跑':'800米跑'}:</label>
-                    <input type="text" class="student-score-field" data-proj="${gender==='男'?'1000米':'800米'}" value="${gender==='男'?(currentScores['1000米']||''):(currentScores['800米']||'')}" placeholder="分.秒(如: 3.45)" oninput="updateTcLiveScore('${className}','${gender}')">
+                    <input type="text" class="student-score-field" data-proj="${gender==='男'?'1000米':'800米'}" value="${gender==='男'?(currentScores['1000米']||''):(currentScores['800米']||'')}" placeholder="分.秒.毫秒" oninput="updateTcLiveScore('${className}','${gender}')">
                     <div class="live-score-badge" id="live-badge-${gender==='男'?'1000米':'800米'}">0分</div>
                 </div>
             </div>
 
-            <button onclick="saveStudentTcScores('${className}', '${studentName}')" style="background-color: #E65100;">💾 保存体测成绩</button>
+            <button onclick="saveStudentTcScores('${className}', '${studentName}')" style="background-color: #E65100; width:100%;">💾 保存体测成绩</button>
         `;
         document.getElementById('calendarModal').style.display = 'flex';
         updateTcLiveScore(className, gender);
@@ -1154,7 +1798,7 @@
         renderTcBatchEntryTable();
     }
 
-    // ================== 7. 两行双态秒表与自适应计时引擎 ==================
+    // 毫秒级双态悬浮秒表引擎[cite: 1]
     let swTimer = null;
     let swStartTime = 0;
     let swElapsedTime = 0;
@@ -1164,20 +1808,19 @@
     let swPanelPos = JSON.parse(localStorage.getItem('sw_tc_pos')) || { right: 15, bottom: 60 };
     let currentStopwatchProjectType = '50米';
 
-    // 格式化输出到流水与表格中的成绩
-function formatTimeByProject(ms, projType) {
-    let totalSec = ms / 1000;
-    if (projType === 'runL') {
-        let m = Math.floor(totalSec / 60);
-        let s = Math.floor(totalSec % 60);
-        let cs = Math.floor((ms % 1000) / 10); // 两位毫秒/百分秒 (00 - 99)
-        let sStr = s < 10 ? '0' + s : String(s);
-        let csStr = cs < 10 ? '0' + cs : String(cs);
-        return `${m}.${sStr}.${csStr}`; // 格式为：分.秒.毫秒 (例如 3.42.56)
-    } else {
-        return totalSec.toFixed(2); // 50米依然显示秒数 (例如 7.85)
+    function formatTimeByProject(ms, projType) {
+        let totalSec = ms / 1000;
+        if (projType === 'runL') {
+            let m = Math.floor(totalSec / 60);
+            let s = Math.floor(totalSec % 60);
+            let cs = Math.floor((ms % 1000) / 10);
+            let sStr = s < 10 ? '0' + s : String(s);
+            let csStr = cs < 10 ? '0' + cs : String(cs);
+            return `${m}.${sStr}.${csStr}`;
+        } else {
+            return totalSec.toFixed(2);
+        }
     }
-}
 
     function formatDisplayClock(ms) {
         let totalSec = Math.floor(ms / 1000);
@@ -1213,8 +1856,8 @@ function formatTimeByProject(ms, projType) {
         const screenH = window.innerHeight || document.documentElement.clientHeight;
 
         if (swPanelPos.left !== undefined && swPanelPos.top !== undefined && 
-            swPanelPos.left >= 0 && swPanelPos.left < (screenW - 100) &&
-            swPanelPos.top >= 0 && swPanelPos.top < (screenH - 100)) {
+            swPanelPos.left >= 0 && swPanelPos.left < (screenW - 140) &&
+            swPanelPos.top >= 0 && swPanelPos.top < (screenH - 140)) {
             panel.style.left = swPanelPos.left + 'px';
             panel.style.top = swPanelPos.top + 'px';
             panel.style.right = 'auto';
@@ -1230,8 +1873,8 @@ function formatTimeByProject(ms, projType) {
 
         panel.innerHTML = `
             <div class="sw-drag-handle" id="swDragBar">
-                <span style="font-size:11px; color:#FFB74D; font-weight:bold;">⚡ ${projTitle}</span>
-                <span style="font-size:10px; color:#bbb;">⠿ 拖动</span>
+                <span style="font-size:12px; color:#FFB74D; font-weight:bold;">⚡ ${projTitle}</span>
+                <span style="font-size:11px; color:#bbb;">⠿ 拖动</span>
             </div>
             <div class="sw-timer-display" id="swTimeDisplay">0.00</div>
             
@@ -1239,7 +1882,7 @@ function formatTimeByProject(ms, projType) {
             <button id="swRow2Btn" class="sw-btn-row btn-reset-state" onclick="handleSwRow2Action()">🔄 重置</button>
             
             <div id="swLapsWrapper" style="display:none; margin-top:2px;">
-                <div style="font-size:10px; color:#aaa; margin-bottom:2px; display:flex; justify-content:space-between;">
+                <div style="font-size:11px; color:#aaa; margin-bottom:2px; display:flex; justify-content:space-between;">
                     <span>流水(点名填录):</span>
                     <span id="swLapCountTag" style="color:#FFB74D;">0次</span>
                 </div>
@@ -1401,8 +2044,6 @@ function formatTimeByProject(ms, projType) {
     function setPendingLapTime(timeStr) {
         selectedPendingLapTime = timeStr;
         renderStopwatchLapsList();
-        
-        // 高亮姓名列，明确告知体育老师可点击填入
         const targets = document.querySelectorAll('.tc-student-click-target');
         targets.forEach(el => el.classList.add('awaiting-target-name'));
     }
@@ -1439,105 +2080,867 @@ function formatTimeByProject(ms, projType) {
             return;
         }
 
+        onTcBatchScoreInput(input, cls);
         const studentName = input.getAttribute('data-name');
         openScoreModal(cls, studentName);
     }
 
+    // 数据分析看板统计计算[cite: 1]
+    function populateAnalysisClassFilter() {
+        const select = document.getElementById('analysisClassSelect');
+        let classNames = Object.keys(students);
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classNames = classNames.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        let html = '<option value="ALL">全部班级 (全校汇总)</option>';
+        classNames.forEach(c => {
+            html += `<option value="${c}">${c}</option>`;
+        });
+        select.innerHTML = html;
+    }
+
+    function computeAndRenderAnalysisDashboard() {
+        const selectedScope = document.getElementById('analysisClassSelect').value;
+        let classList = Object.keys(students);
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        if (selectedScope !== 'ALL') {
+            classList = [selectedScope];
+        }
+
+        let totalStudents = 0;
+        let sumTotalScore = 0;
+        let countYX = 0, countYL = 0, countBK = 0, countNL = 0;
+
+        const projectKeys = [
+            { key: "50米", label: "50米跑 (全员)", targetGender: null },
+            { key: "1000米", label: "1000米跑 (男生)", targetGender: "男" },
+            { key: "800米", label: "800米跑 (女生)", targetGender: "女" },
+            { key: "引体向上", label: "引体向上 (男生)", targetGender: "男" },
+            { key: "仰卧起坐", label: "仰卧起坐 (女生)", targetGender: "女" },
+            { key: "立定跳远", label: "立定跳远 (全员)", targetGender: null },
+            { key: "坐位体前屈", label: "坐位体前屈 (全员)", targetGender: null },
+            { key: "肺活量", label: "肺活量 (全员)", targetGender: null },
+            { key: "体重指数(BMI)", label: "体重指数(BMI)", targetGender: null }
+        ];
+
+        let projectStats = {};
+        projectKeys.forEach(p => {
+            projectStats[p.key] = { 
+                label: p.label, 
+                testedCount: 0, 
+                sumScore: 0, 
+                passCount: 0, 
+                goodCount: 0
+            };
+        });
+
+        classList.forEach(cls => {
+            const list = students[cls] || [];
+            list.forEach(s => {
+                totalStudents++;
+                // 传传入 s.gradeId 计算含附加分的总评
+                const fit = calculateFitnessTotalScore(s.scores || {}, cls, s.gender || '男', s.gradeId || '');
+                sumTotalScore += fit.score;
+
+                // 统计含附加分后的四级人数
+                if (fit.level === '优秀') countYX++;
+                else if (fit.level === '良好') countYL++;
+                else if (fit.level === '及格') countBK++;
+                else countNL++;
+
+                // 各单项得分统计
+                const sScores = s.scores || {};
+                projectKeys.forEach(p => {
+                    if (p.targetGender && s.gender !== p.targetGender) return;
+                    let actualP = p.key;
+                    let val = sScores[actualP];
+                    if (val === undefined || val === null || String(val).trim() === '') {
+                        if (p.key === '1000米' && s.gender === '男') val = sScores['耐力跑'] || sScores['runL'];
+                        else if (p.key === '800米' && s.gender === '女') val = sScores['耐力跑'] || sScores['runL'];
+                        else if (p.key === '引体向上' && s.gender === '男') val = sScores['力量类'] || sScores['str'];
+                        else if (p.key === '仰卧起坐' && s.gender === '女') val = sScores['力量类'] || sScores['str'];
+                        else if (p.key === '体重指数(BMI)') val = sScores["体重指数(BMI)"] || sScores["BMI"];
+                    }
+
+                    if (val !== undefined && val !== null && String(val).trim() !== '') {
+                        let pts = queryStandardScore(actualP, val, cls, s.gender, s.gradeId || '');
+                        if (pts !== null && pts !== undefined) {
+                            projectStats[p.key].testedCount++;
+                            projectStats[p.key].sumScore += pts;
+                            if (pts >= 60) projectStats[p.key].passCount++;
+                            if (pts >= 80) projectStats[p.key].goodCount++;
+                        }
+                    }
+                });
+            });
+        });
+
+        // 基础指标核算
+        document.getElementById('an-total-students').innerText = totalStudents;
+        let avgScore = totalStudents > 0 ? (sumTotalScore / totalStudents).toFixed(1) : "0.0";
+        document.getElementById('an-avg-score').innerText = avgScore;
+
+        // 🌟 优良率 = (优秀人数 + 良好人数) / 总人数
+        let passRate = totalStudents > 0 ? (((countYX + countYL + countBK) / totalStudents) * 100).toFixed(1) : 0;
+        let excelRate = totalStudents > 0 ? (((countYX + countYL) / totalStudents) * 100).toFixed(1) : 0;
+        document.getElementById('an-pass-rate').innerText = `${passRate}%`;
+        document.getElementById('an-excellent-rate').innerText = `${excelRate}%`;
+
+        // 等级进度条与结构标签
+        let pYX = totalStudents > 0 ? ((countYX / totalStudents) * 100).toFixed(1) : 0;
+        let pYL = totalStudents > 0 ? ((countYL / totalStudents) * 100).toFixed(1) : 0;
+        let pBK = totalStudents > 0 ? ((countBK / totalStudents) * 100).toFixed(1) : 0;
+        let pNL = totalStudents > 0 ? ((countNL / totalStudents) * 100).toFixed(1) : 0;
+
+        document.getElementById('bar-yx').style.width = `${pYX}%`;
+        document.getElementById('bar-yl').style.width = `${pYL}%`;
+        document.getElementById('bar-bk').style.width = `${pBK}%`;
+        document.getElementById('bar-nl').style.width = `${pNL}%`;
+
+        document.getElementById('tag-yx').innerText = `${countYX}人 (${pYX}%)`;
+        document.getElementById('tag-yl').innerText = `${countYL}人 (${pYL}%)`;
+        document.getElementById('tag-bk').innerText = `${countBK}人 (${pBK}%)`;
+        document.getElementById('tag-nl').innerText = `${countNL}人 (${pNL}%)`;
+
+        // 渲染单项汇总表格
+        const tbody = document.getElementById('analysisProjectTbody');
+        let tableRowsHtml = '';
+        projectKeys.forEach(p => {
+            const stat = projectStats[p.key];
+            let itemAvg = stat.testedCount > 0 ? (stat.sumScore / stat.testedCount).toFixed(1) : "-";
+            let itemPass = stat.testedCount > 0 ? ((stat.passCount / stat.testedCount) * 100).toFixed(1) + '%' : "-";
+            let itemGood = stat.testedCount > 0 ? ((stat.goodCount / stat.testedCount) * 100).toFixed(1) + '%' : "-";
+            
+            tableRowsHtml += `
+                <tr>
+                    <td style="font-weight:bold; text-align:left; padding-left:14px;">${stat.label}</td>
+                    <td>${stat.testedCount}</td>
+                    <td style="color:${parseFloat(itemAvg) < 60 ? '#D32F2F' : '#2E7D32'}; font-weight:bold;">${itemAvg}</td>
+                    <td>${itemPass}</td>
+                    <td style="color:${parseFloat(itemGood) >= 80 ? '#1976D2' : '#333'}; font-weight:bold;">${itemGood}</td>
+                </tr>
+            `;
+        });
+        tbody.innerHTML = tableRowsHtml;
+        renderStageGradeReportTable();
+    }
+
+    // ================== 数据上报专区核心功能（移植整合） ==================
+
+    // 辅助：学段与编号识别
+    function getEntryYearInfo(clsName) {
+        if (!clsName) return { gId: '', year: '', stage: '', num: '' };
+        const now = new Date();
+        const curYear = now.getFullYear();
+        const curMonth = now.getMonth() + 1;
+        const academicYear = curMonth >= 8 ? curYear : curYear - 1;
+
+        let stage = '', gradeNum = 0;
+        if (clsName.includes('高') || clsName.includes('职') || /1[012]/.test(clsName)) {
+            stage = '3';
+            if (clsName.includes('高三') || clsName.includes('12')) gradeNum = 3;
+            else if (clsName.includes('高二') || clsName.includes('11')) gradeNum = 2;
+            else if (clsName.includes('高一') || clsName.includes('10')) gradeNum = 1;
+        } else if (clsName.includes('初') || /^[789]/.test(clsName)) {
+            stage = '2';
+            if (clsName.includes('初三') || /^9/.test(clsName)) gradeNum = 3;
+            else if (clsName.includes('初二') || /^8/.test(clsName)) gradeNum = 2;
+            else if (clsName.includes('初一') || /^7/.test(clsName)) gradeNum = 1;
+        }
+
+        let n = 1;
+        const classTagMatch = clsName.match(/(\d+)(?=[班|级])/); 
+        if (classTagMatch) {
+            n = parseInt(classTagMatch[1]);
+        } else {
+            const endNumMatch = clsName.match(/(\d+)$/);
+            if (endNumMatch) {
+                let rawNum = parseInt(endNumMatch[1]);
+                n = rawNum > 100 ? (rawNum % 100) : rawNum;
+            }
+        }
+
+        const yearMatch = clsName.match(/(\d{4})级/);
+        let entryYear = yearMatch ? parseInt(yearMatch[1]) : (gradeNum > 0 ? academicYear - (gradeNum - 1) : academicYear);
+        const gId = (stage && gradeNum > 0) ? (stage + gradeNum) : '';
+        const numStr = String(n).padStart(2, '0');
+        const cId = gId ? `${entryYear}${stage}${numStr}` : '';
+
+        return { gId, cId, year: String(entryYear), stage, num: String(n) };
+    }
+
+    function getStandardClassName(clsName) {
+        if (!clsName) return '';
+        if (clsName.includes('级')) return clsName;
+        const info = getEntryYearInfo(clsName);
+        if (!info.year) return clsName;
+        return `${info.stage === '2' ? '初中' : '高中'}${info.year}级${info.num}班`;
+    }
+
+    // 辅助：上报时间分秒格式化 4'12"
+    function formatTimeNationalStandard(val) {
+        if (!val || val === '' || val === '-') return null;
+        let s = String(val).trim();
+        let totalSec = 0;
+        if (s.includes(':')) {
+            let p = s.split(':');
+            totalSec = (parseInt(p[0], 10) || 0) * 60 + (parseFloat(p[1]) || 0);
+        } else if (s.includes('.')) {
+            let p = s.split('.');
+            let m = parseInt(p[0], 10) || 0;
+            let sec = parseFloat(p[1]) || 0;
+            totalSec = m * 60 + sec;
+        } else {
+            let n = parseFloat(s);
+            if (!isNaN(n)) {
+                if (n >= 100) { totalSec = Math.floor(n / 100) * 60 + (n % 100); }
+                else { totalSec = n * 60; }
+            }
+        }
+        if (totalSec <= 0) return null;
+        const minutes = Math.floor(totalSec / 60);
+        const seconds = Math.round(totalSec % 60);
+        return `${minutes}′${String(seconds).padStart(2, '0')}″`;
+    }
+
+    // 辅助：民族转代码（去前导零）
+    const NATION_MAP = { "汉族":"1","蒙古族":"2","回族":"3","藏族":"4","维吾尔族":"5","苗族":"6","彝族":"7","壮族":"8","布依族":"9","朝鲜族":"10","满族":"11","侗族":"12","瑶族":"13","白族":"14","土家族":"15","哈尼族":"16","哈萨克族":"17","傣族":"18","黎族":"19","傈僳族":"20","佤族":"21","畲族":"22","高山族":"23","拉祜族":"24","水族":"25","东乡族":"26","纳西族":"27","景颇族":"28","柯尔克孜族":"29","土族":"30","达斡尔族":"31","仫佬族":"32","羌族":"33","布朗族":"34","撒拉族":"35","毛南族":"36","仡佬族":"37","锡伯族":"38","阿昌族":"39","普米族":"40","塔吉克族":"41","怒族":"42","乌孜别克族":"43","俄罗斯族":"44","鄂温克族":"45","德昂族":"46","保安族":"47","裕固族":"48","京族":"49","塔塔尔族":"50","独龙族":"51","鄂伦春族":"52","赫哲族":"53","门巴族":"54","珞巴族":"55","基诺族":"56","其他":"57","外国血统":"58" };
+    function formatNationCode(val) {
+        if (!val && val !== 0) return '1';
+        let s = String(val).trim();
+        if (/^\d+$/.test(s)) return String(parseInt(s, 10));
+        return NATION_MAP[s] || '1';
+    }
+
+    // 1. 智能校验
+    function runSmartCheckOnReport() {
+        let classList = Object.keys(students);
+        if (classList.length === 0) { alert('暂无体测数据！'); return; }
+
+        let cleanedUnitsCount = 0;
+        let warningLogs = [];
+
+        classList.forEach(cls => {
+            students[cls].forEach(s => {
+                const sc = s.scores || {};
+                
+                // 清洗非法字符
+                ['身高', '体重', '肺活量', '50米', '立定跳远', '坐位体前屈', '仰卧起坐', '引体向上', '1000米', '800米'].forEach(k => {
+                    if (sc[k]) {
+                        let original = String(sc[k]);
+                        let cleaned = original.replace(/['"”’‘：:，,]/g, '.').replace(/[^\d.-]/g, '');
+                        if (cleaned !== original) {
+                            sc[k] = cleaned;
+                            cleanedUnitsCount++;
+                        }
+                    }
+                });
+
+                // 身高/跳远缩放修复
+                if (sc['身高']) {
+                    let h = parseFloat(sc['身高']);
+                    if (h > 0 && h < 3) { sc['身高'] = (h * 100).toFixed(1); cleanedUnitsCount++; }
+                }
+                if (sc['立定跳远']) {
+                    let j = parseFloat(sc['立定跳远']);
+                    if (j > 0 && j < 4) { sc['立定跳远'] = Math.round(j * 100); cleanedUnitsCount++; }
+                }
+
+                // 范围边界校验[cite: 4]
+                const check = (projName, min, max, canZero = false) => {
+                    let v = sc[projName];
+                    if (v !== undefined && v !== null && v !== '') {
+                        let num = parseFloat(v);
+                        if (!canZero && num === 0) warningLogs.push(`【${cls} - ${s.name}】${projName} 为 0 值`);
+                        else if (num < min || num > max) warningLogs.push(`【${cls} - ${s.name}】${projName} 超出正常范围 (${min}~${max})`);
+                    }
+                };
+
+                check('身高', 100, 210);
+                check('体重', 20, 130);
+                check('肺活量', 500, 7500);
+                check('50米', 5.5, 15);
+                check('立定跳远', 90, 320);
+                check('坐位体前屈', -20, 40, true);
+                if (s.gender === '女') check('仰卧起坐', 3, 75);
+                if (s.gender === '男') check('引体向上', 0, 45, true);
+            });
+        });
+
+        localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+
+        if (warningLogs.length > 0) {
+            let sampleMsg = warningLogs.slice(0, 8).join('\n');
+            alert(`🔍 智能校验完毕！\n✅ 自动清理符号/单位: ${cleanedUnitsCount} 处\n⚠️ 发现 ${warningLogs.length} 项数值异常：\n\n${sampleMsg}${warningLogs.length > 8 ? '\n...' : ''}`);
+        } else {
+            alert(`🔍 智能校验完成！\n✅ 数据非常健康，未发现明显异常或 0 值。\n✨ 自动格式化清洗: ${cleanedUnitsCount} 处`);
+        }
+    }
+
+    // 微调原始数据快照存储 Key
+    const OPTIMIZE_BACKUP_KEY = 'tc_sys_students_before_optimize';
+
+    // 2. 黑科技 (梯度微调：自动快照备份 + 数据分析深度联动)
+    function openOptimizeDialogOnReport() {
+        let rateInput = prompt("请输入全校或当前负责班级【目标优良率 %】\n例如输入 85 代表通过梯度微调让优良率达到 85%：", "85");
+        if (!rateInput) return;
+        let targetRate = parseFloat(rateInput);
+        if (isNaN(targetRate) || targetRate <= 0 || targetRate > 100) { alert('请输入有效的百分比 (1-100)！'); return; }
+
+        let classList = Object.keys(students);
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        // 🌟 1. 微调前自动建立原始快照（仅在首次微调或未撤销时备份）
+        if (!localStorage.getItem(OPTIMIZE_BACKUP_KEY)) {
+            localStorage.setItem(OPTIMIZE_BACKUP_KEY, JSON.stringify(students));
+        }
+
+        let allCandidates = [];
+        let totalCount = 0;
+        let initialGoodCount = 0;
+
+        classList.forEach(cls => {
+            students[cls].forEach(s => {
+                totalCount++;
+                let fit = calculateFitnessTotalScore(s.scores || {}, cls, s.gender || '男', s.gradeId || '');
+                if (fit.score >= 80) {
+                    initialGoodCount++;
+                } else if (fit.score >= 74) {
+                    allCandidates.push({ student: s, className: cls, currentScore: fit.score });
+                }
+            });
+        });
+
+        if (totalCount === 0) { alert('无学生数据！'); return; }
+
+        let currentRate = (initialGoodCount / totalCount) * 100;
+        if (currentRate >= targetRate) {
+            alert(`当前优良率已达到 ${currentRate.toFixed(1)}%，无需额外调整！`);
+            return;
+        }
+
+        allCandidates.sort((a, b) => b.currentScore - a.currentScore);
+
+        let modifiedStudentsCount = 0;
+        for (let item of allCandidates) {
+            let curGoodRate = (initialGoodCount / totalCount) * 100;
+            if (curGoodRate >= targetRate) break;
+
+            let s = item.student;
+            let cls = item.className;
+            if (!s.scores) s.scores = {};
+
+            // 50米跑 (减少 0.1~0.35s)
+            if (s.scores['50米']) {
+                let v = parseFloat(s.scores['50米']);
+                if (!isNaN(v) && v > 7.0) {
+                    s.scores['50米'] = (v - (Math.random() * 0.25 + 0.1)).toFixed(2);
+                }
+            }
+
+            // 耐力跑 (缩短 3~10秒)
+            let runProj = (s.gender === '男' || s.gender === '1') ? '1000米' : '800米';
+            let rawRun = s.scores[runProj] || s.scores['耐力跑'];
+            if (rawRun) {
+                let totalSec = parseTime(rawRun);
+                if (totalSec > 180) {
+                    totalSec -= Math.floor(Math.random() * 8 + 3);
+                    let m = Math.floor(totalSec / 60);
+                    let sec = Math.floor(totalSec % 60);
+                    const newRunStr = `${m}'${String(sec).padStart(2, '0')}"`;
+                    s.scores[runProj] = newRunStr;
+                    if (s.scores['耐力跑']) s.scores['耐力跑'] = newRunStr;
+                }
+            }
+
+            // 立定跳远 (+3~9cm)
+            if (s.scores['立定跳远']) {
+                let j = parseFloat(s.scores['立定跳远']);
+                if (!isNaN(j)) {
+                    if (j < 5) j = Math.round(j * 100);
+                    s.scores['立定跳远'] = String(Math.round(j + Math.random() * 6 + 3));
+                }
+            }
+
+            // 肺活量 (+100~300ml)
+            if (s.scores['肺活量']) {
+                let l = parseFloat(s.scores['肺活量']);
+                if (!isNaN(l)) {
+                    s.scores['肺活量'] = String(Math.round(l + Math.random() * 200 + 100));
+                }
+            }
+
+            let newFit = calculateFitnessTotalScore(s.scores, cls, s.gender || '男', s.gradeId || '');
+            if (newFit.score >= 80) {
+                initialGoodCount++;
+                modifiedStudentsCount++;
+            }
+        }
+
+        // 保存微调后的数据
+        localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+        let finalRate = (initialGoodCount / totalCount) * 100;
+        alert(`⚡ 梯度微调完成！\n微调达标人数: ${modifiedStudentsCount} 人\n原优良率: ${currentRate.toFixed(1)}% ➔ 现优良率: ${finalRate.toFixed(1)}%\n\n提示：数据分析看板与导出上报表已即时同步！`);
+
+        // 🌟 核心：无条件强制刷新分析看板与当前采集视图
+        computeAndRenderAnalysisDashboard();
+        const clsSelect = document.getElementById('tcClassSelect');
+        if (clsSelect && clsSelect.value) {
+            renderTcBatchEntryTable();
+        }
+    }
+
+    // 🌟 新增：撤销微调并回滚原始成绩
+    function rollbackOptimization() {
+        const rawBackup = localStorage.getItem(OPTIMIZE_BACKUP_KEY);
+        if (!rawBackup) {
+            alert('当前没有可供撤销的微调记录！');
+            return;
+        }
+
+        if (!confirm('⚠️ 确定要撤销微调操作吗？\n系统将把学生成绩完整回滚到微调前的原始状态。')) return;
+
+        // 恢复快照
+        students = JSON.parse(rawBackup);
+        localStorage.setItem('tc_standalone_students', JSON.stringify(students));
+        // 清理备份缓存
+        localStorage.removeItem(OPTIMIZE_BACKUP_KEY);
+
+        alert('✅ 已成功撤销微调，所有学生成绩已恢复为原始录入状态！');
+
+        // 刷新所有界面视图
+        computeAndRenderAnalysisDashboard();
+        const clsSelect = document.getElementById('tcClassSelect');
+        if (clsSelect && clsSelect.value) {
+            renderTcBatchEntryTable();
+        }
+    }
+
+    // 3. 导出符合教育部上报规范的标准表（严格优先提取自带年级与班级编号）
+    function exportNationalStandardReport() {
+        let classList = Object.keys(students);
+        if (classList.length === 0) { alert('暂无体测数据！'); return; }
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        const header = [
+            "年级编号", "班级编号", "班级名称", "学籍号", "民族代码", 
+            "姓名", "性别", "出生日期", "家庭住址", 
+            "身高", "体重", "肺活量", "50米跑", "立定跳远", 
+            "坐位体前屈", "800米跑", "1000米跑", "一分钟仰卧起坐", "引体向上"
+        ];
+
+        let body = [];
+        classList.forEach(cls => {
+            const classInfo = getEntryYearInfo(cls);
+            students[cls].forEach(s => {
+                const sc = s.scores || {};
+                const isMale = (s.gender === '男' || s.gender === '1');
+
+                // 🌟 核心修复：优先提取学生自带的 gradeId 与 classId，无自带值时才使用 classInfo 兜底
+                let finalGradeId = s.gradeId || classInfo.gId || '';
+                let finalClassId = s.classId || classInfo.cId || '';
+
+                // 如果依然缺失班级编号，尝试由年级编号与班级名自动补全
+                if (!finalClassId && finalGradeId) {
+                    const numMatch = cls.match(/(\d+)(?=[班|级])/) || cls.match(/(\d+)$/);
+                    const n = numMatch ? parseInt(numMatch[1], 10) : 1;
+                    const numStr = String(n > 100 ? (n % 100) : n).padStart(2, '0');
+                    const yearMatch = cls.match(/(\d{4})/);
+                    const entryYear = yearMatch ? yearMatch[1] : (classInfo.year || new Date().getFullYear());
+                    finalClassId = `${entryYear}${finalGradeId.charAt(0)}${numStr}`;
+                }
+
+                let r1000Val = isMale ? formatTimeNationalStandard(sc['1000米'] || sc['耐力跑']) : null;
+                let r800Val = !isMale ? formatTimeNationalStandard(sc['800米'] || sc['耐力跑']) : null;
+                let situpVal = !isMale ? (sc['仰卧起坐'] || null) : null;
+                let pullVal = isMale ? (sc['引体向上'] || null) : null;
+
+                body.push([
+                    finalGradeId,
+                    finalClassId,
+                    getStandardClassName(cls) || cls,
+                    s.stuCode || '',
+                    formatNationCode(s.nation || '1'),
+                    s.name || '',
+                    isMale ? 1 : 2,
+                    s.dob || '',
+                    s.addr || '',
+                    sc['身高'] || null,
+                    sc['体重'] || null,
+                    sc['肺活量'] || null,
+                    sc['50米'] || null,
+                    sc['立定跳远'] || null,
+                    sc['坐位体前屈'] || null,
+                    r800Val,
+                    r1000Val,
+                    situpVal,
+                    pullVal
+                ]);
+            });
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
+
+        // 设置文本格式防科学计数法与美化列宽
+        ws['!cols'] = [
+            { wch: 10 }, { wch: 14 }, { wch: 18 }, { wch: 20 }, { wch: 10 },
+            { wch: 10 }, { wch: 6 }, { wch: 12 }, { wch: 24 },
+            { wch: 8 }, { wch: 8 }, { wch: 10 }, { wch: 8 }, { wch: 10 },
+            { wch: 12 }, { wch: 10 }, { wch: 10 }, { wch: 14 }, { wch: 10 }
+        ];
+
+        XLSX.utils.book_append_sheet(wb, ws, "体质上报标准表");
+        XLSX.writeFile(wb, `全国体质健康上报数据_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    // 4. 导出测试环境信息配置[cite: 4]
+    function openEnvSettingsModal() {
+        let classList = Object.keys(students);
+        if (classList.length === 0) { alert('暂无班级数据！'); return; }
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        const savedConfig = JSON.parse(localStorage.getItem(ENV_STORAGE_KEY) || '{}');
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('env-modal-start-date').value = savedConfig.startDate || today;
+        document.getElementById('env-modal-def-teacher').value = savedConfig.defaultTeacher || '';
+
+        const container = document.getElementById('envClassTeacherInputsContainer');
+        container.innerHTML = '';
+        classList.forEach(cls => {
+            const savedT = (savedConfig.classTeachers && savedConfig.classTeachers[cls]) || savedConfig.defaultTeacher || '';
+            container.innerHTML += `
+                <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px dashed #eee;">
+                    <span style="font-size:13px; font-weight:bold; color:#333;">${cls}</span>
+                    <input type="text" class="env-cls-teacher-input" data-cls="${cls}" value="${savedT}" placeholder="教师姓名" style="width:140px; margin:0; padding:4px 6px; font-size:12px;">
+                </div>
+            `;
+        });
+
+        document.getElementById('envSettingsModal').style.display = 'flex';
+    }
+
+    function applyDefaultTeacherToAllInputs() {
+        const def = document.getElementById('env-modal-def-teacher').value.trim();
+        if (!def) { alert('请先输入默认测试员姓名！'); return; }
+        document.querySelectorAll('.env-cls-teacher-input').forEach(inp => {
+            inp.value = def;
+        });
+    }
+
+    function getWorkDate(startStr, offsetDays) {
+        let date = new Date(startStr);
+        let added = 0;
+        while (date.getDay() === 0 || date.getDay() === 6) { date.setDate(date.getDate() + 1); }
+        while (added < offsetDays) {
+            date.setDate(date.getDate() + 1);
+            if (date.getDay() !== 0 && date.getDay() !== 6) { added++; }
+        }
+        return date.toISOString().slice(0, 10).replace(/-/g, '/');
+    }
+
+    function executeExportEnvExcel() {
+        const startDate = document.getElementById('env-modal-start-date').value;
+        const defTeacher = document.getElementById('env-modal-def-teacher').value.trim();
+        if (!startDate) { alert('请选择起始测试日期！'); return; }
+
+        let classTeachers = {};
+        document.querySelectorAll('.env-cls-teacher-input').forEach(inp => {
+            classTeachers[inp.getAttribute('data-cls')] = inp.value.trim() || defTeacher || '体育教师';
+        });
+
+        localStorage.setItem(ENV_STORAGE_KEY, JSON.stringify({
+            startDate: startDate,
+            defaultTeacher: defTeacher,
+            classTeachers: classTeachers
+        }));
+
+        document.getElementById('envSettingsModal').style.display = 'none';
+
+        let classList = Object.keys(classTeachers);
+        const itemsConfig = [
+            { name: '身高', tool: '身高体重仪', group: 0 },
+            { name: '体重', tool: '身高体重仪', group: 0 },
+            { name: '肺活量', tool: '肺活量仪', group: 0 },
+            { name: '50米跑', tool: '秒表', group: 1 },
+            { name: '立定跳远', tool: '皮尺', group: 2 },
+            { name: '坐位体前屈', tool: '测试仪', group: 3 },
+            { name: '1000米跑', tool: '秒表', group: 4 },
+            { name: '引体向上', tool: '单杠', group: 5 },
+            { name: '800米跑', tool: '秒表', group: 6 },
+            { name: '一分钟仰卧起坐', tool: '仰卧垫', group: 7 }
+        ];
+
+        const sheetData = [['年级', '班级班号', '班级名称', '项目名称', '测试老师', '测试时间', '测试地点', '测试器材', '测试方式(手工/仪器)']];
+
+        classList.forEach((cls, clsIndex) => {
+            const classInfo = getEntryYearInfo(cls);
+            const teacher = classTeachers[cls];
+            const batchOffset = Math.floor(clsIndex / 4);
+
+            itemsConfig.forEach(item => {
+                const testDateStr = getWorkDate(startDate, batchOffset + item.group);
+                sheetData.push([
+                    classInfo.gId || '',
+                    classInfo.cId || '',
+                    getStandardClassName(cls) || cls,
+                    item.name,
+                    teacher,
+                    testDateStr,
+                    '操场',
+                    item.tool,
+                    '仪器'
+                ]);
+            });
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(sheetData);
+        XLSX.utils.book_append_sheet(wb, ws, "测试环境信息");
+        XLSX.writeFile(wb, `全校测试环境信息表_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+    // 5. 导出全校班级信息对照表[cite: 4]
+    function exportClassInfoTable() {
+        let classList = Object.keys(students);
+        if (classList.length === 0) { alert('暂无班级数据！'); return; }
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+
+        const header = ["年级编号", "班级编号", "班级名称"];
+        let body = [];
+
+        classList.forEach(cls => {
+            const classInfo = getEntryYearInfo(cls);
+            body.push([
+                classInfo.gId || '',
+                classInfo.cId || '',
+                getStandardClassName(cls) || cls
+            ]);
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet([header, ...body]);
+        XLSX.utils.book_append_sheet(wb, ws, "班级汇总");
+        XLSX.writeFile(wb, `全校班级信息汇总表_${new Date().toISOString().slice(0, 10)}.xlsx`);
+    }
+
+   // 智能解析全格式 Excel（精准识别 A 列年级编号，并同步回写标准中文年级）
     function importExcel(e) {
         const file = e.target.files[0];
         if (!file) return;
         
         const reader = new FileReader();
         const isCSV = file.name.endsWith('.csv');
-        document.getElementById('fileStatus').innerText = "正在智能解析导入...";
+        document.getElementById('fileStatus').innerText = "正在智能深度解析导入...";
 
         reader.onload = function(evt) {
             try {
                 const data = evt.target.result;
                 let workbook = isCSV ? XLSX.read(data, { type: 'string' }) : XLSX.read(data, { type: 'binary' });
-                const json = XLSX.utils.sheet_to_json(workbook.Sheets[workbook.SheetNames[0]]);
-                if (json.length === 0) { alert('表格内容为空！'); return; }
+                
+                let addStuCount = 0;
+                let updateScoreCount = 0;
+                let recognizedSheets = 0;
 
-                const firstRowKeys = Object.keys(json[0]);
-                let classField = "", nameField = "", genderField = "";
+                workbook.SheetNames.forEach(sheetName => {
+                    const sheet = workbook.Sheets[sheetName];
+                    const json = XLSX.utils.sheet_to_json(sheet, { header: 1 });
+                    if (!json || json.length < 2) return;
 
-                firstRowKeys.forEach(key => {
-                    let cleanedKey = String(key).replace(/\s+/g, ""); 
-                    if (cleanedKey.includes("班级")) classField = key;
-                    if (cleanedKey.includes("姓名") || cleanedKey.includes("学生")) nameField = key;
-                    if (cleanedKey.includes("性别")) genderField = key;
+                    // 1. 扫描前 10 行，自动定位实际表头所在行
+                    let headerRowIdx = -1;
+                    for (let i = 0; i < Math.min(json.length, 10); i++) {
+                        if (!json[i]) continue;
+                        const rowStr = json[i].join('|');
+                        if (rowStr.includes('姓名') || rowStr.includes('班级') || rowStr.includes('学籍号') || rowStr.includes('年级')) {
+                            headerRowIdx = i;
+                            break;
+                        }
+                    }
+                    if (headerRowIdx === -1) return;
+                    recognizedSheets++;
+
+                    // 2. 清洗表头（过滤换行符、回车与所有空格）
+                    const headerRow = json[headerRowIdx].map(s => String(s || '').trim().replace(/[\r\n\s]+/g, ''));
+                    const findCol = (keywords) => headerRow.findIndex(h => keywords.some(k => h.includes(k)));
+
+                    const col = {
+                        gradeId: findCol(['年级编号', '年级代码', '年级']), // 强化支持匹配 A 列
+                        cls: findCol(['班级名称']) !== -1 ? findCol(['班级名称']) : findCol(['班级']),
+                        clsId: findCol(['班级编号']),
+                        name: findCol(['姓名', '学生姓名']),
+                        gender: findCol(['性别']),
+                        stuCode: findCol(['学籍号', '学号']),
+                        nation: findCol(['民族代码', '民族']),
+                        dob: findCol(['出生日期', '生日']),
+                        addr: findCol(['家庭住址', '住址', '地址']),
+                        h: findCol(['身高']),
+                        w: findCol(['体重']),
+                        lung: findCol(['肺活量']),
+                        r50: findCol(['50米', '50米跑']),
+                        jump: findCol(['立定跳远', '跳远']),
+                        sit: findCol(['坐位体前屈', '体前屈']),
+                        situp: findCol(['仰卧起坐', '一分钟仰卧起坐']),
+                        pull: findCol(['引体向上', '引体']),
+                        r1000: findCol(['1000米', '1000米跑']),
+                        r800: findCol(['800米', '800米跑']),
+                        runL: findCol(['耐力跑', '长跑', '耐久跑'])
+                    };
+
+                    // 若 A 列索引未命中，但第 0 列包含 21-33 代码，则强制兜底为 A 列
+                    if (col.gradeId === -1 && json.length > headerRowIdx + 1) {
+                        const testVal = String(json[headerRowIdx + 1][0] || '').trim();
+                        if (/^(21|22|23|31|32|33)$/.test(testVal)) {
+                            col.gradeId = 0;
+                        }
+                    }
+
+                    if (col.cls === -1 || col.name === -1) return;
+
+                    // 3. 逐行录入并合并
+                    for (let r = headerRowIdx + 1; r < json.length; r++) {
+                        const row = json[r];
+                        if (!row || row.length === 0) continue;
+
+                        const cls = String(row[col.cls] || '').trim();
+                        const name = String(row[col.name] || '').trim();
+                        if (!cls || !name) continue;
+
+                        // 性别代码兼容：1 -> 男，2 -> 女
+                        let rawGender = col.gender > -1 ? String(row[col.gender] || '').trim() : '';
+                        let gender = '男';
+                        if (rawGender === '2' || rawGender.includes('女')) {
+                            gender = '女';
+                        } else if (rawGender === '1' || rawGender.includes('男')) {
+                            gender = '男';
+                        }
+
+                        // 权限班级自动关联
+                        if (currentUser && currentUser.role === 'teacher') {
+                            if (!currentUser.classes.includes(cls)) {
+                                currentUser.classes.push(cls);
+                                localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
+                                if (teacherAccounts[currentUser.username]) {
+                                    teacherAccounts[currentUser.username].classes = currentUser.classes;
+                                    localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
+                                }
+                            }
+                        }
+
+                        if (!students[cls]) students[cls] = [];
+
+                        const stuCodeVal = col.stuCode > -1 ? String(row[col.stuCode] || '').trim() : '';
+                        let sObj = students[cls].find(s => (stuCodeVal && s.stuCode && s.stuCode === stuCodeVal) || s.name === name);
+
+                        if (!sObj) {
+                            sObj = { name: name, gender: gender, scores: {} };
+                            students[cls].push(sObj);
+                            addStuCount++;
+                        } else {
+                            sObj.gender = gender;
+                            if (!sObj.scores) sObj.scores = {};
+                        }
+
+                        // 🌟 核心修复：优先提取 A 列年级编号，并同步转换出标准中文年级存入 sObj.grade
+                        let rawGid = (col.gradeId > -1 && row[col.gradeId] !== undefined) ? String(row[col.gradeId]).trim() : '';
+                        if (!rawGid) {
+                            const autoIds = getEntryYearInfo(cls);
+                            rawGid = autoIds.gId;
+                        }
+                        sObj.gradeId = rawGid;
+                        sObj.grade = normalizeGrade(rawGid || cls); // 确保写入 "初一"~"高三"
+
+                        // 写入学籍字段
+                        if (stuCodeVal) sObj.stuCode = stuCodeVal;
+                        if (col.clsId > -1 && row[col.clsId]) sObj.classId = String(row[col.clsId]).trim();
+                        if (col.nation > -1 && row[col.nation]) sObj.nation = String(row[col.nation]).trim();
+                        if (col.addr > -1 && row[col.addr]) sObj.addr = String(row[col.addr]).trim();
+
+                        // 日期格式化兼容
+                        if (col.dob > -1 && row[col.dob]) {
+                            let rawDob = row[col.dob];
+                            if (typeof rawDob === 'number' && rawDob > 25000) {
+                                const dObj = new Date(Math.round((rawDob - 25569) * 86400 * 1000));
+                                sObj.dob = `${dObj.getFullYear()}/${String(dObj.getMonth() + 1).padStart(2, '0')}/${String(dObj.getDate()).padStart(2, '0')}`;
+                            } else {
+                                sObj.dob = String(rawDob).trim().replace(/[-.]/g, '/');
+                            }
+                        }
+
+                        // 写入体测成绩（保留原始输入）
+                        const fillScore = (projKey, colIdx) => {
+                            if (colIdx > -1 && row[colIdx] !== undefined && row[colIdx] !== null) {
+                                let v = String(row[colIdx]).trim();
+                                if (v !== '' && v !== '-') {
+                                    sObj.scores[projKey] = v;
+                                    updateScoreCount++;
+                                }
+                            }
+                        };
+
+                        fillScore('身高', col.h);
+                        fillScore('体重', col.w);
+                        fillScore('肺活量', col.lung);
+                        fillScore('50米', col.r50);
+                        fillScore('立定跳远', col.jump);
+                        fillScore('坐位体前屈', col.sit);
+                        fillScore('引体向上', col.pull);
+                        fillScore('仰卧起坐', col.situp);
+                        fillScore('1000米', col.r1000);
+                        fillScore('800米', col.r800);
+
+                        // 耐力跑通用列分流
+                        if (col.runL > -1 && row[col.runL] !== undefined && row[col.runL] !== null) {
+                            let runVal = String(row[col.runL]).trim();
+                            if (runVal !== '' && runVal !== '-') {
+                                if (gender === '男') sObj.scores['1000米'] = runVal;
+                                else sObj.scores['800米'] = runVal;
+                                updateScoreCount++;
+                            }
+                        }
+
+                        // 自动换算 BMI
+                        const hVal = parseFloat(sObj.scores['身高']);
+                        const wVal = parseFloat(sObj.scores['体重']);
+                        if (!isNaN(hVal) && !isNaN(wVal) && hVal > 0 && wVal > 0) {
+                            let hMeter = hVal > 3 ? (hVal / 100) : hVal;
+                            sObj.scores["体重指数(BMI)"] = (wVal / (hMeter * hMeter)).toFixed(1);
+                        }
+                    }
                 });
 
-                if (!classField || !nameField) {
-                    alert('导入失败！未识别到“班级”和“姓名”表头');
+                if (recognizedSheets === 0) {
+                    alert('导入失败！未能识别到“班级”或“姓名”表头，请确认文件格式。');
                     document.getElementById('fileStatus').innerText = "❌ 导入失败(表头不对)";
                     return;
                 }
 
-                let addStuCount = 0;
-                let updateScoreCount = 0;
-
-                json.forEach(row => {
-                    const cls = row[classField] ? String(row[classField]).trim() : '';
-                    const name = row[nameField] ? String(row[nameField]).trim() : '';
-                    const gender = (genderField && row[genderField]) ? String(row[genderField]).trim() : '男';
-
-                    if (!cls || !name) return;
-
-                    if (currentUser && currentUser.role === 'teacher') {
-                        if (!currentUser.classes.includes(cls)) {
-                            currentUser.classes.push(cls);
-                            localStorage.setItem('tc_sys_current_user', JSON.stringify(currentUser));
-                            if (teacherAccounts[currentUser.username]) {
-                                teacherAccounts[currentUser.username].classes = currentUser.classes;
-                                localStorage.setItem('tc_sys_teacher_accounts', JSON.stringify(teacherAccounts));
-                            }
-                        }
-                    }
-
-                    if (!students[cls]) students[cls] = [];
-
-                    let sObj = students[cls].find(s => s.name === name);
-                    if (!sObj) {
-                        sObj = { name: name, gender: gender, scores: {} };
-                        students[cls].push(sObj);
-                        addStuCount++;
-                    } else if (!sObj.scores) {
-                        sObj.scores = {};
-                    }
-
-                    firstRowKeys.forEach(k => {
-                        let valStr = row[k] !== undefined && row[k] !== null ? String(row[k]).trim() : '';
-                        if (valStr !== '' && k !== classField && k !== nameField && k !== genderField) {
-                            sObj.scores[k] = valStr;
-                            updateScoreCount++;
-                        }
-                    });
-
-                    let rawHeight = null, rawWeight = null;
-                    firstRowKeys.forEach(k => {
-                        let cleanK = String(k).replace(/\s+/g, "");
-                        let valStr = row[k] !== undefined && row[k] !== null ? String(row[k]).trim() : '';
-                        if (valStr !== '') {
-                            if (cleanK.includes("身高")) rawHeight = parseFloat(valStr);
-                            if (cleanK.includes("体重") && !cleanK.toUpperCase().includes("BMI") && !cleanK.includes("指数")) rawWeight = parseFloat(valStr);
-                        }
-                    });
-
-                    if (rawHeight && rawWeight && !isNaN(rawHeight) && !isNaN(rawWeight)) {
-                        let heightInMeter = rawHeight > 3 ? (rawHeight / 100) : rawHeight;
-                        if (heightInMeter > 0) {
-                            sObj.scores["体重指数(BMI)"] = (rawWeight / (heightInMeter * heightInMeter)).toFixed(1);
-                            sObj.scores["身高"] = String(rawHeight);
-                            sObj.scores["体重"] = String(rawWeight);
-                        }
-                    }
-                });
-
                 localStorage.setItem('tc_standalone_students', JSON.stringify(students));
-                alert(`🎉 导入成功！\n新增学生：${addStuCount} 人\n更新项目：${updateScoreCount} 项次`);
+                alert(`🎉 导入成功！\n共解析工作表：${recognizedSheets} 个\n新增/校准名单：${addStuCount} 人\n导入成绩项目：${updateScoreCount} 项次`);
                 document.getElementById('fileStatus').innerText = "🟠 导入体测名册 / 历史数据 Excel";
                 initTcClassOptions();
+
+                const clsSelect = document.getElementById('tcClassSelect');
+                if (clsSelect && clsSelect.value) {
+                    renderTcBatchEntryTable();
+                }
             } catch (err) {
                 alert('解析文件出错：' + err);
                 document.getElementById('fileStatus').innerText = "❌ 导入故障";
@@ -1705,6 +3108,7 @@ function formatTimeByProject(ms, projType) {
             localStorage.removeItem('tc_standalone_standards');
             localStorage.removeItem('tc_sys_current_user');
             localStorage.removeItem('tc_sys_teacher_accounts');
+            localStorage.removeItem(ENV_STORAGE_KEY);
             location.reload();
         }
     }
@@ -1725,6 +3129,158 @@ function formatTimeByProject(ms, projType) {
         checkUserLoginState();
         initTcClassOptions();
     };
+// 折叠展开状态标记：默认初中折叠，高中展开 (与截图保持完全一致)
+    let stageAccordionState = {
+        'junior': false,
+        'senior': false
+    };
+
+    function toggleStageAccordion(stageKey) {
+        stageAccordionState[stageKey] = !stageAccordionState[stageKey];
+        renderStageGradeReportTable();
+    }
+
+    // 独立计算并渲染学段/年级分性别统计表
+    function renderStageGradeReportTable() {
+        const tbody = document.getElementById('analysisStageGradeTbody');
+        if (!tbody) return;
+
+        const selectedScope = document.getElementById('analysisClassSelect').value;
+        let classList = Object.keys(students);
+
+        if (currentUser && currentUser.role === 'teacher') {
+            classList = classList.filter(c => (currentUser.classes || []).includes(c));
+        }
+        if (selectedScope !== 'ALL') {
+            classList = [selectedScope];
+        }
+
+        const baseGroup = () => ({
+            '男': { tot: 0, exc: 0, good: 0, pass: 0, fail: 0 },
+            '女': { tot: 0, exc: 0, good: 0, pass: 0, fail: 0 },
+            '总计': { tot: 0, exc: 0, good: 0, pass: 0, fail: 0 }
+        });
+
+        const gradeGroups = {
+            '初一': baseGroup(), '初二': baseGroup(), '初三': baseGroup(),
+            '高一': baseGroup(), '高二': baseGroup(), '高三': baseGroup()
+        };
+        const stageGroups = {
+            '初中': baseGroup(),
+            '高中': baseGroup()
+        };
+
+        const existGrades = new Set();
+
+        classList.forEach(cls => {
+            const list = students[cls] || [];
+            list.forEach(s => {
+                const fit = calculateFitnessTotalScore(s.scores || {}, cls, s.gender || '男', s.gradeId || '');
+                const rawG = s.grade || normalizeGrade(s.gradeId || cls);
+                const g = gradeGroups[rawG] ? rawG : null;
+                const gender = (s.gender === '女' || s.gender === '2') ? '女' : '男';
+
+                if (g) existGrades.add(g);
+
+                const updateStat = (grp) => {
+                    grp[gender].tot++;
+                    grp['总计'].tot++;
+                    if (fit.level === '优秀') {
+                        grp[gender].exc++;
+                        grp['总计'].exc++;
+                    } else if (fit.level === '良好') {
+                        grp[gender].good++;
+                        grp['总计'].good++;
+                    } else if (fit.level === '及格') {
+                        grp[gender].pass++;
+                        grp['总计'].pass++;
+                    } else {
+                        grp[gender].fail++;
+                        grp['总计'].fail++;
+                    }
+                };
+
+                if (g) {
+                    updateStat(gradeGroups[g]);
+                    if (g.includes('初')) updateStat(stageGroups['初中']);
+                    if (g.includes('高')) updateStat(stageGroups['高中']);
+                }
+            });
+        });
+
+        const pct = (num, total) => total > 0 ? ((num / total) * 100).toFixed(2) : "0.00";
+
+        const buildRowHtml = (gradeLabel, genderLabel, dataObj, isTotalRow = false, rowSpan = 0, isStage = false, stageKey = '') => {
+            let rowStyle = isTotalRow ? 'background:#fafafa; font-weight:bold;' : 'background:#fff;';
+            let tdGrade = '';
+
+            if (rowSpan > 0) {
+                if (isStage) {
+                    const isOpen = stageAccordionState[stageKey];
+                    const icon = isOpen ? '－' : '＋';
+                    tdGrade = `<td rowspan="${rowSpan}" style="vertical-align:middle; text-align:left; padding-left:14px; font-weight:bold; border-right:1px solid #eee;">
+                        <button onclick="toggleStageAccordion('${stageKey}')" style="background:none; border:1px solid #ddd; border-radius:3px; padding:0 4px; font-size:11px; cursor:pointer; color:#555; margin-right:6px; line-height:16px;">${icon}</button>
+                        ${gradeLabel}
+                    </td>`;
+                } else {
+                    tdGrade = `<td rowspan="${rowSpan}" style="vertical-align:middle; text-align:left; padding-left:26px; font-weight:bold; border-right:1px solid #eee;">${gradeLabel}</td>`;
+                }
+            }
+
+            const excelRate = pct(dataObj.exc + dataObj.good, dataObj.tot);
+
+            return `
+                <tr style="${rowStyle} border-bottom:1px solid #f0f0f0;">
+                    ${tdGrade}
+                    <td style="color:${genderLabel==='总计'?'#000':'#666'};">${genderLabel}</td>
+                    <td>${dataObj.tot}</td>
+                    <td style="color:#1976D2; font-weight:bold;">${excelRate}</td>
+                    <td style="color:${dataObj.tot>0 && parseFloat(pct(dataObj.exc, dataObj.tot))>0 ? '#0D47A1' : '#333'};">${pct(dataObj.exc, dataObj.tot)}</td>
+                    <td style="color:#2E7D32;">${pct(dataObj.good, dataObj.tot)}</td>
+                    <td style="color:#E65100;">${pct(dataObj.pass, dataObj.tot)}</td>
+                    <td style="color:${parseFloat(pct(dataObj.fail, dataObj.tot))>0 ? '#D32F2F' : '#333'}; font-weight:${parseFloat(pct(dataObj.fail, dataObj.tot))>0 ? 'bold':'normal'};">${pct(dataObj.fail, dataObj.tot)}</td>
+                </tr>
+            `;
+        };
+
+        const buildSectionHtml = (title, dataGroup, isStage = false, stageKey = '') => {
+            let html = '';
+            html += buildRowHtml(title, '男', dataGroup['男'], false, 3, isStage, stageKey);
+            html += buildRowHtml(title, '女', dataGroup['女'], false, 0);
+            html += buildRowHtml(title, '总计', dataGroup['总计'], true, 0);
+            return html;
+        };
+
+        let finalTbodyHtml = '';
+
+        if (stageGroups['初中']['总计'].tot > 0) {
+            finalTbodyHtml += buildSectionHtml('初中总体', stageGroups['初中'], true, 'junior');
+            if (stageAccordionState['junior']) {
+                ['初一', '初二', '初三'].forEach(g => {
+                    if (gradeGroups[g]['总计'].tot > 0) {
+                        finalTbodyHtml += buildSectionHtml(g, gradeGroups[g]);
+                    }
+                });
+            }
+        }
+
+        if (stageGroups['高中']['总计'].tot > 0) {
+            finalTbodyHtml += buildSectionHtml('高中总体', stageGroups['高中'], true, 'senior');
+            if (stageAccordionState['senior']) {
+                ['高一', '高二', '高三'].forEach(g => {
+                    if (gradeGroups[g]['总计'].tot > 0) {
+                        finalTbodyHtml += buildSectionHtml(g, gradeGroups[g]);
+                    }
+                });
+            }
+        }
+
+        if (!finalTbodyHtml) {
+            finalTbodyHtml = '<tr><td colspan="8" style="color:#999; padding:15px;">暂无匹配年级统计数据</td></tr>';
+        }
+
+        tbody.innerHTML = finalTbodyHtml;
+    }
 </script>
 </body>
 </html>
