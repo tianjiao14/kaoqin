@@ -110,8 +110,12 @@
             color: #ffffff;
         }
 
-        /* 🌟 核心：移动端屏幕强制收起抽屉样式 */
         @media (max-width: 900px) {
+    /* 增加视口底部安全边距，防止最后一行被底栏遮挡 */
+    .view-viewport {
+        padding: 8px 6px 60px 6px !important;
+        -webkit-overflow-scrolling: touch;
+    }
             .menu-toggle-btn {
                 display: inline-flex !important;
                 align-items: center;
@@ -652,7 +656,7 @@
     <div class="modal-overlay" id="loginModal" style="z-index: 20000;">
         <div class="modal-content" style="max-width: 320px; text-align: center;">
             <h3 style="margin-top:0; color:#BF360C;">🔐 体测系统账号登录</h3>
-            <p style="font-size: 12px; color: #666; margin-bottom: 12px;">管理员初始账号: admin 密码: admin</p>
+            <p style="font-size: 12px; color: #666; margin-bottom: 12px;"></p>
             <input type="text" id="loginUsername" placeholder="账号 / 教师姓名" style="width: 100%; margin-bottom: 12px;">
             <input type="password" id="loginPassword" placeholder="密码" style="width: 100%; margin-bottom: 12px;">
             <button onclick="handleLoginSubmit()" style="background-color: var(--primary); font-weight: bold; width:100%; margin:0;">立即登录</button>
@@ -2101,8 +2105,8 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         select.innerHTML = html;
     }
 
-    function computeAndRenderAnalysisDashboard() {
-        const selectedScope = document.getElementById('analysisClassSelect').value;
+   function computeAndRenderAnalysisDashboard() {
+        const selectedScope = document.getElementById('analysisClassSelect') ? document.getElementById('analysisClassSelect').value : 'ALL';
         let classList = Object.keys(students);
 
         if (currentUser && currentUser.role === 'teacher') {
@@ -2117,60 +2121,69 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
         let sumTotalScore = 0;
         let countYX = 0, countYL = 0, countBK = 0, countNL = 0;
 
+        // 包含各项及 BMI
         const projectKeys = [
-            { key: "50米", label: "50米跑", targetGender: null },
-            { key: "1000米", label: "1000米跑", targetGender: "男" },
-            { key: "800米", label: "800米跑", targetGender: "女" },
-            { key: "引体向上", label: "引体向上", targetGender: "男" },
-            { key: "仰卧起坐", label: "仰卧起坐", targetGender: "女" },
-            { key: "立定跳远", label: "立定跳远", targetGender: null },
-            { key: "坐位体前屈", label: "坐位体前屈", targetGender: null },
-            { key: "肺活量", label: "肺活量", targetGender: null },
-            { key: "体重指数(BMI)", label: "体重指数(BMI)", targetGender: null }
+            { key: "50米", label: "50米跑" },
+            { key: "1000米", label: "1000米跑" },
+            { key: "800米", label: "800米跑" },
+            { key: "引体向上", label: "引体向上" },
+            { key: "仰卧起坐", label: "仰卧起坐" },
+            { key: "立定跳远", label: "立定跳远" },
+            { key: "坐位体前屈", label: "坐位体前屈" },
+            { key: "肺活量", label: "肺活量" },
+            { key: "bmi", label: "体重指数(BMI)" }
         ];
 
         let projectStats = {};
         projectKeys.forEach(p => {
-            projectStats[p.key] = { 
-                label: p.label, 
-                testedCount: 0, 
-                sumScore: 0, 
-                passCount: 0, 
-                goodCount: 0
-            };
+            projectStats[p.key] = { label: p.label, testedCount: 0, sumScore: 0, passCount: 0, goodCount: 0 };
         });
 
         classList.forEach(cls => {
             const list = students[cls] || [];
             list.forEach(s => {
                 totalStudents++;
-                // 传传入 s.gradeId 计算含附加分的总评
-                const fit = calculateFitnessTotalScore(s.scores || {}, cls, s.gender || '男', s.gradeId || '');
+                const sScores = s.scores || {};
+                const fit = calculateFitnessTotalScore(sScores, cls, s.gender || '男');
                 sumTotalScore += fit.score;
 
-                // 统计含附加分后的四级人数
-                if (fit.level === '优秀') countYX++;
+                if (fit.level === '优') countYX++;
                 else if (fit.level === '良好') countYL++;
                 else if (fit.level === '及格') countBK++;
                 else countNL++;
 
-                // 各单项得分统计
-                const sScores = s.scores || {};
+                // 🌟 核心：计算或提取 BMI
+                let currentBmiVal = sScores["体重指数(BMI)"] || sScores["BMI"] || sScores["体重指数"] || '';
+                if (!currentBmiVal && sScores["身高"] && sScores["体重"]) {
+                    let h = parseFloat(sScores["身高"]);
+                    let w = parseFloat(sScores["体重"]);
+                    if (h > 0 && w > 0) {
+                        let hM = h > 3 ? (h / 100) : h;
+                        currentBmiVal = (w / (hM * hM)).toFixed(1);
+                    }
+                }
+
+                // 统计各项目有效人数与得分
                 projectKeys.forEach(p => {
-                    if (p.targetGender && s.gender !== p.targetGender) return;
-                    let actualP = p.key;
-                    let val = sScores[actualP];
-                    if (val === undefined || val === null || String(val).trim() === '') {
-                        if (p.key === '1000米' && s.gender === '男') val = sScores['耐力跑'] || sScores['runL'];
-                        else if (p.key === '800米' && s.gender === '女') val = sScores['耐力跑'] || sScores['runL'];
-                        else if (p.key === '引体向上' && s.gender === '男') val = sScores['力量类'] || sScores['str'];
-                        else if (p.key === '仰卧起坐' && s.gender === '女') val = sScores['力量类'] || sScores['str'];
-                        else if (p.key === '体重指数(BMI)') val = sScores["体重指数(BMI)"] || sScores["BMI"];
+                    let val = null;
+                    if (p.key === 'bmi') {
+                        val = currentBmiVal;
+                    } else if (p.key === '1000米') {
+                        if (s.gender === '男') val = sScores['1000米'] || sScores['耐力跑'] || sScores['runL'];
+                    } else if (p.key === '800米') {
+                        if (s.gender === '女') val = sScores['800米'] || sScores['耐力跑'] || sScores['runL'];
+                    } else if (p.key === '引体向上') {
+                        if (s.gender === '男') val = sScores['引体向上'] || sScores['引体'] || sScores['str'];
+                    } else if (p.key === '仰卧起坐') {
+                        if (s.gender === '女') val = sScores['仰卧起坐'] || sScores['仰卧'] || sScores['str'];
+                    } else {
+                        val = sScores[p.key] || sScores[p.label];
                     }
 
                     if (val !== undefined && val !== null && String(val).trim() !== '') {
-                        let pts = queryStandardScore(actualP, val, cls, s.gender, s.gradeId || '');
-                        if (pts !== null && pts !== undefined) {
+                        let projCode = p.key === 'bmi' ? 'bmi' : p.key;
+                        let pts = queryStandardScore(projCode, val, cls, s.gender);
+                        if (pts !== null) {
                             projectStats[p.key].testedCount++;
                             projectStats[p.key].sumScore += pts;
                             if (pts >= 60) projectStats[p.key].passCount++;
@@ -2181,54 +2194,58 @@ function calculateFitnessTotalScore(scoresObj, className, gender, gradeId = '') 
             });
         });
 
-        // 基础指标核算
-        document.getElementById('an-total-students').innerText = totalStudents;
+        // 渲染基础指标卡片
+        const anTotEl = document.getElementById('an-total-students');
+        if (anTotEl) anTotEl.innerText = totalStudents;
         let avgScore = totalStudents > 0 ? (sumTotalScore / totalStudents).toFixed(1) : "0.0";
-        document.getElementById('an-avg-score').innerText = avgScore;
+        const anAvgEl = document.getElementById('an-avg-score');
+        if (anAvgEl) anAvgEl.innerText = avgScore;
 
-        // 🌟 优良率 = (优秀人数 + 良好人数) / 总人数
         let passRate = totalStudents > 0 ? (((countYX + countYL + countBK) / totalStudents) * 100).toFixed(1) : 0;
         let excelRate = totalStudents > 0 ? (((countYX + countYL) / totalStudents) * 100).toFixed(1) : 0;
-        document.getElementById('an-pass-rate').innerText = `${passRate}%`;
-        document.getElementById('an-excellent-rate').innerText = `${excelRate}%`;
+        const anPassEl = document.getElementById('an-pass-rate');
+        if (anPassEl) anPassEl.innerText = `${passRate}%`;
+        const anExcEl = document.getElementById('an-excellent-rate');
+        if (anExcEl) anExcEl.innerText = `${excelRate}%`;
 
-        // 等级进度条与结构标签
+        // 渲染进度条
         let pYX = totalStudents > 0 ? ((countYX / totalStudents) * 100).toFixed(1) : 0;
         let pYL = totalStudents > 0 ? ((countYL / totalStudents) * 100).toFixed(1) : 0;
         let pBK = totalStudents > 0 ? ((countBK / totalStudents) * 100).toFixed(1) : 0;
         let pNL = totalStudents > 0 ? ((countNL / totalStudents) * 100).toFixed(1) : 0;
 
-        document.getElementById('bar-yx').style.width = `${pYX}%`;
-        document.getElementById('bar-yl').style.width = `${pYL}%`;
-        document.getElementById('bar-bk').style.width = `${pBK}%`;
-        document.getElementById('bar-nl').style.width = `${pNL}%`;
+        if (document.getElementById('bar-yx')) document.getElementById('bar-yx').style.width = `${pYX}%`;
+        if (document.getElementById('bar-yl')) document.getElementById('bar-yl').style.width = `${pYL}%`;
+        if (document.getElementById('bar-bk')) document.getElementById('bar-bk').style.width = `${pBK}%`;
+        if (document.getElementById('bar-nl')) document.getElementById('bar-nl').style.width = `${pNL}%`;
 
-        document.getElementById('tag-yx').innerText = `${countYX}人 (${pYX}%)`;
-        document.getElementById('tag-yl').innerText = `${countYL}人 (${pYL}%)`;
-        document.getElementById('tag-bk').innerText = `${countBK}人 (${pBK}%)`;
-        document.getElementById('tag-nl').innerText = `${countNL}人 (${pNL}%)`;
+        if (document.getElementById('tag-yx')) document.getElementById('tag-yx').innerText = `${countYX}人 (${pYX}%)`;
+        if (document.getElementById('tag-yl')) document.getElementById('tag-yl').innerText = `${countYL}人 (${pYL}%)`;
+        if (document.getElementById('tag-bk')) document.getElementById('tag-bk').innerText = `${countBK}人 (${pBK}%)`;
+        if (document.getElementById('tag-nl')) document.getElementById('tag-nl').innerText = `${countNL}人 (${pNL}%)`;
 
-        // 渲染单项汇总表格
+        // 渲染单项汇总表格（包含及格率与优良率）
         const tbody = document.getElementById('analysisProjectTbody');
-        let tableRowsHtml = '';
-        projectKeys.forEach(p => {
-            const stat = projectStats[p.key];
-            let itemAvg = stat.testedCount > 0 ? (stat.sumScore / stat.testedCount).toFixed(1) : "-";
-            let itemPass = stat.testedCount > 0 ? ((stat.passCount / stat.testedCount) * 100).toFixed(1) + '%' : "-";
-            let itemGood = stat.testedCount > 0 ? ((stat.goodCount / stat.testedCount) * 100).toFixed(1) + '%' : "-";
-            
-            tableRowsHtml += `
-                <tr>
-                    <td style="font-weight:bold; text-align:left; padding-left:14px;">${stat.label}</td>
-                    <td>${stat.testedCount}</td>
-                    <td style="color:${parseFloat(itemAvg) < 60 ? '#D32F2F' : '#2E7D32'}; font-weight:bold;">${itemAvg}</td>
-                    <td>${itemPass}</td>
-                    <td style="color:${parseFloat(itemGood) >= 80 ? '#1976D2' : '#333'}; font-weight:bold;">${itemGood}</td>
-                </tr>
-            `;
-        });
-        tbody.innerHTML = tableRowsHtml;
-        renderStageGradeReportTable();
+        if (tbody) {
+            let tableRowsHtml = '';
+            projectKeys.forEach(p => {
+                const stat = projectStats[p.key];
+                let itemAvg = stat.testedCount > 0 ? (stat.sumScore / stat.testedCount).toFixed(1) : "-";
+                let itemPass = stat.testedCount > 0 ? ((stat.passCount / stat.testedCount) * 100).toFixed(1) + '%' : "-";
+                let itemGood = stat.testedCount > 0 ? ((stat.goodCount / stat.testedCount) * 100).toFixed(1) + '%' : "-";
+
+                tableRowsHtml += `
+                    <tr>
+                        <td style="font-weight:bold; text-align:left; padding-left:10px;">${stat.label}</td>
+                        <td>${stat.testedCount}</td>
+                        <td style="color:${parseFloat(itemAvg) < 60 ? '#D32F2F' : '#2E7D32'}; font-weight:bold;">${itemAvg}</td>
+                        <td>${itemPass}</td>
+                        <td>${itemGood}</td>
+                    </tr>
+                `;
+            });
+            tbody.innerHTML = tableRowsHtml;
+        }
     }
 
     // ================== 数据上报专区核心功能（移植整合） ==================
